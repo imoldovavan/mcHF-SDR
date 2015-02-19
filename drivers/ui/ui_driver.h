@@ -40,8 +40,10 @@
 
 // Button Definitions
 #define 	BUTTON_NONE						0
-#define 	BUTTON_HOLD_TIME				50000
+#define		BUTTON_PRESS_DEBOUNCE			75		// time to debounce normal button press
+#define 	BUTTON_HOLD_TIME				1000	// time of press-and-hold
 #define 	AUTO_BLINK_TIME					200000
+#define		DEBOUNCE_TIME_MAX				50000	// ceiling time of debounce counter to prevent overflow
 
 typedef struct KeypadState
 {
@@ -52,13 +54,22 @@ typedef struct KeypadState
 	ulong	button_id;
 
 	// Flag to indicate click event
-	uchar	button_pressed;
+	bool	button_pressed;
 
 	// Flag to indicate release event
-	uchar	button_released;
+	bool	button_released;
 
 	// Flag to indicate under process
-	uchar	button_processed;
+	bool	button_processed;
+
+	// Flag to indicate that the button had been continued to be pressed during debounce
+	bool	button_still_pressed;
+
+	// Flag to indicate that debounce check was complete
+	bool	debounce_check_complete;
+
+	// Flag to indicate a "press-and-hold" condition
+	bool	press_hold;
 
 	uchar	dummy;
 
@@ -66,8 +77,48 @@ typedef struct KeypadState
 
 #define S_METER_MAX							34
 
+// Spectrum scope operational constants
+//
+#define	SPECTRUM_SCOPE_TOP_LIMIT			5	// Top limit of spectrum scope magnitude
+//
+#define SPECTRUM_SCOPE_AGC_THRESHOLD		2000//400	// AGC "Knee" above which output from spectrum scope FFT  AGC will cause action
+#define SPECTRUM_SCOPE_MAX_FFT_VAL			8192//16384 // Value above which input to spectrum scope FFT will cause AGC action
+#define SPECTRUM_SCOPE_MIN_GAIN				0.1	// Minimum gain for spectrum scope FFT AGC loop
+#define SPECTRUM_SCOPE_MAX_GAIN				140	// Maximum gain for spectrum scope FFT AGC loop
+#define	SPECTRUM_SCOPE_AGC_ATTACK			0.5//0.1	// Attack rate for spectrum scope FFT AGC/gain
+#define	SPECTRUM_SCOPE_AGC_DECAY			0.166//0.1	// Decay rate for spectrum scope FFT AGC/gain
+//
+#define	SPECTRUM_SCOPE_LPF_FACTOR			4	// IIR Factor for spectrum scope low-pass filtering
+	// Higher = slower response.  3 = 33% input; 66% feedback, 4 = 25% input, 75% feedback, 5 = 20% input, 80% feedback
+#define	SPECTRUM_SCOPE_LPF_FACTOR_SPI		2	// IIR Factor for spectrum scope low-pass filtering using SPI display (update rate is slower, use faster filter)
+//
+#define PK_AVG_RESCALE_THRESH		3		// This sets the minimum peak-to-average ratio of the spectrum display before it starts to rescale the peak
+		// value from the top.  This prevents it from going completely "white" on noise/no-signal conditions.
+//
+#define	SPECTRUM_SCOPE_RESCALE_ATTACK_RATE	0.1	// Rate at which scaling of spectrum scope adapts to strong signals within its passband
+#define	SPECTRUM_SCOPE_RESCALE_DECAY_RATE	0.033	// Rate at which scaling of spectrum scope decays after strong signals disappear from its passband
+//
+#define SPECTRUM_SCOPE_SPEED_MIN			1	// minimum spectrum scope speed
+#define SPECTRUM_SCOPE_SPEED_MAX			5	// maximum spectrum scope speed
+#define SPECTRUM_SCOPE_SPEED_DEFAULT		1
+//
+#define SPECTRUM_SCOPE_FILTER_MIN			1	// minimum filter setting
+#define	SPECTRUM_SCOPE_FILTER_MAX			10	// maximum filter setting
+#define SPECTRUM_SCOPE_FILTER_DEFAULT		4	// default filter setting
+//
+#define	SPECTRUM_SCOPE_RESCALE_MIN			5	// minimum spectrum scope rescale rate setting
+#define	SPECTRUM_SCOPE_RESCALE_MAX			50	// maximum spectrum scope rescale rate setting
+#define	SPECTRUM_SCOPE_RESCALE_DEFAULT		10	// minimum spectrum scope rescale rate setting
+//
+#define	SPECTRUM_SCOPE_AGC_MIN				5	// minimum spectrum scope AGC rate setting
+#define	SPECTRUM_SCOPE_AGC_MAX				50	// maximum spectrum scope AGC rate setting
+#define	SPECTRUM_SCOPE_AGC_DEFAULT			10	// minimum spectrum scope AGC rate setting
+//
+//
 #define SWR_SAMPLES_SKP						1	//5000
 #define SWR_SAMPLES_CNT						4
+//
+#define	SD_DB_DIV_SCALING					0.0316	// Scaling factor for number of dB/Division	0.0316 = 10dB/Division
 
 // SWR meter public
 typedef struct SWRMeter
@@ -77,8 +128,14 @@ typedef struct SWRMeter
 	ushort	pwr_aver;
 	ushort	swr_aver;
 	uchar	p_curr;
+	uchar	fwd_cal;		// SWR forward calibration (75-150 = 0.75-1.50)
 
 } SWRMeter;
+
+#define	SWR_CAL_MIN		75
+#define	SWR_CAL_MAX		150
+#define	SWR_CAL_DEFAULT	100
+//
 
 // Power levels ranges
 #define POWER_1W_MIN						0
@@ -265,13 +322,21 @@ typedef struct EepromSave
 // IQ phase balance
 #define POS_BP_IND_X						0
 #define POS_BP_IND_Y						110
+// Frequency Calibrate
+#define POS_FC_IND_X						0
+#define POS_FC_IND_Y						78
 
 // --------------------------------------------------
 // Standalone controls
 //
-// Keyer mode
-#define POS_KM_IND_X						0
-#define POS_KM_IND_Y						131
+// DSP mode
+// Upper DSP box
+#define POS_DSPU_IND_X						0
+#define POS_DSPU_IND_Y						116
+// Lower DSP box
+#define POS_DSPL_IND_X						0
+#define POS_DSPL_IND_Y						131
+
 // Power level
 #define POS_PW_IND_X						0
 #define POS_PW_IND_Y						147
@@ -307,12 +372,179 @@ typedef struct EepromSave
 
 #define POS_TEMP_IND_X						0
 #define POS_TEMP_IND_Y						0
-
+//
+// Starting position of configuration menu
+//
+#define	POS_MENU_IND_X						60		// X position of description of menu item being changed
+#define	POS_MENU_IND_Y						128		// Y position of first (top) item being changed
+#define	POS_MENU_CHANGE_X					244		// Position of variable being changed
+#define	POS_MENU_CURSOR_X					311		// Position of cursor used to indicate selected item
+//
 // --------------------------------------------------------------------------
 // Exports
-void ui_driver_init(void);
-void ui_driver_thread(void);
-void ui_driver_irq(void);
-void ui_driver_toggle_tx(void);
-
+void 	ui_driver_init(void);
+void 	ui_driver_thread(void);
+void 	ui_driver_irq(void);
+void 	ui_driver_toggle_tx(void);
+void 	UiCalcRxPhaseAdj(void);
+void 	UiCalcTxPhaseAdj(void);
+void 	UiDriverLoadFilterValue(void);
+void 	UiDriverClearSpectrumDisplay(void);
+//
+void 	UiDriverChangeBandFilter(uchar band,uchar bpf_only);
+void 	UiDriverChangeFilter(uchar ui_only_update);
+void 	UiDriverCreateTemperatureDisplay(uchar enabled,uchar create);
+void 	UiDriverUpdateFrequency(char skip_encoder_check);
+void 	UiDriverUpdateFrequencyFast(void);
+void	UiCalcRxIqGainAdj(void);
+void	UiCalcTxIqGainAdj(void);
+void 	UiDriverSetBandPowerFactor(uchar band);
+void UiDrawSpectrumScopeFrequencyBarText(void);
+//
+void 	UiDriverChangeBandFilter(uchar band,uchar bpf_only);
+void 	UiDriverUpdateFrequency(char skip_encoder_check);
+void 	UiDriverUpdateFrequencyFast(void);
+void 	UiDriverChangeFilter(uchar ui_only_update);
+void 	UiDriverSetBandPowerFactor(uchar band);
+void	UiCalcRxIqGainAdj(void);
+void	UiCalcTxIqGainAdj(void);
+//
+void 	UiDriverChangeStGain(uchar enabled);
+void 	UiDriverChangeCmpLevel(uchar enabled);
+void 	UiDriverChangeKeyerSpeed(uchar enabled);
+void	UiDriverChangeAudioGain(uchar enabled);
+void 	UiDriverChangeRfGain(uchar enabled);
+//
+void 	UIDriverChangeAudioGain(uchar enabled);
+//
+void 	UiDriverShowStep(ulong step);
+//
+void UiCalcTxCompLevel(void);
+void UiCalcNB_AGC(void);
+void UiCWSidebandMode(void);
+void 	UiDriverShowMode(void);
+//
+//
+#define	SIDETONE_MAX_GAIN	10		// Maximum sidetone gain
+#define	DEFAULT_SIDETONE_GAIN	5	// Default sidetone gain
+//
+#define	MIN_KEYER_SPEED		5		// Minimum keyer speed
+#define	MAX_KEYER_SPEED		48		// Maximum keyer speed
+#define DEFAULT_KEYER_SPEED	20		// Default keyer speed
+//
+#define	CW_OFFSET_USB_TX	0		// CW in USB mode, display is TX frequency if received frequency was zero-beated
+#define	CW_OFFSET_LSB_TX	1		// CW in LSB mode, display is TX frequency if received frequency was zero-beated
+#define	CW_OFFSET_AUTO_TX	2		// Same as CW_OFFSET_USB_TX except LSB if frequency is < 10 MHz, USB if >= 10 MHz
+#define	CW_OFFSET_USB_RX	3		// CW in USB mode, display is RX frequency if received signal is matched to sidetone
+#define	CW_OFFSET_LSB_RX	4		// CW in LSB mode, display is RX frequency if received signal is matched to sidetone
+#define CW_OFFSET_AUTO_RX	5		// Same as CW_OFFSET_USB_RX except LSB if frequency is < 10 MHz, USB if >= 10 MHz
+#define CW_OFFSET_USB_SHIFT 6		// CW in USB mode, LO shifts, display is RX frequency if signal is matched to sidetone
+#define	CW_OFFSET_LSB_SHIFT 7		// CW in LSB mode, LO shifts, display is RX frequency if signal is matched to sidetone
+#define	CW_OFFSET_AUTO_SHIFT	8	// Same as "CW_OFFSET_USB_SHIFT" except LSB if frequency is <10 MHz, USB of >= 10 MHz
+#define	CW_OFFSET_MAX		8		// Maximum menu setting
+#define	CW_OFFSET_MODE_DEFAULT	0	// Default CW offset setting
+//
+#define	USB_FREQ_THRESHOLD	40000000	// LO frequency at and above which the default is USB, Hz*4  (e.g. 10 MHz = 40 MHz)
+//
+#define	MAX_RF_ATTEN		15		// Maximum setting for RF attenuation
+//
+#define	MIN_RIT_VALUE		-50		// Minimum RIT Value
+#define	MAX_RIT_VALUE		50		// Maximum RIT Value
+//
+#define	MAX_RF_GAIN			50		// Maximum RF gain setting
+#define	DEFAULT_RF_GAIN		50		// Default RF gain setting
+//
+#define	MAX_RF_CODEC_GAIN_VAL		9		// Maximum RF gain setting
+#define	DEFAULT_RF_CODEC_GAIN_VAL	9		// Default RF gain setting (9 = AUTO mode)
+//
+#define	MAX_AUDIO_GAIN		30		// Maximum audio gain setting
+#define	DEFAULT_AUDIO_GAIN	16		// Default audio gain
+//
+// The following are used in the max volume setting in the menu system
+//
+#define	MAX_VOLUME_MIN				8		// Minimum setting for maximum volume
+#define	MAX_VOLUME_MAX				MAX_AUDIO_GAIN		// Maximum setting for maximum volume
+#define	MAX_VOLUME_DEFAULT			DEFAULT_AUDIO_GAIN
+//
+#define	MAX_VOL_RED_THRESH	10		// "MAX VOLUME" setting at or below which number will be RED to warn user
+#define	MAX_VOLT_YELLOW_THRESH	16	// "MAX VOLUME" setting at or below which number will be YELLOW to warn user
+//
+//
+#define	MAX_PA_BIAS			115		// Maximum PA Bias Setting
+#define	DEFAULT_PA_BIAS		0		// Default PA Bias setting
+//
+#define	BIAS_OFFSET			25		// Offset value to be added to bias setting
+//  DA value = (OFFSET + (2*setting))  where DA value is 0-255
+//
+#define	MIN_TX_IQ_GAIN_BALANCE	-99	// Minimum setting for TX IQ gain balance
+#define MAX_TX_IQ_GAIN_BALANCE	99	// Maximum setting for TX IQ gain balance
+//
+#define	MIN_RX_IQ_GAIN_BALANCE	-99	// Minimum setting for RX IQ gain balance
+#define	MAX_RX_IQ_GAIN_BALANCE	99	// Maximum setting for RX IQ gain balance
+//
+#define	MIN_TX_IQ_PHASE_BALANCE	-32	// Minimum setting for TX IQ phase balance
+#define	MAX_TX_IQ_PHASE_BALANCE	32	// Maximum setting for TX IQ phase balance
+//
+#define	MIN_RX_IQ_PHASE_BALANCE	-32	// Minimum setting for RX IQ phase balance
+#define	MAX_RX_IQ_PHASE_BALANCE	32	// Maximum setting for RX IQ phase balance
+//
+#define	XVERTER_MULT_MAX		10		// maximum LO multipler in xverter mode
+#define	XVERTER_OFFSET_MAX		150000000	// Maximum transverter offset (150 MHz)
+//
+#define	AUTO_LSB_USB_OFF		0
+#define	AUTO_LSB_USB_ON			1
+#define	AUTO_LSB_USB_60M		2
+#define	AUTO_LSB_USB_MAX		2
+#define	AUTO_LSB_USB_DEFAULT	AUTO_LSB_USB_OFF
+//
+// Items that are timed using ts.sysclock (operates at 100 Hz)
+//
+#define	DSP_STARTUP_DELAY		350		// Delay, in 100ths of seconds, after startup, before allowing DSP NR or Notch to be enabled.
+#define	DSP_REENABLE_DELAY		13		// Delay, in 100ths of seconds, after return to RX before allowing DSP NR or Notch to be re-enabled
+#define	DSP_BAND_CHANGE_DELAY	100		// Delay, in 100ths of a seconds, after changing bands before restoring DSP NR
+//
+// Button definitions
+//
+enum {
+BUTTON_M2_PRESSED = 0,	// 0
+BUTTON_G3_PRESSED,		// 1
+BUTTON_G2_PRESSED,		// 2
+BUTTON_BNDM_PRESSED,	// 3
+BUTTON_G4_PRESSED,		// 4
+BUTTON_M3_PRESSED,		// 5
+BUTTON_STEPM_PRESSED,	// 6
+BUTTON_STEPP_PRESSED,	// 7
+BUTTON_M1_PRESSED,		// 8
+BUTTON_F3_PRESSED,		// 9 - Press and release handled in UiDriverProcessFunctionKeyClick()
+BUTTON_F1_PRESSED,		// 10 - Press and release handled in UiDriverProcessFunctionKeyClick()
+BUTTON_F2_PRESSED,		// 11 - Press and release handled in UiDriverProcessFunctionKeyClick()
+BUTTON_F4_PRESSED,		// 12 - Press and release handled in UiDriverProcessFunctionKeyClick()
+BUTTON_BNDP_PRESSED,	// 13
+BUTTON_F5_PRESSED,		// 14 - Press and release handled in UiDriverProcessFunctionKeyClick()
+BUTTON_G1_PRESSED,		// 15
+BUTTON_POWER_PRESSED	// 16 - Used for press and release
+};
+//
+// UI Driver State machine definitions
+enum {
+STATE_SPECTRUM_DISPLAY = 0,		// 0
+STATE_S_METER,					// 1
+STATE_SWR_METER,				// 2
+STATE_HANDLE_POWERSUPPLY,		// 3
+STATE_LO_TEMPERATURE,			// 4
+STATE_TASK_CHECK,				// 5
+STATE_CHECK_ENC_ONE,			// 6
+STATE_CHECK_ENC_TWO,			// 7
+STATE_CHECK_ENC_THREE,			// 8
+STATE_UPDATE_FREQUENCY,			// 9
+STATE_PROCESS_KEYBOARD,			// 10
+STATE_SWITCH_OFF_PTT			// 11
+};
+//
+// Used for press-and-hold "temporary" step size adjust
+//
+#define	STEP_PRESS_OFF		0
+#define	STEP_PRESS_MINUS	1
+#define	STEP_PRESS_PLUS	2
+//
 #endif

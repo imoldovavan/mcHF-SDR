@@ -141,11 +141,21 @@ void cw_gen_remove_click_on_falling_edge(float *i_buffer,float *q_buffer,ulong s
 //*----------------------------------------------------------------------------
 void cw_gen_check_keyer_state(void)
 {
-	if(!GPIO_ReadInputDataBit(PADDLE_DAH_PIO,PADDLE_DAH))
-		ps.port_state |= CW_DAH_L;
+	if(!ts.paddle_reverse)	{	// Paddles NOT reversed
+		if(!GPIO_ReadInputDataBit(PADDLE_DAH_PIO,PADDLE_DAH))
+			ps.port_state |= CW_DAH_L;
 
-	if(!GPIO_ReadInputDataBit(PADDLE_DIT_PIO,PADDLE_DIT))
-		ps.port_state |= CW_DIT_L;
+		if(!GPIO_ReadInputDataBit(PADDLE_DIT_PIO,PADDLE_DIT))
+			ps.port_state |= CW_DIT_L;
+	}
+	else	{	// Paddles ARE reversed
+		if(!GPIO_ReadInputDataBit(PADDLE_DAH_PIO,PADDLE_DAH))
+			ps.port_state |= CW_DIT_L;
+
+		if(!GPIO_ReadInputDataBit(PADDLE_DIT_PIO,PADDLE_DIT))
+			ps.port_state |= CW_DAH_L;
+	}
+
 }
 
 //*----------------------------------------------------------------------------
@@ -180,6 +190,7 @@ ulong cw_gen_process_strk(float *i_buffer,float *q_buffer,ulong size)
 		if(ps.break_timer == 0)
 		{
 			ts.txrx_mode = TRX_MODE_RX;
+			ts.audio_unmute = 1;		// Assure that TX->RX timer gets reset at the end of an element
 			ui_driver_toggle_tx();				// straight
 		}
 		if(ps.break_timer) ps.break_timer--;
@@ -252,19 +263,27 @@ ulong cw_gen_process_iamb(float *i_buffer,float *q_buffer,ulong size)
 				(ps.port_state & 3))
 			{
 				cw_gen_check_keyer_state();
-				ps.cw_state = CW_DIT_CHECK;
+				ps.cw_state = CW_WAIT;		// Note if Dit/Dah is discriminated in this function, it breaks the Iambic-ness!
 			}
 			else
 			{
 				// Back to RX
 				if(ts.txrx_mode == TRX_MODE_TX)
 				{
-					ts.txrx_mode = TRX_MODE_RX;
-					ui_driver_toggle_tx();				// iambic
+					ts.txrx_mode = TRX_MODE_RX;	{
+						ts.audio_unmute = 1;		// Assure that TX->RX timer gets reset at the end of an element
+						ui_driver_toggle_tx();				// iambic
+					}
 				}
 			}
 
 			return 0;
+		}
+
+		case CW_WAIT:		// This is an extra state called after detection of an element to allow the other state machines to settle.
+		{					// It is NECESSARY to eliminate a "glitch" at the beginning of the first Iambic Morse DIT element in a string!
+			ps.cw_state = CW_DIT_CHECK;
+			break;
 		}
 
 		case CW_DIT_CHECK:
@@ -313,6 +332,7 @@ ulong cw_gen_process_iamb(float *i_buffer,float *q_buffer,ulong size)
 
 			ps.port_state &= ~(CW_DIT_L + CW_DAH_L);
 			ps.cw_state    = CW_KEY_UP;
+			ts.audio_unmute = 1;		// Assure that TX->RX timer gets reset at the end of an element
 
 			return 1;
 		}
@@ -371,6 +391,7 @@ ulong cw_gen_process_iamb(float *i_buffer,float *q_buffer,ulong size)
 		default:
 			return 0;
 	}
+	return 0;
 }
 
 //*----------------------------------------------------------------------------
@@ -386,7 +407,8 @@ void cw_gen_dah_IRQ(void)
 	if(ts.keyer_mode != CW_MODE_STRAIGHT)
 	{
 		// Just flag change - nothing to call
-		ts.txrx_mode = TRX_MODE_TX;
+		if(!ts.tx_disable)
+			ts.txrx_mode = TRX_MODE_TX;
 	}
 	else
 	{
@@ -402,8 +424,10 @@ void cw_gen_dah_IRQ(void)
 		if(ts.txrx_mode == TRX_MODE_RX)
 		{
 			// Direct switch here
-			ts.txrx_mode = TRX_MODE_TX;
-			ui_driver_toggle_tx();			// straight
+			if(!ts.tx_disable)	{
+				ts.txrx_mode = TRX_MODE_TX;
+				ui_driver_toggle_tx();			// straight
+			}
 		}
 	}
 }
@@ -422,6 +446,7 @@ void cw_gen_dit_IRQ(void)
 	if(ts.keyer_mode != CW_MODE_STRAIGHT)
 	{
 		// Just flag change - nothing to call
-		ts.txrx_mode = TRX_MODE_TX;
+		if(!ts.tx_disable)
+			ts.txrx_mode = TRX_MODE_TX;
 	}
 }

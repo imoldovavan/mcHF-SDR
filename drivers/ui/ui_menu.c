@@ -138,68 +138,67 @@ void UiDriverUpdateMenu(uchar mode)
 		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"26-Wide Filt in CW mode",m_clr,Black,0);
 		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"27-CW Filt in SSB mode",m_clr,Black,0);
 		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"28-AM mode disable",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"30-AGC Mode",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"31-RF Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"29-LSB/USB Auto Select",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"30-AGC Mode",m_clr,Black,0);
 	}
 	else if(ts.menu_item < 18)	{	// display third screen of items
 		if(screen_disp !=3)
 			UiDriverClearSpectrumDisplay();
 		screen_disp = 3;
 		update_vars = 1;
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"32-Cust AGC (+=Slower)", m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"33-RX Codec Gain",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"34-RX NB Setting",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"40-Mic/Line Select",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"41-Mic Input Gain",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"42-Line Input Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"31-RF Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"32-Cust AGC (+=Slower)", m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"33-RX Codec Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"34-RX NB Setting",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"35-RX/TX Freq Xlate",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"40-Mic/Line Select",m_clr,Black,0);
 	}
 	else if(ts.menu_item < 24)	{	// display fourth screen of items
 		if(screen_disp !=4)
 			UiDriverClearSpectrumDisplay();
 		screen_disp = 4;
 		update_vars = 1;
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"43-ALC Release Time",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"44-TX PRE ALC Gain",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"45-TX Audio Compress",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"50-CW Keyer Mode",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"51-CW Keyer Speed",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"52-CW Sidetone Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"41-Mic Input Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"42-Line Input Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"43-ALC Release Time",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"44-TX PRE ALC Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"45-TX Audio Compress",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"50-CW Keyer Mode",m_clr,Black,0);
 	}
 	else if(ts.menu_item < 30)	{	// display fifth screen of items
 		if(screen_disp !=5)
 			UiDriverClearSpectrumDisplay();
 		screen_disp = 5;
 		update_vars = 1;
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"53-CW Side/Off Freq",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"54-CW Paddle Reverse",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"55-CW TX->RX Delay",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"56-CW Freq. Offset",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"70-TCXO Off/On/Stop",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"71-TCXO Temp. (C/F)",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"51-CW Keyer Speed",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"52-CW Sidetone Gain",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"53-CW Side/Off Freq",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"54-CW Paddle Reverse",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"55-CW TX->RX Delay",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"56-CW Freq. Offset",m_clr,Black,0);
 	}
 	else if(ts.menu_item < 36)	{	// display sixth screen of items
 		if(screen_disp !=6)
 			UiDriverClearSpectrumDisplay();
 		screen_disp = 6;
 		update_vars = 1;
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"80-Spec. Scope Speed",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"81-Spec. Scope Filter",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"82-Spec. Trace Colour",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"83-Spec. Grid Colour",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"84-Spec. Scale Colour",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"85-Spec. 2x Magnify",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"70-TCXO Off/On/Stop",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"71-TCXO Temp. (C/F)",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"80-Spec. Scope Speed",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"81-Spec. Scope Filter",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"82-Spec. Trace Colour",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"83-Spec. Grid Colour",m_clr,Black,0);
 	}
 	else if(ts.menu_item < MAX_MENU_ITEM)	{	// display seventh screen of items
 		if(screen_disp !=7)
 			UiDriverClearSpectrumDisplay();
 		screen_disp = 7;
 		update_vars = 1;
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"86-Spec. AGC Adj.",m_clr,Black,0);
-		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"87-Spec. Rescale Adj.",m_clr,Black,0);
-//		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"84-Spec. Scale Colour",m_clr,Black,0);
-//		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"85-Spec. 2x Magnify",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"84-Spec. Scale Colour",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"85-Spec. 2x Magnify",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"86-Spec. AGC Adj.",m_clr,Black,0);
+		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"87-Spec. Rescale Adj.",m_clr,Black,0);
 //		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"86-Spec. AGC Adj.",m_clr,Black,0);
-//		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"87-Spec. Rescale Adj.",m_clr,Black,0);
 		UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"00-Adjustment Menu",c_clr,Black,0);
 	}
 	//
@@ -216,92 +215,103 @@ void UiDriverUpdateMenu(uchar mode)
 			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"202-Band+/- Button Swap",c_clr,Black,0);
 			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"203-Transmit Disable",c_clr,Black,0);
 			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"204-O/S Menu SW on TX",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"210-Max Volume",c_clr,Black,0);
-
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"205-Mute Line Out TX",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 12)	{	// yes - display the second screen
 			if(screen_disp != 52)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 52;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"211-Max RX Gain (0=Max)",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"220-CAT mode",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"230-Freq. Calibrate",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"240-LSB RX IQ Bal.",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"241-LSB RX IQ Phase",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"242-USB/CW RX IQ Bal.",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"210-Max Volume",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"211-Max RX Gain (0=Max)",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"220-CAT mode",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"230-Freq. Calibrate",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"240-LSB RX IQ Bal.",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"241-LSB RX IQ Phase",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 18)	{	// yes - display the third screen
 			if(screen_disp != 53)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 53;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"243-USB RX IQ Phase",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"244-AM RX IQ Bal.",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"250-LSB TX IQ Bal.",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"251-LSB TX IQ Phase",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"252-USB/CW TX IQ Bal.",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"253-USB TX IQ Phase",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"242-USB/CW RX IQ Bal.",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"243-USB RX IQ Phase",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"244-AM RX IQ Bal.",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"250-LSB TX IQ Bal.",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"251-LSB TX IQ Phase",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"252-USB/CW TX IQ Bal.",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 24)	{	// yes - display the fourth screen
 			if(screen_disp != 54)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 54;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"260-CW PA Bias (If >0 )",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"261-PA Bias",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"270-FWD PWR Cal. Factor",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"280-XVTR Offs/Mult",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"281-XVTR Offset (Hz)",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"290-80m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"253-USB TX IQ Phase",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"260-CW PA Bias (If >0 )",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"261-PA Bias",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"270-FWD PWR Cal. Factor",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"280-XVTR Offs/Mult",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"281-XVTR Offset (Hz)",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 30)	{	// yes - display the fifth screen
 			if(screen_disp != 55)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 55;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"291-60m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"292-40m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"293-30m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"294-20m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"295-17m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"296-15m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"290-80m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"291-60m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"292-40m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"293-30m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"294-20m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"295-17m 5W PWR Adjust",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 36)	{	// yes - display the sixth screen
 			if(screen_disp != 56)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 56;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"297-12m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"298-10m 5W PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"300-80m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"301-60m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"302-40m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"303-30m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"296-15m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"297-12m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"298-10m 5W PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"300-80m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"301-60m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"302-40m Full PWR Adjust",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 42)	{	// yes - display the seventh screen
 			if(screen_disp != 57)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 57;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"304-20m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"305-17m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"306-15m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"307-12m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"308-10m Full PWR Adjust",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"310-DSP NR BufLen",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"303-30m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"304-20m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"305-17m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"306-15m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"307-12m Full PWR Adjust",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"308-10m Full PWR Adjust",c_clr,Black,0);
 		}
 		else if((ts.menu_item - MAX_MENU_ITEM) < 48)	{	// yes - display the eighth screen
 			if(screen_disp != 58)
 				UiDriverClearSpectrumDisplay();
 			screen_disp = 58;
 			update_vars = 1;
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"312-DSP NR FFT NumTaps",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"311-DSP NR Post-AGC",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"313-DSP Notch ConvRate",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"314-DSP Notch BufLen",c_clr,Black,0);
-			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"315-NB AGC T/C (<=Slow)",c_clr,Black,0);
-//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"312-DSP NR FFT NumTaps",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"310-DSP NR BufLen",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"312-DSP NR FFT NumTaps",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"311-DSP NR Post-AGC",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"313-DSP Notch ConvRate",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"314-DSP Notch BufLen",c_clr,Black,0);
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"315-NB AGC T/C (<=Slow)",c_clr,Black,0);
+		}
+		else if((ts.menu_item - MAX_MENU_ITEM) < 54)	{	// yes - display the ninth screen
+			if(screen_disp != 59)
+				UiDriverClearSpectrumDisplay();
+			screen_disp = 59;
+			update_vars = 1;
+			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+0,"320-AM TX Audio Filter",c_clr,Black,0);
+//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+12,"312-DSP NR FFT NumTaps",c_clr,Black,0);
+//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+24,"311-DSP NR Post-AGC",c_clr,Black,0);
+//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+36,"313-DSP Notch ConvRate",c_clr,Black,0);
+//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+48,"314-DSP Notch BufLen",c_clr,Black,0);
+//			UiLcdHy28_PrintText(POS_MENU_IND_X, POS_MENU_IND_Y+60,"315-NB AGC T/C (<=Slow)",c_clr,Black,0);
 		}
 	}
 
@@ -372,8 +382,11 @@ void UiDriverUpdateMenu(uchar mode)
 			else if(ts.menu_item < MAX_MENU_ITEM + 42)
 				for(var = MAX_MENU_ITEM + 36; var < (MAX_MENU_ITEM + 42); var++)	// seventh screen of configuration items
 					UiDriverUpdateConfigMenuLines(var-MAX_MENU_ITEM, 0);
+			else if(ts.menu_item < MAX_MENU_ITEM + 48)
+				for(var = MAX_MENU_ITEM + 42; var < (MAX_MENU_ITEM + 48); var++)	// eighth screen of configuration items
+					UiDriverUpdateConfigMenuLines(var-MAX_MENU_ITEM, 0);
 			else if(ts.menu_item < MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS)
-				for(var = MAX_MENU_ITEM + 42; var < (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS); var++)	// eighth screen of configuration items
+				for(var = MAX_MENU_ITEM + 48; var < (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS); var++)	// ninth screen of configuration items
 					UiDriverUpdateConfigMenuLines(var-MAX_MENU_ITEM, 0);
 		}
 	}
@@ -852,6 +865,38 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 		opt_pos = MENU_AM_DISABLE % MENUSIZE;
 		break;
 		//
+	case MENU_SSB_AUTO_MODE_SELECT:		// Enable/Disable auto LSB/USB select
+		if(var >= 1)	{	// did the selection increase?
+			ts.lsb_usb_auto_select++;	// yes - increase
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
+		}
+		else if(var <= -1)	{		// did the setting decrease?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
+			if(ts.lsb_usb_auto_select)		// yes, reduce the setting if not at minimum
+				ts.lsb_usb_auto_select--;
+		}
+		//
+		if(mode == 3)	{		// load default setting
+			fchange = 1;
+			ts.lsb_usb_auto_select = AUTO_LSB_USB_OFF;
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+		}
+		//
+		if(ts.lsb_usb_auto_select > AUTO_LSB_USB_MAX)	// limit to maximum setting
+			ts.lsb_usb_auto_select = AUTO_LSB_USB_MAX;
+		//
+		if(ts.lsb_usb_auto_select == AUTO_LSB_USB_ON)		// LSB on bands < 10 MHz
+			strcpy(options, "   ON  ");		// yes
+		else if(ts.lsb_usb_auto_select == AUTO_LSB_USB_60M)	// USB on 60 meters?
+			strcpy(options, "USB 60M");		// yes
+		else
+			strcpy(options, "  OFF  ");		// no (obviously!)
+		//
+		opt_pos = MENU_SSB_AUTO_MODE_SELECT % MENUSIZE;	// Y position of this menu item
+		break;
+	//
 	case MENU_AGC_MODE:	// AGC mode
 		if(var >= 1)	{	// did the selection increase?
 			ts.agc_mode++;	// yes - increase
@@ -1033,9 +1078,11 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 		if(var >= 1)	{	// setting increase?
 			ts.nb_setting++;
 			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
 		}
 		else if(var <= -1)	{	// setting decrease?
 			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
 			if(ts.nb_setting)
 				ts.nb_setting--;
 		}
@@ -1043,6 +1090,7 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 		if(mode == 3)	{		// default
 			ts.nb_setting = 0;	// off
 			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
 		}
 		//
 		if(ts.nb_setting > MAX_NB_SETTING)
@@ -1059,7 +1107,49 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 		//
 		opt_pos = MENU_NOISE_BLANKER_SETTING % MENUSIZE;
 		break;
+	//
+	case MENU_RX_FREQ_CONV:		// Enable/Disable receive frequency conversion
+		if(var >= 1)	{	// setting increase?
+			ts.iq_freq_mode++;
+			fchange = 1;
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+		}
+		else if(var <= -1)	{	// setting decrease?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			fchange = 1;
+			if(ts.iq_freq_mode)
+				ts.iq_freq_mode--;
+		}
 		//
+		if(mode == 3)	{		// default
+			ts.iq_freq_mode = FREQ_IQ_CONV_MODE_DEFAULT;	// off
+			fchange = 1;
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+		}
+		//
+		if(ts.iq_freq_mode > FREQ_IQ_CONV_MODE_MAX)
+			ts.iq_freq_mode = FREQ_IQ_CONV_MODE_MAX;
+		//
+		disp_shift = 1;
+		if(!ts.iq_freq_mode)
+			sprintf(options,"    OFF   ");
+		else if(ts.iq_freq_mode == 1)	{
+			sprintf(options,"RX LO HIGH");
+			sd.magnify = 0;		// force spectrum scope magnify to OFF mode
+		}
+		else if(ts.iq_freq_mode == 2)	{
+			sprintf(options,"RX LO LOW ");
+			sd.magnify = 0;		// force spectrum scope magnify to OFF mode
+		}
+		//
+		//
+		if(fchange)	{	// update parameters if changed
+			UiDriverUpdateFrequency(1);	// update frequency display without checking encoder
+		}
+		//
+		opt_pos = MENU_RX_FREQ_CONV % MENUSIZE;	// Y position of this menu item
+		break;
+	//
 	case MENU_MIC_LINE_MODE:	// Mic/Line mode
 		if(var >= 1)	{	// setting increase?
 			ts.tx_audio_source++;
@@ -1508,34 +1598,34 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 		//
 		switch(ts.cw_offset_mode)	{
 			case CW_OFFSET_USB_TX:
-				sprintf(options, "     USB   ", ts.cw_rx_delay);
+				sprintf(options, "     USB   ");
 				break;
 			case CW_OFFSET_LSB_TX:
-				sprintf(options, "     LSB   ", ts.cw_rx_delay);
+				sprintf(options, "     LSB   ");
 				break;
 			case CW_OFFSET_USB_RX:
-				sprintf(options, "  USB DISP ", ts.cw_rx_delay);
+				sprintf(options, "  USB DISP ");
 				break;
 			case CW_OFFSET_LSB_RX:
-				sprintf(options, "  LSB DISP ", ts.cw_rx_delay);
+				sprintf(options, "  LSB DISP ");
 				break;
 			case CW_OFFSET_USB_SHIFT:
-				sprintf(options, " USB SHIFT ", ts.cw_rx_delay);
+				sprintf(options, " USB SHIFT ");
 				break;
 			case CW_OFFSET_LSB_SHIFT:
-				sprintf(options, " LSB SHIFT ", ts.cw_rx_delay);
+				sprintf(options, " LSB SHIFT ");
 				break;
 			case CW_OFFSET_AUTO_TX:
-				sprintf(options, "AUT USB/LSB", ts.cw_rx_delay);
+				sprintf(options, "AUT USB/LSB");
 				break;
 			case CW_OFFSET_AUTO_RX:
-				sprintf(options, " AUTO DISP ", ts.cw_rx_delay);
+				sprintf(options, " AUTO DISP ");
 				break;
 			case CW_OFFSET_AUTO_SHIFT:
-				sprintf(options, " AUTO SHIFT", ts.cw_rx_delay);
+				sprintf(options, " AUTO SHIFT");
 				break;
 			default:
-				sprintf(options, "  ERROR!    ", ts.cw_rx_delay);
+				sprintf(options, "  ERROR!    ");
 				break;
 		}
 		//
@@ -1906,6 +1996,11 @@ static void UiDriverUpdateMenuLines(uchar index, uchar mode)
 			ts.menu_var_changed = 1;	// indicate that a change has occurred
 		}
 		//
+		if(ts.iq_freq_mode)	{	// is translate mode on?
+			sd.magnify = 0;		// yes - force magnify off!
+			clr = Red;			// make it RED to indicate that it is locked out!
+		}
+		//
 		if(sd.magnify)	{
 			strcpy(options, "ON ");
 			clr = Orange;
@@ -2037,7 +2132,6 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 	ulong	clr;
 	ulong	calc_var;
 	uchar	temp_var;
-	float 	temp_float;
 	int var;
 	bool tchange = 0;		// used to indicate a parameter change
 	bool disp_shift = 0;	// used to cause display to be shifted to the left for large amounts of data (e.g. frequency displays)
@@ -2054,8 +2148,6 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 		ts.menu_var = 0;		// clear encoder change detect
 	}
 	strcpy(options, "ERROR");	// pre-load to catch error condition
-	//
-	//
 	//
 	switch(select)	{		//
 	//
@@ -2226,6 +2318,43 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 			strcpy(options, "  ON ");
 		//
 		opt_pos = CONFIG_AUDIO_MAIN_SCREEN_MENU_SWITCH % MENUSIZE;	// Y position of this menu item
+		break;
+		//
+	case CONFIG_MUTE_LINE_OUT_TX:	// Enable/disable MUTE of TX audio on LINE OUT
+		temp_var = ts.misc_flags1 & 4;
+		if(var >= 1)	{	// setting increase?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			temp_var = 1;				// MUTE of TX audio on LINE OUT is enabled
+			tchange = 1;				// indicate change of parameter
+		}
+		else if(var <= -1)	{	// setting decrease?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			temp_var =  0;				// MUTE of TX audio on LINE OUT is disabled
+			tchange = 1;				// indicate change of parameter
+		}
+		//
+		if(mode == 3)	{
+			temp_var = 0;				// turn it off by default
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			tchange = 1;				// indicate change of parameter
+		}
+		//
+		if((tchange) && (!ts.iq_freq_mode))		{	// did the status change and is translate mode NOT active?
+			if(temp_var)	// Yes - MUTE of TX audio on LINE OUT is enabled
+				ts.misc_flags1 |= 4;		// set LSB
+			else			// MUTE of TX audio on LINE OUT is disabled
+				ts.misc_flags1 &= 0xfb;		// clear LSB
+		}
+		//
+		if(ts.misc_flags1 & 4)				// MUTE of TX audio on LINE OUT disabled
+			strcpy(options, "  ON ");
+		else
+			strcpy(options, "  OFF");
+		//
+		if(ts.iq_freq_mode)	// Mark RED if translate mode is active
+			clr = Red;
+		//
+		opt_pos = CONFIG_MUTE_LINE_OUT_TX % MENUSIZE;	// Y position of this menu item
 		break;
 		//
 	case CONFIG_MAX_VOLUME:	// maximum audio volume
@@ -3525,7 +3654,7 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 		if(ts.dsp_nr_numtaps >= ts.dsp_nr_delaybuf_len)	// Warn if number of taps greater than/equal buffer length!
 			clr = Red;
 		//
-		sprintf(options, "  %u ", ts.dsp_nr_delaybuf_len);
+		sprintf(options, "  %u ", (uint)ts.dsp_nr_delaybuf_len);
 		//
 		opt_pos = CONFIG_DSP_NR_DECORRELATOR_BUFFER_LENGTH % MENUSIZE;
 		break;
@@ -3673,7 +3802,7 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 			clr = Orange;
 		//
 		//
-		sprintf(options, "  %u ", ts.dsp_notch_delaybuf_len);
+		sprintf(options, "  %u ", (uint)ts.dsp_notch_delaybuf_len);
 		//
 		opt_pos = CONFIG_DSP_NOTCH_DECORRELATOR_BUFFER_LENGTH % MENUSIZE;
 		break;
@@ -3708,6 +3837,42 @@ static void UiDriverUpdateConfigMenuLines(uchar index, uchar mode)
 		sprintf(options, "  %u ", ts.nb_agc_time_const);
 		//
 		opt_pos = CONFIG_AGC_TIME_CONSTANT % MENUSIZE;
+		break;
+		//
+	case CONFIG_AM_TX_FILTER_ENABLE:	// Enable/disable AM TX audio filter
+		temp_var = ts.misc_flags1 & 8;
+		if(var >= 1)	{	// setting increase?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			temp_var = 1;				// AM TX audio filter is disabled
+			tchange = 1;				// indicate change of parameter
+		}
+		else if(var <= -1)	{	// setting decrease?
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			temp_var =  0;				// AM TX audio filter is enabled
+			tchange = 1;				// indicate change of parameter
+		}
+		//
+		if(mode == 3)	{
+			temp_var = 0;				// enable by default
+			ts.menu_var_changed = 1;	// indicate that a change has occurred
+			tchange = 1;				// indicate change of parameter
+		}
+		//
+		if(tchange)		{	// did the status change and is translate mode NOT active?
+			if(temp_var)	// AM TX audio filter is disabled
+				ts.misc_flags1 |= 8;		// set LSB
+			else			// AM TX audio filter is enabled
+				ts.misc_flags1 &= 0xf7;		// clear LSB
+		}
+		//
+		if(ts.misc_flags1 & 8)	{			// Display status of TX audio filter
+			strcpy(options, "  OFF");
+			clr = Orange;					// warn user that filter is off!
+		}
+		else
+			strcpy(options, "  ON  ");
+		//
+		opt_pos = CONFIG_AM_TX_FILTER_ENABLE % MENUSIZE;	// Y position of this menu item
 		break;
 		//
 	default:						// Move to this location if we get to the bottom of the table!
