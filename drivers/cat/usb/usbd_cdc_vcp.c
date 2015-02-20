@@ -202,8 +202,10 @@ static uint16_t VCP_Ctrl (uint32_t Cmd, uint8_t* Buf, uint32_t Len)
 	  // PTT on
 	  if((ts.txrx_mode == TRX_MODE_RX) && (Buf[0] == 0x03))
 	  {
-		  ts.txrx_mode = TRX_MODE_TX;
-		  ui_driver_toggle_tx();			// cat
+		  if(!ts.tx_disable)	{
+			  ts.txrx_mode = TRX_MODE_TX;
+			  ui_driver_toggle_tx();			// cat
+		  }
 	  }
 
 	  // PTT off

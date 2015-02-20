@@ -19,9 +19,9 @@
 
 #include "i2s.h"
 
-DMA_InitTypeDef DMA_InitStructure, DMA_InitStructure2;
+static DMA_InitTypeDef DMA_InitStructure, DMA_InitStructure2;
 
-uint32_t txbuf, rxbuf, szbuf;
+static uint32_t txbuf, rxbuf, szbuf;
 
 //*----------------------------------------------------------------------------
 //* Function Name       : I2S_Block_Init
@@ -185,9 +185,9 @@ void I2S_Block_Stop(void)
 void DMA1_Stream2_IRQHandler(void)
 { 
 #ifdef USE_24_BITS
-	int32_t *src, *dst, sz;
+	static int32_t *src, *dst, sz;
 #else
-	int16_t *src, *dst, sz;
+	static int16_t *src, *dst, sz;
 #endif
 
 #ifdef EXEC_PROFILING
