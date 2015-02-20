@@ -20,11 +20,24 @@
 
 #include "ui_rotary.h"
 #include "ui_lcd_hy28.h"
-
+//
+#include "ui_driver.h"
+//
+// Eeprom items
+#include "eeprom.h"
+extern uint16_t VirtAddVarTab[NB_OF_VAR];
+//
 extern const ButtonMap	bm[];
 
 // Transceiver state public structure
 extern __IO TransceiverState ts;
+
+//
+__IO	FilterCoeffs		fc;
+
+// ------------------------------------------------
+// Frequency public
+__IO DialFrequency 				df;
 
 //*----------------------------------------------------------------------------
 //* Function Name       : mchf_board_led_init
@@ -220,6 +233,17 @@ static void mchf_board_keyer_irq_init(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
+void mchf_board_power_button_input_init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	// Configure pin as input
+	GPIO_InitStructure.GPIO_Pin   = BUTTON_PWR;
+	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(BUTTON_PWR_PIO, &GPIO_InitStructure);
+}
 //*----------------------------------------------------------------------------
 //* Function Name       : mchf_board_power_button_irq_init
 //* Object              :
@@ -574,7 +598,7 @@ static void mchf_board_watchdog_init(void)
 static void mchf_board_set_system_tick_value(void)
 {
 	RCC_ClocksTypeDef 	RCC_Clocks;
-	//NVIC_InitTypeDef 	NVIC_InitStructure;
+//	NVIC_InitTypeDef 	NVIC_InitStructure;
 
 	// Configure Systick clock source as HCLK
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
@@ -585,11 +609,11 @@ static void mchf_board_set_system_tick_value(void)
 	// Need 1mS tick for responcive UI
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
 
-	//NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;
-	//NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
-	//NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	//NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	//NVIC_Init(&NVIC_InitStructure);
+//	NVIC_InitStructure.NVIC_IRQChannel = SysTick_IRQn;
+//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0E;
+//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//	NVIC_Init(&NVIC_InitStructure);
 }
 
 //*----------------------------------------------------------------------------
@@ -678,8 +702,71 @@ void mchf_board_switch_tx(char mode)
 //*----------------------------------------------------------------------------
 void mchf_board_power_off(void)
 {
+	ulong i;
+	uchar	tx[32];
 	// Power off all - high to disable main regulator
-	POWER_DOWN_PIO->BSRRL = POWER_DOWN;
+	//
+
+//	Write_VirtEEPROM(EEPROM_FREQ_HIGH,(df.tune_new >> 16));						// Save frequency
+//	Write_VirtEEPROM(EEPROM_FREQ_LOW,(df.tune_new & 0xFFFF));					//
+//
+	UiDriverClearSpectrumDisplay();	// clear display under spectrum scope
+
+	for(i = 0; i < 2; i++)	// Slight delay before we invoke EEPROM write
+		non_os_delay();
+
+//	UiDriverSaveEepromValues();		// save EEPROM values
+
+	   sprintf(tx,"                           ");
+	   UiLcdHy28_PrintText(80,148,tx,Black,Black,0);
+
+	   sprintf(tx,"       Powering off...     ");
+	   UiLcdHy28_PrintText(80,156,tx,Blue2,Black,0);
+
+	   sprintf(tx,"                           ");
+	   UiLcdHy28_PrintText(80,168,tx,Blue2,Black,0);
+
+
+	   sprintf(tx," Saving settings to EEPROM ");
+	   UiLcdHy28_PrintText(80,176,tx,Blue,Black,0);
+
+	   sprintf(tx,"            2              ");
+	   UiLcdHy28_PrintText(80,188,tx,Blue,Black,0);
+
+	   sprintf(tx,"                           ");
+	   UiLcdHy28_PrintText(80,200,tx,Black,Black,0);
+
+	Codec_Mute(1);	// mute audio when powering down
+
+	// Delay before killing power to allow EEPROM write to finish
+	//
+
+	for(i = 0; i < 10; i++)
+		non_os_delay();
+	//
+
+	sprintf(tx,"            1              ");
+	UiLcdHy28_PrintText(80,188,tx,Blue,Black,0);
+
+	for(i = 0; i < 10; i++)
+		non_os_delay();
+	//
+	sprintf(tx,"            0              ");
+	UiLcdHy28_PrintText(80,188,tx,Blue,Black,0);
+
+	for(i = 0; i < 10; i++)
+		non_os_delay();
+
+	ts.powering_down = 1;	// indicate that we should be powering down
+
+	UiDriverSaveEepromValuesPowerDown();		// save EEPROM values again - to make sure...
+
+	//
+	// Actual power-down moved to "UiDriverHandlePowerSupply()" with part of delay
+	// so that EEPROM write could complete without non_os_delay
+	// using the constant "POWERDOWN_DELAY_COUNT" as the last "second" of the delay
+	//
+	// POWER_DOWN_PIO->BSRRL = POWER_DOWN;
 }
 
 //*----------------------------------------------------------------------------
@@ -767,3 +854,37 @@ void mchf_board_post_init(void)
 }
 
 
+
+//
+// Interface for virtual EEPROM functions and our code
+//
+uint16_t Read_VirtEEPROM(uint16_t addr, uint16_t *value)	{		// reference to virtual EEPROM read function
+
+	return(EE_ReadVariable(VirtAddVarTab[addr], value));
+}
+
+uint16_t Write_VirtEEPROM(uint16_t addr, uint16_t value)	{		// reference to virtual EEPROM write function, writing unsigned 16 bit
+	uint16_t	retvar;
+//	char	temp[32];
+
+	retvar = (EE_WriteVariable(VirtAddVarTab[addr], value));
+
+//	sprintf(temp, "Wstat=%d ", retvar);		// Debug indication of write status
+//	UiLcdHy28_PrintText((POS_PB_IND_X + 32),(POS_PB_IND_Y + 1), temp,White,Black,0);
+
+	return retvar;
+}
+
+uint16_t Write_VirtEEPROM_Signed(uint16_t addr, int value)	{		// reference to virtual EEPROM write function, writing signed integer
+	uint16_t	*u_var;
+	uint16_t	retvar;
+//	char	temp[32];
+
+	u_var = (uint16_t *)&value;
+	retvar = (EE_WriteVariable(VirtAddVarTab[addr], *u_var));
+
+//	sprintf(temp, "Wstat=%d ", retvar);		// Debug indication of write status
+//	UiLcdHy28_PrintText((POS_PB_IND_X + 32),(POS_PB_IND_Y + 1), temp,White,Black,0);
+
+	return retvar;
+}
