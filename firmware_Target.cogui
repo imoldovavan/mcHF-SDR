@@ -10,71 +10,24 @@
 <info part="DefaultEditorWorkbook">
 <folder appearance="1" expanded="2">
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
-<part id="7"/>
-<part id="4"/>
 <part id="0"/>
-<part id="1"/>
-<part id="2"/>
-<part id="3"/>
-<part id="5"/>
-<part id="6"/>
 </presentation>
 </folder>
 </info>
 </editorArea>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="audio_driver.c" partName="audio_driver.c" path="D:/mchf/ver_0_0_216/drivers/audio/audio_driver.c" title="audio_driver.c" tooltip="D:/mchf/ver_0_0_216/drivers/audio/audio_driver.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/audio/audio_driver.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="36780" selectionTopPixel="14818"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="audio_driver.h" partName="audio_driver.h" path="D:/mchf/ver_0_0_216/drivers/audio/audio_driver.h" title="audio_driver.h" tooltip="D:/mchf/ver_0_0_216/drivers/audio/audio_driver.h" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/audio/audio_driver.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="14" selectionOffset="13788" selectionTopPixel="5696"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="ui_menu.c" partName="ui_menu.c" path="D:/mchf/ver_0_0_216/drivers/ui/ui_menu.c" title="ui_menu.c" tooltip="D:/mchf/ver_0_0_216/drivers/ui/ui_menu.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/ui/ui_menu.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="15" selectionOffset="39452" selectionTopPixel="18209"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="ui_menu.h" partName="ui_menu.h" path="D:/mchf/ver_0_0_214/drivers/ui/ui_menu.h" title="ui_menu.h" tooltip="D:/mchf/ver_0_0_214/drivers/ui/ui_menu.h" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/ui/ui_menu.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1233" selectionTopPixel="180"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="ui_driver.h" partName="ui_driver.h" path="D:/mchf/ver_0_0_216/drivers/ui/ui_driver.h" title="ui_driver.h" tooltip="D:/mchf/ver_0_0_216/drivers/ui/ui_driver.h" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/ui/ui_driver.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="19" selectionOffset="12367" selectionTopPixel="6468"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_board.h" partName="mchf_board.h" path="D:/mchf/ver_0_0_216/hardware/mchf_board.h" title="mchf_board.h" tooltip="D:/mchf/ver_0_0_216/hardware/mchf_board.h" workbook="DefaultEditorWorkbook">
+<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_board.h" partName="mchf_board.h" path="C:/Projects/mcHF/firmware/hardware/mchf_board.h" title="mchf_board.h" tooltip="C:/Projects/mcHF/firmware/hardware/mchf_board.h" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/hardware/mchf_board.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="30761" selectionTopPixel="14336"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="D:/mchf/ver_0_0_216/main.c" title="main.c" tooltip="D:/mchf/ver_0_0_216/main.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="15459" selectionTopPixel="8837"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="ui_driver.c" partName="ui_driver.c" path="D:/mchf/ver_0_0_216/drivers/ui/ui_driver.c" title="ui_driver.c" tooltip="D:/mchf/ver_0_0_216/drivers/ui/ui_driver.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/firmware_Target/drivers/ui/ui_driver.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="104561" selectionTopPixel="51693"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1319" selectionTopPixel="0"/>
 </editor>
 </editors>
 <views>
-<view id="org.coocox.component.ui.ComponentView" partName="Components">
-<viewState/>
-</view>
 <view id="org.coocox.builder.ui.views.ProjectView" partName="Project">
 <viewState CommonNavigator.LINKING_ENABLED="0" horizontalPosition="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0" verticalPosition="0">
 <expanded>
 <element path="/firmware_Target"/>
-<element path="/firmware_Target/drivers"/>
-<element path="/firmware_Target/drivers/audio"/>
-<element path="/firmware_Target/drivers/audio/codec"/>
-<element path="/firmware_Target/drivers/cat"/>
-<element path="/firmware_Target/drivers/ui"/>
-<element path="/firmware_Target/drivers/ui/lcd"/>
-<element path="/firmware_Target/hardware"/>
-<element path="/firmware_Target/misc"/>
-<element path="/firmware_Target/misc/v_eprom"/>
 </expanded>
 <selection>
-<element path="/firmware_Target/drivers/audio/codec/i2s.c"/>
+<element path="/firmware_Target/main.c"/>
 </selection>
 </viewState>
 </view>
@@ -87,21 +40,21 @@
 <view id="org.eclipse.ui.console.ConsoleView" partName="Console">
 <viewState/>
 </view>
-<view id="org.coocox.component.ui.Help" partName="Help">
+<view id="org.eclipse.ui.views.ContentOutline" partName="Outline">
 <viewState/>
 </view>
 </views>
 <perspectives activePart="org.eclipse.cdt.ui.editor.CEditor" activePerspective="org.coocox.builder.perspective.CoBuilder">
 <perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
 <descriptor class="org.coocox.builder.ui.PerspectiveCoBuilder" id="org.coocox.builder.perspective.CoBuilder" label="CooCox CoBuilder"/>
+<alwaysOnActionSet id="org.coocox.component.ui.actionSet"/>
+<alwaysOnActionSet id="org.coocox.welcome.ui.actionSet"/>
 <alwaysOnActionSet id="org.eclipse.search.searchActionSet"/>
 <alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.annotationNavigation"/>
 <alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.navigation"/>
 <alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo"/>
 <alwaysOnActionSet id="org.eclipse.ui.actionSet.keyBindings"/>
 <alwaysOnActionSet id="org.eclipse.ui.actionSet.openFiles"/>
-<alwaysOnActionSet id="org.coocox.component.ui.actionSet"/>
-<alwaysOnActionSet id="org.coocox.welcome.ui.actionSet"/>
 <alwaysOnActionSet id="org.eclipse.debug.ui.breakpointActionSet"/>
 <alwaysOnActionSet id="org.coocox.userspace.actionSet"/>
 <hide_menu_item_id id="org.coocox.codebugger.configuration.showMemoryAction"/>
@@ -122,31 +75,25 @@
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
 <hide_toolbar_item_id id="org.eclipse.debug.ui.commands.TerminateAndRelaunch"/>
 <view id="org.coocox.builder.ui.views.ProjectView"/>
-<view id="org.coocox.component.ui.Help"/>
 <view id="org.eclipse.ui.console.ConsoleView"/>
 <view id="org.eclipse.search.ui.views.SearchView"/>
-<fastViewBars>
-<fastViewBar fastViewLocation="16384" id="org.eclipse.ui.internal.ViewStack@1c58fb9" orientation="256" selectedTabId="org.coocox.component.ui.ComponentView" style="0">
-<fastViews>
-<view id="org.coocox.component.ui.ComponentView" ratio="0.3"/>
-</fastViews>
-</fastViewBar>
-</fastViewBars>
+<view id="org.eclipse.ui.views.ContentOutline"/>
+<fastViewBars/>
 <layout>
 <mainWindow>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@1c58fb9">
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@125a28e">
 <folder appearance="2" expanded="2">
 <page content="org.coocox.component.ui.ComponentView" label="LabelNotFound"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
 </folder>
 </info>
-<info folder="true" part="stickyFolderRight" ratio="0.75" ratioLeft="1434" ratioRight="478" relationship="2" relative="org.eclipse.ui.internal.ViewStack@1c58fb9">
+<info folder="true" part="stickyFolderRight" ratio="0.7496662" ratioLeft="1123" ratioRight="375" relationship="2" relative="org.eclipse.ui.internal.ViewStack@125a28e">
 <folder appearance="2" expanded="2">
 <page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
 <page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@14e0f6a" ratio="0.6993865" ratioLeft="684" ratioRight="294" relationship="4" relative="org.eclipse.ui.internal.ViewStack@1c58fb9">
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@56181d" ratio="0.79196703" ratioLeft="769" ratioRight="202" relationship="4" relative="org.eclipse.ui.internal.ViewStack@125a28e">
 <folder activePageID="org.eclipse.ui.console.ConsoleView" appearance="2" expanded="2">
 <page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
 <page content="org.eclipse.search.ui.views.SearchView" label="Search"/>
@@ -156,12 +103,12 @@
 </presentation>
 </folder>
 </info>
-<info part="org.coocox.builder.ui.exampleView" ratio="0.21966527" ratioLeft="420" ratioRight="1492" relationship="2" relative="org.eclipse.ui.internal.ViewStack@1c58fb9"/>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@1cbd22" ratio="0.864976" ratioLeft="1262" ratioRight="197" relationship="2" relative="org.coocox.builder.ui.exampleView">
-<folder activePageID="org.coocox.component.ui.Help" appearance="2" expanded="2">
-<page content="org.coocox.component.ui.Help" label="Help"/>
+<info part="org.coocox.builder.ui.exampleView" ratio="0.16232073" ratioLeft="249" ratioRight="1285" relationship="2" relative="org.eclipse.ui.internal.ViewStack@125a28e"/>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@144317f" ratio="0.7205503" ratioLeft="838" ratioRight="325" relationship="2" relative="org.coocox.builder.ui.exampleView">
+<folder activePageID="org.eclipse.ui.views.ContentOutline" appearance="2" expanded="2">
+<page content="org.eclipse.ui.views.ContentOutline" label="Outline"/>
+<page content="org.coocox.component.ui.Help" label="LabelNotFound"/>
 <page content="org.eclipse.debug.ui.BreakpointView" label="LabelNotFound"/>
-<page content="org.eclipse.ui.views.ContentOutline" label="LabelNotFound"/>
 <page content="org.coocox.coassistant.view.CoAssistantView" label="LabelNotFound"/>
 <page content="org.coocox.builder.ui.MoreExampleView" label="LabelNotFound"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
@@ -169,8 +116,8 @@
 </presentation>
 </folder>
 </info>
-<info part="org.eclipse.ui.editorss" ratio="0.44989774" ratioLeft="440" ratioRight="538" relationship="4" relative="org.coocox.builder.ui.exampleView"/>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@15ec9f4" ratio="0.36912066" ratioLeft="361" ratioRight="617" relationship="4" relative="org.eclipse.ui.internal.ViewStack@1c58fb9">
+<info part="org.eclipse.ui.editorss" ratio="0.4495837" ratioLeft="486" ratioRight="595" relationship="4" relative="org.coocox.builder.ui.exampleView"/>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@1d34c83" ratio="0.3691027" ratioLeft="399" ratioRight="682" relationship="4" relative="org.eclipse.ui.internal.ViewStack@125a28e">
 <folder activePageID="org.coocox.builder.ui.views.ProjectView" appearance="2" expanded="2">
 <page content="org.coocox.builder.ui.views.ProjectView" label="Project"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
@@ -185,162 +132,166 @@
 <workingSets/>
 <navigationHistory>
 <editors>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/audio/codec/codec.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/audio/audio_driver.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/ui/ui_driver.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/ui/ui_menu.c"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/ui/ui_driver.h"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/hardware/mchf_board.h"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/ui/ui_driver.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/cmsis/arm_math.h"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/audio/filters/fir_2_3k.h"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/audio/audio_driver.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/audio/codec/codec.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/hardware/mchf_board.h"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/firmware_Target/drivers/ui/ui_driver.c"/>
 </editors>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="84182" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="22713" y="0"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="82849" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="22943" y="0"/>
 </item>
-<item historyLabel="ui_menu.c" index="2">
-<position info="not_deleted" x="65695" y="0"/>
-</item>
-<item historyLabel="audio_driver.c" index="0">
-<position info="not_deleted" x="55745" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="82849" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="3149" y="23"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="101711" y="23"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103749" y="0"/>
-</item>
-<item historyLabel="ui_menu.c" index="2">
-<position info="not_deleted" x="65695" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103749" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103527" y="0"/>
-</item>
-<item historyLabel="ui_driver.h" index="3">
-<position info="not_deleted" x="12367" y="19"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20043" y="0"/>
-</item>
-<item historyLabel="ui_menu.c" index="2">
-<position info="not_deleted" x="39452" y="15"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20043" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20074" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20073" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20074" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="20149" y="27"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="3215" y="27"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="106402" y="27"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="106631" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="108255" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103449" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="102035" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="104228" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="104910" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="105446" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="106055" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="102044" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103969" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="104910" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="103406" y="0"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="107650" y="9"/>
-</item>
-<item historyLabel="ui_driver.c" index="1">
+<item historyLabel="ui_driver.c" index="3">
 <position/>
 </item>
-<item historyLabel="mchf_board.h" index="4">
-<position info="not_deleted" x="30761" y="0"/>
+<item historyLabel="mchf_board.h" index="2">
+<position info="not_deleted" x="16239" y="16"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="135162" y="0"/>
+</item>
+<item historyLabel="mchf_board.h" index="2">
+<position info="not_deleted" x="1645" y="0"/>
+</item>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="136602" y="0"/>
+</item>
+<item historyLabel="codec.c" index="0">
+<position info="not_deleted" x="7524" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="12123" y="11"/>
+</item>
+<item historyLabel="arm_math.h" index="4">
+<position info="not_deleted" x="31832" y="11"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="12123" y="11"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="12487" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="4582" y="32"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="1749" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="10030" y="18"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="11922" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="4582" y="32"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="4998" y="110"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="3750" y="17"/>
+</item>
+<item historyLabel="audio_driver.c" index="1">
 <position/>
 </item>
-<item historyLabel="mchf_board.h" index="4">
-<position info="not_deleted" x="30761" y="0"/>
+<item historyLabel="fir_2_3k.h" index="5">
+<position info="not_deleted" x="1477" y="7"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position/>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="11843" y="0"/>
 </item>
-<item historyLabel="mchf_board.h" index="4">
-<position info="not_deleted" x="30761" y="0"/>
+<item historyLabel="mchf_board.h" index="2">
+<position info="not_deleted" x="2011" y="0"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="102044" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="136651" y="0"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="108353" y="0"/>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="12087" y="0"/>
 </item>
-<item historyLabel="mchf_board.h" index="4">
-<position info="not_deleted" x="30761" y="0"/>
+<item historyLabel="mchf_board.h" index="2">
+<position info="not_deleted" x="2011" y="0"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="106475" y="0"/>
+<item historyLabel="audio_driver.c" index="1">
+<position info="not_deleted" x="12087" y="0"/>
 </item>
-<item historyLabel="main.c" index="5">
-<position info="not_deleted" x="21108" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="136651" y="0"/>
 </item>
-<item historyLabel="mchf_board.h" index="4">
-<position info="not_deleted" x="30761" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="92624" y="24"/>
 </item>
-<item historyLabel="main.c" index="5">
-<position info="not_deleted" x="15459" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="95239" y="27"/>
 </item>
-<item historyLabel="ui_driver.c" index="1">
-<position info="not_deleted" x="104561" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="53923" y="23"/>
 </item>
-<item historyLabel="audio_driver.c" index="0">
-<position info="not_deleted" x="55745" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="58558" y="21"/>
 </item>
-<item active="true" historyLabel="audio_driver.c" index="0">
-<position info="not_deleted" x="61331" y="0"/>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="52357" y="21"/>
+</item>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="67482" y="25"/>
+</item>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="62965" y="27"/>
+</item>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="79461" y="23"/>
+</item>
+<item historyLabel="ui_driver.c" index="3">
+<position info="not_deleted" x="108162" y="22"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="12087" y="0"/>
+</item>
+<item historyLabel="codec.c" index="7">
+<position info="not_deleted" x="7524" y="0"/>
+</item>
+<item historyLabel="codec.c" index="7">
+<position info="not_deleted" x="3578" y="18"/>
+</item>
+<item historyLabel="codec.c" index="7">
+<position info="not_deleted" x="3578" y="18"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="1539" y="0"/>
+</item>
+<item historyLabel="mchf_board.h" index="8">
+<position info="not_deleted" x="2011" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="1539" y="0"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="4152" y="19"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="6699" y="18"/>
+</item>
+<item historyLabel="audio_driver.c" index="6">
+<position info="not_deleted" x="11046" y="0"/>
+</item>
+<item historyLabel="mchf_board.h" index="8">
+<position info="not_deleted" x="2011" y="0"/>
+</item>
+<item historyLabel="ui_driver.c" index="9">
+<position info="not_deleted" x="108358" y="0"/>
+</item>
+<item active="true" historyLabel="mchf_board.h" index="8">
+<position info="not_deleted" x="1319" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -349,50 +300,50 @@
 <actionBarAdvisor/>
 </window>
 <mruList>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.systemExternalEditor" name="firmware.coproj" tooltip="D:\mchf\ver_0_0_216\firmware.coproj">
-<persistable uri="file:/D:/mchf/ver_0_0_216/firmware.coproj"/>
-</file>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.systemExternalEditor" name="firmware.coproj" tooltip="D:\mchf\ver_0_0_215\firmware.coproj">
-<persistable uri="file:/D:/mchf/ver_0_0_215/firmware.coproj"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.c" tooltip="firmware_Target/drivers/audio/codec/codec.c">
-<persistable path="/firmware_Target/drivers/audio/codec/codec.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="fir_2_3k.h" tooltip="firmware_Target/drivers/audio/filters/fir_2_3k.h">
+<persistable path="/firmware_Target/drivers/audio/filters/fir_2_3k.h"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="arm_math.h" tooltip="firmware_Target/cmsis/arm_math.h">
 <persistable path="/firmware_Target/cmsis/arm_math.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="i2s.c" tooltip="firmware_Target/drivers/audio/codec/i2s.c">
-<persistable path="/firmware_Target/drivers/audio/codec/i2s.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_board.c" tooltip="firmware_Target/hardware/mchf_board.c">
-<persistable path="/firmware_Target/hardware/mchf_board.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f4xx.c" tooltip="firmware_Target/cmsis_boot/startup/startup_stm32f4xx.c">
-<persistable path="/firmware_Target/cmsis_boot/startup/startup_stm32f4xx.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="firmware_Target/main.c">
+<persistable path="/firmware_Target/main.c"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="ui_driver.c" tooltip="firmware_Target/drivers/ui/ui_driver.c">
 <persistable path="/firmware_Target/drivers/ui/ui_driver.c"/>
 </file>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.systemExternalEditor" name="firmware.coproj" tooltip="D:\mchf\ver_0_0_214\firmware.coproj">
-<persistable uri="file:/D:/mchf/ver_0_0_214/firmware.coproj"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.h" tooltip="firmware_Target/drivers/audio/codec/codec.h">
+<persistable path="/firmware_Target/drivers/audio/codec/codec.h"/>
 </file>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.eclipse.ui.systemExternalEditor" name="firmware.coproj" tooltip="D:\mchf\ver_0_0_213\firmware.coproj">
-<persistable uri="file:/D:/mchf/ver_0_0_213/firmware.coproj"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="audio_driver.h" tooltip="firmware_Target/drivers/audio/audio_driver.h">
+<persistable path="/firmware_Target/drivers/audio/audio_driver.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="ui_si570.c" tooltip="firmware_Target/drivers/ui/oscillator/ui_si570.c">
-<persistable path="/firmware_Target/drivers/ui/oscillator/ui_si570.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="i_tx_filter.h" tooltip="firmware_Target/drivers/audio/filters/i_tx_filter.h">
+<persistable path="/firmware_Target/drivers/audio/filters/i_tx_filter.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="softdds.c" tooltip="firmware_Target/drivers/audio/softdds/softdds.c">
-<persistable path="/firmware_Target/drivers/audio/softdds/softdds.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="audio_driver.c" tooltip="firmware_Target/drivers/audio/audio_driver.c">
+<persistable path="/firmware_Target/drivers/audio/audio_driver.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.c" tooltip="firmware_Target/drivers/audio/codec/codec.c">
+<persistable path="/firmware_Target/drivers/audio/codec/codec.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="cw_gen.h" tooltip="firmware_Target/drivers/audio/cw/cw_gen.h">
+<persistable path="/firmware_Target/drivers/audio/cw/cw_gen.h"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="cw_gen.c" tooltip="firmware_Target/drivers/audio/cw/cw_gen.c">
 <persistable path="/firmware_Target/drivers/audio/cw/cw_gen.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_i2c.h" tooltip="firmware_Target/cmsis_lib/include/stm32f4xx_i2c.h">
-<persistable path="/firmware_Target/cmsis_lib/include/stm32f4xx_i2c.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_board.c" tooltip="firmware_Target/hardware/mchf_board.c">
+<persistable path="/firmware_Target/hardware/mchf_board.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_hw_i2c.h" tooltip="firmware_Target/hardware/mchf_hw_i2c.h">
-<persistable path="/firmware_Target/hardware/mchf_hw_i2c.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_gpio.h" tooltip="firmware_Target/cmsis_lib/include/stm32f4xx_gpio.h">
+<persistable path="/firmware_Target/cmsis_lib/include/stm32f4xx_gpio.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_hw_i2c.c" tooltip="firmware_Target/hardware/mchf_hw_i2c.c">
+<persistable path="/firmware_Target/hardware/mchf_hw_i2c.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="mchf_hw_i2c.c" tooltip="firmware_Target/hardware/mchf_hw_i2c.c">
+<persistable path="/firmware_Target/hardware/mchf_hw_i2c.c"/>
 </file>
 </mruList>
 </workbench>

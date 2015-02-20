@@ -34,27 +34,23 @@
 //
 #define White          		0xFFFF
 #define Black          		0x0000
-#define Grey           		RGB(0xb8,0xbc,0xa8)	//=0xBDF5
-#define Blue           		RGB(0x50,0x50,0xFF)	// Brighter Blue	//Original - 0x001F =#0000FF
-#define Blue2          		0x051F				// =#00A0FF
-#define Red            		RGB(0xFF,0x38,0x38)	// Brighter (easier to see) Red	//Original 0xF800 =#FF0000
-#define	Red2				RGB(0xFF,0x80,0x80)	// Even "brighter" red (almost pink)
-#define Magenta        		RGB(0xFF,0x30,0xFF)	// Brighter Magenta	//Original 0xF81F =#FF00FF
-#define Green          		0x07E0				// =#00FF00
+#define Grey           		0xBDF5
+#define Blue           		0x001F
+#define Blue2          		0x051F
+#define Red            		0xF800
+#define Magenta        		0xF81F
+#define Green          		0x07E0
 #define Cyan           		0x7FFF
-#define Yellow         		RGB(0xFF,0xFF,0x20)	// "Yellower" and brighter	//Original - 0xFFE0 =#FFFF00
+#define Yellow         		0xFFE0
 
-#define Orange				RGB(0xFF,0xA8,0x20)	//"Orange-er" and brighter	//Original - RGB(0xF6,0xA0,0x1A)
+#define Orange				RGB(0xF6,0xA0,0x1A)
 #define Cream				RGB(0xED,0xE7,0xD7)
 
 #define Grey1				RGB(0x80,0x80,0x80)
 #define Grey2				RGB(0xC0,0xC0,0xC0)
 #define Grey3				RGB(0xA6,0xA8,0xAD)
-#define Grey4				RGB(0x40,0x40,0x40)
-#define	Grey6				RGB(0x78,0x78,0x78)
 
-// Dark grey colour used for spectrum scope grid
-#define Grid				RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD)		// COL_SPECTRUM_GRAD = 0x40
+#define Grid				RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD)
 
 #define LCD_DIR_HORIZONTAL	0x0000
 #define LCD_DIR_VERTICAL	0x0001
@@ -99,7 +95,6 @@ void 	UiLcdHy28_DrawBottomButton(ushort Xpos, ushort Ypos, ushort Height, ushort
 void 	UiLcdHy28_DrawFullRect (ushort Xpos, ushort Ypos, ushort Height, ushort Width, ushort color);
 
 void 	UiLcdHy28_DrawSpectrum(q15_t *fft,ushort color,ushort shift);
-void 	UiLcdHy28_DrawSpectrum_Interleaved(q15_t *fft_old, q15_t *fft_new, ushort color_old, ushort color_new,ushort shift);
 
 void 	UiLcdHy28_Test(void);
 uchar 	UiLcdHy28_Init(void);

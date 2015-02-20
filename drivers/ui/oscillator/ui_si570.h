@@ -22,8 +22,8 @@
 // ------------------
 #define SI570_ADDRESS			(0x55 << 1)			// R/W bit = LSB
 
-#define SI570_MIN_FREQ			 7200000	// 2 MHz 10000000			// 2.5 Mhz
-#define SI570_MAX_FREQ			128000000			// 32 Mhz
+#define SI570_MIN_FREQ			 10000000			// 2.5 Mhz
+#define SI570_MAX_FREQ			120000000			// 30 Mhz
 
 #define SI570_RECALL			(1<<0)
 #define SI570_FREEZE_DCO		(1<<4)

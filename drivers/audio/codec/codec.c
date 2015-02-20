@@ -13,7 +13,6 @@
 
 // Common
 #include "mchf_board.h"
-#include "audio_driver.h"
 
 #include <stdio.h>
 
@@ -21,15 +20,44 @@
 #include "mchf_hw_i2c2.h"
 #include "codec.h"
 
+// Mask for the bit EN of the I2S CFGR register
+#define I2S_ENABLE_MASK                 0x0400
+
+#define CODEC_STANDARD                	0x04
+#define I2S_STANDARD                   	I2S_Standard_Phillips
+
+#define W8731_ADDR_0 					0x1A		// CS = 0, MODE to GND
+#define W8731_ADDR_1 					0x1B		// CS = 1, MODE to GND
+
+// The 7 bits Codec address (sent through I2C interface)
+#define CODEC_ADDRESS           		(W8731_ADDR_0<<1)
+// --------------------------------------------------
+// Registers
+#define W8731_LEFT_LINE_IN				0x00		// 0000000
+#define W8731_RIGHT_LINE_IN				0x01		// 0000001
+
+#define W8731_LEFT_HEADPH_OUT			0x02		// 0000010
+#define W8731_RIGHT_HEADPH_OUT			0x03		// 0000011
+
+#define W8731_ANLG_AU_PATH_CNTR			0x04		// 0000100
+#define W8731_DIGI_AU_PATH_CNTR			0x05		// 0000101
+
+#define W8731_POWER_DOWN_CNTR			0x06		// 0000110
+#define W8731_DIGI_AU_INTF_FORMAT		0x07		// 0000111
+
+#define W8731_SAMPLING_CNTR				0x08		// 0001000
+#define W8731_ACTIVE_CNTR				0x09		// 0001001
+#define W8731_RESET						0x0F		// 0001111
+
+// -------------------------------------------------
+
+#define W8731_DEEMPH_CNTR 				0x06
+
 // Demodulator mode public flag
 extern __IO ulong demod_mode;
 
 // Transceiver state public structure
 extern __IO TransceiverState ts;
-
-// Public Audio
-extern __IO		AudioDriverState	ads;
-
 
 //*----------------------------------------------------------------------------
 //* Function Name       : Codec_Init
@@ -122,16 +150,10 @@ void Codec_Reset(uint32_t AudioFreq,ulong word_size)
 //*----------------------------------------------------------------------------
 void Codec_RX_TX(void)
 {
-
-	uchar mute_count;
-
 	if(ts.txrx_mode == TRX_MODE_RX)
 	{
 		// First step - mute sound
 		Codec_Volume(0);
-
-		// Mute line input
-		Codec_Line_Gain_Adj(0);
 
 		// Reg 04: Analog Audio Path Control (DAC sel, ADC line, Mute Mic)
 		Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0012);
@@ -146,108 +168,70 @@ void Codec_RX_TX(void)
 		// Reg 06: Power Down Control (Clk off, Osc off, Mic On)
 		//Codec_WriteRegister(0x06,0x0061);
 		// --------------------------------------------------------------
-		//
-		ts.audio_unmute = 1;
 
-	}
-	else		// It is transmit
-	{
-		Codec_Volume(0);	// Mute sound
+		// --------------------------------------------------------------
+		// Wait settle, remove clicking
 		//
-		ads.agc_holder = ads.agc_val;		// store AGC value at instant we went to TX for recovery when we return to RX
+		// Serious problem here - delay needed to remove clicking on back
+		// to RX, but RXTX switching becomes very slow, need solution !!!
+		// ToDo: ....
 		//
-		if((ts.dmod_mode == DEMOD_CW) && ts.tune)	{	// Turn sidetone on for CW in TUNE mode
-			//
-			Codec_SidetoneSetgain();
-			//
-		}
-		else if(ts.tune)	{	// Not in CW mode - but in TUNE mode
-			if(!ts.iq_freq_mode)	// Is translate mode *NOT* active?
-				Codec_SidetoneSetgain();	// yes, turn on sidetone in SSB-TUNE mode
-		}
-		else	{	// Not CW or TUNE mode
-			//
-			for(mute_count = 0; mute_count < 8; mute_count++)		// Doing this seems to suppress the loud CLICK
-				Codec_Volume(0);	// that occurs when going from RX to TX in modes other than CW
-				// This is probably because of the delay between the mute command, above, and the
-			//
+		if(ts.dmod_mode == DEMOD_CW)
+		{
+			//non_os_delay();
+			//non_os_delay();
 			non_os_delay();
-			//
-			// Select source or leave it as it is
-			// PHONE out is muted, normal exit routed to TX modulator
-			// input audio is routed via 4066 switch
-			if(ts.tx_audio_source == TX_AUDIO_MIC)
-			{
-				// Set up microphone gain and adjust mic boost accordingly
-				if(ts.tx_mic_gain > 50)	{
-					ts.mic_boost = 1;
-					ts.tx_mic_gain_mult = (ts.tx_mic_gain - 35)/3;
-				}
-				else	{
-					ts.mic_boost = 0;
-					ts.tx_mic_gain_mult = ts.tx_mic_gain;
-				}
-				//
-				if(!ts.mic_boost)
-					Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0014);	// mic boost off
-				else
-					Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0015);	// mic boost on
-				//
-				// Reg 04: Analog Audio Path Control (DAC sel, ADC Mic, Mic on)
-				// Reg 06: Power Down Control (Clk off, Osc off, Mic On)
-				Codec_WriteRegister(W8731_POWER_DOWN_CNTR,0x0061);
-			}
+			non_os_delay();
+			non_os_delay();
+
+			// Update codec volume
+			//  0 - 10: via codec command
+			// 10 - 20: soft gain after decoder
+			if(ts.audio_gain < 10)
+				Codec_Volume((ts.audio_gain*8));
 			else
-				Codec_Line_Gain_Adj(ts.tx_line_gain);	// set LINE input gain if in LINE in mode
-			//
+				Codec_Volume((80));
+		}
+		else
+		{
+			// Request delayed unmute by audio driver,
+			// work for SSB PTT, but not on CW due to lack
+			// of IRQ locking (need further testing...)
+			ts.audio_unmute = 1;
+		}
+	}
+	else
+	{
+		// First step - mute sound
+		Codec_Volume(0);
+
+		// Select source or leave it as it is
+		// PHONE out is muted, normal exit routed to TX modulator
+		// input audio is routed via 4066 switch
+		if(ts.tx_audio_source == TX_AUDIO_MIC)
+		{
+			// Reg 04: Analog Audio Path Control (DAC sel, ADC Mic, Mic on)
+			if(!ts.mic_boost)
+				Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0014);	// mic boost off
+			else
+				Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0015);	// mic boost on
+
+			// Reg 06: Power Down Control (Clk off, Osc off, Mic On)
+			Codec_WriteRegister(W8731_POWER_DOWN_CNTR,0x0061);
+		}
+
+		// Leave sidetone on CW
+		if(ts.dmod_mode == DEMOD_CW)
+		{
+			// ToDo: use tx_power_factor coefficient and fix variable
+			// sidetone level based on power
+			//int	adj = (int)(ts.tx_power_factor * 100);
+			//adj = 100/adj;
+
+			Codec_Volume((ts.st_gain*11));
 		}
 	}
 }
-
-//*----------------------------------------------------------------------------
-//* Function Name       : Codec_SidetoneSetgain
-//* Object              : calculates and sets sidetone gain based on tx power factor
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void Codec_SidetoneSetgain(void)
-{
-float vcalc, vcalc1;
-
-// This calculates the relative level of the sidetone and sets the headphone gain appropriately
-// to keep the sidetone level more or less the same.
-// This seems to be slightly "off", particularly at the extremes of high and low
-// transmit power levels - this needs to be looked into...
-//
-// Note that this function is called from places OTHER than Codec_RX_TX(), above!
-
-	// bail out if not in transmit mode
-		return;
-	//
-	if(ts.st_gain)	{	// calculate if the sidetone gain is non-zero
-		vcalc = (float)ts.tx_power_factor;	// get TX scaling power factor
-		vcalc *= vcalc;
-		vcalc = 1/vcalc;		// invert it since we are calculating attenuation of the original signal (assuming normalization to 1.0)
-		vcalc = log10f(vcalc);	// get the log
-		vcalc *= 10;			// convert to deciBels and calibrate for the per-step value of the codec
-		vcalc1 = (float)ts.st_gain;		// get the sidetone gain (level) setting
-		vcalc1 *= 6;			// offset by # of dB the desired sidetone gain
-		vcalc += vcalc1;		// add the calculated gain to the desired sidetone gain
-		if(vcalc > 127)			// enforce limits of calculation to range of attenuator
-			vcalc = 127;
-		else if	(vcalc < 0)
-			vcalc = 0;
-	}
-	else						// mute if zero value
-		vcalc = 0;
-	//
-	Codec_Volume((uchar)vcalc);		// set the calculated sidetone volume
-	//
-}
-
-
 
 //*----------------------------------------------------------------------------
 //* Function Name       : Codec_Volume
@@ -259,11 +243,7 @@ float vcalc, vcalc1;
 //*----------------------------------------------------------------------------
 void Codec_Volume(uchar vol)
 {
-//	ts.codec_vol = vol;		// copy codec volume for global use
 	ulong lv = vol;
-
-//	if(vol == 0)
-//		ts.codec_was_muted = 1;
 
 	lv += 0x2F;
 
@@ -273,19 +253,7 @@ void Codec_Volume(uchar vol)
 	//printf("codec reg: 0x%02x\n\r",lv);
 
 	// Reg 03: LINE OUT - const level
-//	Codec_WriteRegister(W8731_RIGHT_HEADPH_OUT,0x65);
-
-	//
-	// Selectively mute "Right Headphone" output (LINE OUT) depending on transceiver configuration
-	//
-	if(ts.txrx_mode == TRX_MODE_TX)	{	// in transmit mode?
-		if((ts.iq_freq_mode) || ((!ts.iq_freq_mode) && (ts.misc_flags1 & 4)))	// is translate mode active OR translate mode OFF but LINE OUT to be muted during transmit
-			Codec_WriteRegister(W8731_RIGHT_HEADPH_OUT,0);	// yes - mute LINE OUT during transmit
-		else							// audio is NOT to be muted during transmit
-			Codec_WriteRegister(W8731_RIGHT_HEADPH_OUT,0x78);	// value selected for 0.5VRMS at AGC setting
-	}
-	else	// receive mode - LINE OUT always enabled
-		Codec_WriteRegister(W8731_RIGHT_HEADPH_OUT,0x78);	// value selected for 0.5VRMS at AGC setting
+	Codec_WriteRegister(W8731_RIGHT_HEADPH_OUT,0x65);
 
 	// Reg 02: Speaker - variable volume
 	Codec_WriteRegister(W8731_LEFT_HEADPH_OUT,lv);
@@ -293,7 +261,7 @@ void Codec_Volume(uchar vol)
 
 //*----------------------------------------------------------------------------
 //* Function Name       : Codec_Mute
-//* Object              : new method of mute via soft mute of the DAC
+//* Object              : mew method of mute via soft mute of the DAC
 //* Object              :
 //* Input Parameters    :
 //* Output Parameters   :
@@ -301,18 +269,14 @@ void Codec_Volume(uchar vol)
 //*----------------------------------------------------------------------------
 void Codec_Mute(uchar state)
 {
-//	ts.codec_mute_state = state;
-	//
 	// Reg 05: Digital Audio Path Control(all filters disabled)
 	// De-emphasis control, bx11x - 48kHz
 	//                      bx00x - off
 	// DAC soft mute		b1xxx - mute on
 	//						b0xxx - mute off
 	//
-	if(state)	{
+	if(state)
 		Codec_WriteRegister(W8731_DIGI_AU_PATH_CNTR,(W8731_DEEMPH_CNTR|0x08));	// mute
-//		ts.codec_was_muted = 1;
-	}
 	else
 		Codec_WriteRegister(W8731_DIGI_AU_PATH_CNTR,(W8731_DEEMPH_CNTR));		// mute off
 }
@@ -424,28 +388,4 @@ void Codec_GPIO_Init(void)
 	GPIO_PinAFConfig(CODEC_I2S_SDO_PIO, CODEC_I2S_SCK_SOURCE, CODEC_I2S_GPIO_AF);
 	GPIO_PinAFConfig(CODEC_I2S_SDO_PIO,	CODEC_I2S_SDO_SOURCE, CODEC_I2S_GPIO_AF);
 	GPIO_PinAFConfig(CODEC_I2S_SDO_PIO, CODEC_I2S_SDI_SOURCE, CODEC_I2S_GPIO_AF);
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : Codec_Line_Gain_Adj
-//* Object              :
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void Codec_Line_Gain_Adj(uchar gain)
-{
-	uint16_t l_gain;
-	//printf("codec line gain adjust = %d\n\r",gain);
-
-	l_gain = (uint16_t)gain;
-	//
-	// Use Reg 00: Left Line In, set MSB to adjust gain of both channels simultaneously
-	//
-	l_gain |= 0x100;	// set MSB of control word for "LRINBOTH" flag
-	//
-	Codec_WriteRegister(W8731_LEFT_LINE_IN,l_gain);
-
-
 }

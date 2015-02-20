@@ -46,10 +46,10 @@ typedef struct DialFrequency
 	ulong	tune_old;			// previous value
 	ulong	tune_new;			// most current value
 
-	// Current tuning step
-	ulong	tuning_step;		// selected step by user
+	// Current tunning step
+	ulong	tunning_step;		// selected step by user
 	ulong	selected_idx;		// id of step
-//	ulong	last_tune_step;		// last tunning step used during dial rotation
+	ulong	last_tune_step;		// last tunning step used during dial rotation
 	ulong	step_new;			// Eth driver req step
 
 	// First OSC frequency

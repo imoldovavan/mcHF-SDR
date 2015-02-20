@@ -331,7 +331,7 @@ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data)
 }
 
 /**
-  * @brief  Writes/updates variable data in EEPROM.
+  * @brief  Writes/updadtes variable data in EEPROM.
   * @param  VirtAddress: Variable virtual address
   * @param  Data: 16 bit data to be written
   * @retval Success or error status:

@@ -13,8 +13,7 @@
 
 // Common
 #include "mchf_board.h"
-#include "codec.h"
-//
+
 #include <math.h>
 
 #include <stdio.h>
@@ -455,9 +454,8 @@ found:
 		res = ui_si570_small_frequency_change();
 
 		// Maybe large change was needed, let's try it
-		if(res)	{
+		if(res)
 			res = ui_si570_large_frequency_change();
-		}
 	}
 
 	if(res)
@@ -486,27 +484,10 @@ found:
 uchar ui_si570_set_frequency(ulong freq,int calib,int temp_factor)
 {
 	long double d;
-	float		si_freq, freq_calc, freq_scale, temp_scale, temp;
-
-	freq_scale = (float)freq;		// get frequency
-	freq_calc = freq_scale;		// copy frequency
-	freq_scale /= 14000000;		// get scaling factor since our calibrations are referenced to 14.000 MHz
-	//
-	temp = (float)calib;			// get calibration factor
-	temp *= (freq_scale);		// scale calibration for operating frequency but double magnitude of calibration factor
-	freq_calc -= temp;				// subtract calibration factor
-	//
-	//
-	temp_scale = (float)temp_factor;	// get temperature factor
-	temp_scale /= 14000000;		// calculate scaling factor for the temperature correction (referenced to 14.000 MHz)
-	//
-	freq_calc *= (1 + temp_scale);	// rescale by temperature correction factor
-	//
-	freq = (ulong)freq_calc;
-
+	float		si_freq;
 
 	// -----------------------------
-	// freq = freq + calib*4 + temp_factor;		// This is the old version - it does NOT scale calibration/temperature with operating frequency.
+	freq = freq + calib*4 + temp_factor;
 	// -----------------------------
 
 	d = freq;								// convert to float

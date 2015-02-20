@@ -17,10 +17,7 @@
 #include <stdio.h>
 #include "arm_math.h"
 #include "math.h"
-#include "codec.h"
-#include "ui_menu.h"
-//
-//
+
 // LCD
 #include "ui_lcd_hy28.h"
 
@@ -47,125 +44,103 @@
 
 #include "cw_gen.h"
 
-// SSB filters
-
-#include "filters/q_rx_filter_10kHz.h"
-#include "filters/i_rx_filter_10kHz.h"
-//
-#include "filters/q_rx_filter_3k6.h"
-#include "filters/i_rx_filter_3k6.h"
-//
-#include "filters/q_tx_filter.h"
-#include "filters/i_tx_filter.h"
-
-#include "filters/iq_rx_filter_am_10kHz.h"
-#include "filters/iq_rx_filter_am_3k6.h"
-#include "filters/iq_rx_filter_am_2k3.h"
-
 static void 	UiDriverPublicsInit(void);
 static void 	UiDriverProcessKeyboard(void);
-static void 	UiDriverPressHoldStep(uchar is_up);
 static void 	UiDriverProcessFunctionKeyClick(ulong id);
 
-//static void 	UiDriverShowMode(void);
-//static void 	UiDriverShowStep(ulong step);
+static void 	UiDriverShowMode(void);
+static void 	UiDriverShowStep(ulong step);
 static void 	UiDriverShowBand(uchar band);
-//static void 	UiDriverChangeBandFilter(uchar band,uchar bpf_only);
+static void 	UiDriverChangeBandFilter(uchar band,uchar bpf_only);
+
 static void 	UiDriverCreateDesktop(void);
+
 static void 	UiDriverCreateFunctionButtons(bool full_repaint);
+
 static void 	UiDriverCreateSpectrumScope(void);
 //static void 	UiDriverRepaintSpectrumScope(void);
 //static void 	UiDriverCreateDigiPanel(void);
-//
-static void UiDriverDeleteSMeter(void);
+
 static void 	UiDriverCreateSMeter(void);
-static void 	UiDriverDrawWhiteSMeter(void);
-static void 	UiDriverDrawRedSMeter(void);
-//
+
 //static void 	UiDriverUpdateTopMeter(uchar val,uchar old);
 static void 	UiDriverUpdateTopMeterA(uchar val,uchar old);
-static void 	UiDriverUpdateBtmMeter(uchar val, uchar warn);
+static void 	UiDriverUpdateBtmMeter(uchar val);
 
 static void 	UiDriverInitFrequency(void);
-//
-static void 	UiDriverCheckFilter(ulong freq);
-uchar 			UiDriverCheckBand(ulong freq, ushort update);
-//static void 	UiDriverUpdateFrequency(char skip_encoder_check);
-//static void 	UiDriverUpdateFrequencyFast(void);
+
+static void 	UiDriverUpdateFrequency(char skip_encoder_check);
+static void 	UiDriverUpdateFrequencyFast(void);
 static void 	UiDriverUpdateLcdFreq(ulong dial_freq,ushort color);
 static void 	UiDriverUpdateSecondLcdFreq(ulong dial_freq);
-static void 	UiDriverChangeTuningStep(uchar is_up);
-static uchar 	UiDriverButtonCheck(ulong button_num);
-static void		UiDriverTimeScheduler(void);				// Also handles audio gain and switching of audio on return from TX back to RX
-static void 	UiDriverChangeDemodMode(uchar noskip);
+
+static void 	UiDriverChangeTunningStep(uchar is_up);
+
+static void		UiDriverKeypadCheck(void);
+
+static void 	UiDriverChangeDemodMode(void);
 static void 	UiDriverChangeBand(uchar is_up);
+
 static bool 	UiDriverCheckFrequencyEncoder(void);
 static void 	UiDriverCheckEncoderOne(void);
 static void 	UiDriverCheckEncoderTwo(void);
 static void 	UiDriverCheckEncoderThree(void);
+
 static void 	UiDriverChangeEncoderOneMode(uchar skip);
 static void 	UiDriverChangeEncoderTwoMode(uchar skip);
 static void 	UiDriverChangeEncoderThreeMode(uchar skip);
+
 //static void 	UiDriverSelectBandFilter(void);
+
 // encoder one
 static void 	UiDriverChangeAfGain(uchar enabled);
-//static void 	UiDriverChangeStGain(uchar enabled);
-//static void 	UiDriverChangeKeyerSpeed(uchar enabled);
+static void 	UiDriverChangeStGain(uchar enabled);
+static void 	UiDriverChangeKeyerSpeed(uchar enabled);
 // encoder two
-//static void 	UiDriverChangeRfGain(uchar enabled);
-static void 	UiDriverChangeSigProc(uchar enabled);
+static void 	UiDriverChangeRfGain(uchar enabled);
+static void 	UiDriverChangeRfAttenuator(uchar enabled);
+static void 	UiDriverChangeIQGainBalance(uchar enabled,uchar visible);
+static void 	UiDriverChangeIQPhaseBalance(uchar enabled,uchar visible);
+static void 	UiDriverChangePaBias(uchar enabled,uchar visible);
 // encoder three
 static void 	UiDriverChangeRit(uchar enabled);
-//static void 	UiDriverChangeFilter(uchar ui_only_update);
-static void 	UiDriverProcessActiveFilterScan(void);
-static void 	UiDriverChangeDSPMode(void);
+static void 	UiDriverChangeFilter(uchar ui_only_update);
+
+static void 	UiDriverChangeKeyerMode(void);
 static void 	UiDriverChangePowerLevel(void);
-//static void 	UiDrawSpectrumScopeFrequencyBarText(void);
+
 static void 	UiDriverInitSpectrumDisplay(void);
-//static void 	UiDriverClearSpectrumDisplay(void);
 static void 	UiDriverReDrawSpectrumDisplay(void);
-static ulong 	UiDriverGetScopeTraceColour(void);
+
 //static void 	UiDriverUpdateEthernetStatus(void);
 //static void 	UiDriverUpdateUsbKeyboardStatus(void);
+
+static void 	UiDriverPowerOffCheck(void);
+
 static void 	UiDriverHandleSmeter(void);
 static void 	UiDriverHandleSWRMeter(void);
 static void 	UiDriverHandlePowerSupply(void);
+
 // LO TCXO routines
 static void 	UiDriverUpdateLoMeter(uchar val,uchar active);
-void 	UiDriverCreateTemperatureDisplay(uchar enabled,uchar create);
+static void 	UiDriverCreateTemperatureDisplay(uchar enabled,uchar create);
 static void 	UiDriverRefreshTemperatureDisplay(uchar enabled,int temp);
 static void 	UiDriverHandleLoTemperature(void);
+
 //static void 	UiDriverEditMode(void);
+
 static void 	UiDriverSwitchOffPtt(void);
-//static void 	UiDriverSetBandPowerFactor(uchar band);
-//
-//static void		UiCalcTxIqGainAdj(void);
+
+static void 	UiDriverDelayedUnmute(void);
+
+static void 	UiDriverSetBandPowerFactor(uchar band);
+
 static void 	UiDriverLoadEepromValues(void);
-void			UiDriverUpdateMenu(uchar mode);
-void 			UiDriverUpdateMenuLines(uchar index, uchar mode);
-void			UiDriverUpdateConfigMenuLines(uchar index, uchar mode);
-void 			UiDriverSaveEepromValuesPowerDown(void);
+static void 	UiDriverSaveEepromValues(void);
 
 // Tuning steps
-const ulong tune_steps[MAX_STEPS] = {
-T_STEP_1HZ,
-T_STEP_10HZ,
-T_STEP_100HZ,
-T_STEP_1KHZ,
-T_STEP_10KHZ,
-T_STEP_100KHZ
-};
+const ulong tune_steps[MAX_STEPS] = {T_STEP_1HZ,T_STEP_10HZ,T_STEP_100HZ,T_STEP_1KHZ,T_STEP_10KHZ,T_STEP_100KHZ};
 
-enum {
-	T_STEP_1HZ_IDX = 0,
-	T_STEP_10HZ_IDX,
-	T_STEP_100HZ_IDX,
-	T_STEP_1KHZ_IDX,
-	T_STEP_10KHZ_IDX,
-	T_STEP_100KHZ_IDX
-};
-
-//
 // Band definitions - band base frequency value
 const ulong tune_bands[MAX_BANDS] = { BAND_FREQ_80,
 									  BAND_FREQ_60,
@@ -175,8 +150,7 @@ const ulong tune_bands[MAX_BANDS] = { BAND_FREQ_80,
 									  BAND_FREQ_17,
 									  BAND_FREQ_15,
 									  BAND_FREQ_12,
-									  BAND_FREQ_10};//,
-//									  BAND_FREQ_GEN};
+									  BAND_FREQ_10};
 
 // Band definitions - band frequency size
 const ulong size_bands[MAX_BANDS] = { BAND_SIZE_80,
@@ -187,8 +161,7 @@ const ulong size_bands[MAX_BANDS] = { BAND_SIZE_80,
 									  BAND_SIZE_17,
 									  BAND_SIZE_15,
 									  BAND_SIZE_12,
-									  BAND_SIZE_10};//,
-//									  BAND_SIZE_GEN};
+									  BAND_SIZE_10};
 
 // -------------------------------------------------------
 // Constant declaration of the buttons map across ports
@@ -213,53 +186,9 @@ const ButtonMap	bm[16] =
 		{BUTTON_G1_PIO,		BUTTON_G1}		// 15
 };
 
-
-// The following are calibrations for the S-meter based on 6 dB per S-unit, 10 dB per 10 dB mark above S-9
-// The numbers within are linear gain values, not logarithmic, starting with a zero signal level of 1
-// There are 33 entries, one corresponding with each point on the S-meter
-#define	S_Meter_Cal_Size	33	// number of entries in table below
-const float S_Meter_Cal[] =
-{
-// - Dummy variable		1,		//0, S0, 0dB
-		1.41,	//1, S0.5, 3dB
-		2,		//2, S1, 6dB
-		2.81,	//3, S1.5, 9dB
-		3,		//4, S2, 12dB
-		5.62,	//5, S2.5, 15dB
-		7.94,	//6, S3, 18dB
-		11.22,	//7, S3.5, 21dB
-		15.85,	//8, S4, 24dB
-		22.39,	//9, S4.5, 27dB
-		31.63,	//10, S5, 30dB
-		44.67,	//11, S5.5, 33dB
-		63.10,	//12, S6, 36dB
-		89.13,	//13, S6.5, 39dB
-		125.89,	//14, S7, 42dB
-		177.83,	//15, S7.5, 45dB
-		251.19,	//16, S8, 48dB
-		354.81,	//17, S8.5, 51dB
-		501.19,	//18, S9, 54dB
-		891.25,	//19, +5, 59dB
-		1584.89,	//20, +10, 64dB
-		2818.38,	//21, +15, 69dB
-		5011.87,	//22, +20, 74dB
-		8912.51,	//23, +25, 79dB
-		15848.93,	//24, +30, 84dB
-		28183.82,	//25, +35, 89dB
-		50118.72,	//26, +35, 94dB
-		89125.09,	//27, +40, 99dB
-		158489.32,	//28, +45, 104dB
-		281838.29,	//29, +50, 109dB
-		501187.23,	//30, +55, 114dB
-		891250.94,	//31, +60, 119dB
-		1584893.19,	//32, +65, 124dB
-		2818382.93	//33, +70, 129dB
-};
-//
 // Bands tuning values
-__IO ulong band_dial_value[MAX_BANDS+1];
-__IO ulong band_decod_mode[MAX_BANDS+1];
-__IO ulong band_filter_mode[MAX_BANDS+1];
+__IO ulong band_dial_value[MAX_BANDS];
+__IO ulong band_decod_mode[MAX_BANDS];
 
 // ------------------------------------------------
 // Transceiver state public structure
@@ -322,14 +251,11 @@ extern __IO	SpectrumDisplay		sd;
 
 // ------------------------------------------------
 // Public USB Keyboard status
-extern __IO KeypadState		ks;
+//extern __IO KeyBoardStatus		kbs;
 
 // ------------------------------------------------
 // Public s meter
 extern	__IO	SMeter			sm;
-//
-// Public Audio
-extern __IO		AudioDriverState	ads;
 
 // ------------------------------------------------
 // Eeprom items
@@ -340,27 +266,6 @@ extern uint16_t VirtAddVarTab[NB_OF_VAR];
 uchar drv_state = 0;
 uchar drv_init = 0;
 
-//
-extern __IO	FilterCoeffs		fc;
-
-//
-// RX Hilbert transform (90 degree) FIR filter state tables and instances
-//
-static float32_t 		FirState_I[128];
-extern __IO arm_fir_instance_f32 	FIR_I;
-//
-static float32_t 		FirState_Q[128];
-extern __IO arm_fir_instance_f32 	FIR_Q;
-
-//
-// TX Hilbert transform (90 degree) FIR filter state tables and instances
-//
-static float 			FirState_I_TX[128];
-extern __IO	arm_fir_instance_f32	FIR_I_TX;
-
-static float 			FirState_Q_TX[128];
-extern __IO	arm_fir_instance_f32	FIR_Q_TX;
-//
 
 
 
@@ -383,26 +288,14 @@ void ui_driver_init(void)
 	// Driver publics init
 	UiDriverPublicsInit();
 
-	// Load stored data from eeprom - some are needed for initialization
-	UiDriverLoadEepromValues();
-	//
-	UiCWSidebandMode();			// determine CW sideband mode from the restored frequency
 	// Init frequency publics
 	UiDriverInitFrequency();
 
-	// Load stored data from eeprom - again - as some of the values above would have been overwritten
-	UiDriverLoadEepromValues();
-	//
-	UiCalcRxIqGainAdj();
-	//
-	UiCalcRxPhaseAdj();
-	//
-	UiCalcTxPhaseAdj();
-	//
-	UiCalcTxIqGainAdj();
-	//
 	// Init spectrum display
 	UiDriverInitSpectrumDisplay();
+
+	// Load from eeprom
+	UiDriverLoadEepromValues();
 
 	// Temp sensor setup
 	lo.sensor_present = ui_si570_init_temp_sensor();
@@ -419,22 +312,22 @@ void ui_driver_init(void)
 
 	// Set SoftDDS in CW mode
 	if(ts.dmod_mode == DEMOD_CW)
-		softdds_setfreq((float)ts.sidetone_freq,ts.samp_rate,0);
+		softdds_setfreq(CW_SIDETONE_OFFCET,ts.samp_rate,0);
 	else
 		softdds_setfreq(0.0,ts.samp_rate,0);
 
 	// Update codec volume
-	//  0 - 16: via codec command
-	// 17 - 30: soft gain after decoder
-	Codec_Volume((ts.audio_gain*8));		// This is only approximate - it will be properly set later
+	//  0 - 10: via codec command
+	// 10 - 20: soft gain after decoder
+	Codec_Volume((ts.audio_gain*8));
 
 	// Set TX power factor
-	UiDriverSetBandPowerFactor(ts.band);
+	UiDriverSetBandPowerFactor(ts.band_mode);
 
 	// Reset inter driver requests flag
 	ts.LcdRefreshReq	= 0;
-	ts.new_band 		= ts.band;
-	df.step_new 		= df.tuning_step;
+	ts.new_band 		= ts.band_mode;
+	df.step_new 		= df.tunning_step;
 
 	// Extra HW init
 	mchf_board_post_init();
@@ -445,14 +338,6 @@ void ui_driver_init(void)
 	// mchf_board_post_init(), but still used by
 	// ui_driver_toggle_tx() to prevent re-entrance
 	drv_init = 1;
-
-	// Do update of frequency display
-
-	ts.refresh_freq_disp = 1;	// cause frequency display to be completely refreshed
-	UiDriverUpdateFrequency(1);	// Yes - update frequency
-	ts.refresh_freq_disp = 0;	// Turn off this flag now that we are done
-	UiDriverUpdateFrequency(1);	// Update frequency again
-	//
 
 #ifdef DEBUG_BUILD
 	printf("ui driver init ok\n\r");
@@ -469,6 +354,8 @@ void ui_driver_init(void)
 //*----------------------------------------------------------------------------
 void ui_driver_thread(void)
 {
+	// Is there user request for power off ?
+//	UiDriverPowerOffCheck();
 
 	// Spectrum display
 //	UiDriverReDrawSpectrumDisplay();
@@ -508,7 +395,7 @@ void ui_driver_thread(void)
 //	UiDriverSwitchOffPtt();
 
 	// Save eeprom values
-//	UiDriverSaveEepromValues();
+	UiDriverSaveEepromValues();
 }
 
 //*----------------------------------------------------------------------------
@@ -521,7 +408,6 @@ void ui_driver_thread(void)
 //*----------------------------------------------------------------------------
 void ui_driver_irq(void)
 {
-
 	// Do not run the state machine
 	// before the driver init is done
 	if(!drv_init)
@@ -529,40 +415,43 @@ void ui_driver_irq(void)
 
 	switch(drv_state)
 	{
-		case STATE_SPECTRUM_DISPLAY:
+		case 0:
+			UiDriverPowerOffCheck();
+			break;
+		case 1:
 			UiDriverReDrawSpectrumDisplay();
 			break;
-		case STATE_S_METER:
+		case 2:
 			UiDriverHandleSmeter();
 			break;
-		case STATE_SWR_METER:
+		case 3:
 			UiDriverHandleSWRMeter();
 			break;
-		case STATE_HANDLE_POWERSUPPLY:
+		case 4:
 			UiDriverHandlePowerSupply();
 			break;
-		case STATE_LO_TEMPERATURE:
+		case 5:
 			UiDriverHandleLoTemperature();
 			break;
-		case STATE_TASK_CHECK:
-			UiDriverTimeScheduler();		// Handles live update of Calibrate between TX/RX and volume control
+		case 6:
+			UiDriverKeypadCheck();
 			break;
-		case STATE_CHECK_ENC_ONE:
+		case 7:
 			UiDriverCheckEncoderOne();
 			break;
-		case STATE_CHECK_ENC_TWO:
+		case 8:
 			UiDriverCheckEncoderTwo();
 			break;
-		case STATE_CHECK_ENC_THREE:
+		case 9:
 			UiDriverCheckEncoderThree();
 			break;
-		case STATE_UPDATE_FREQUENCY:
+		case 10:
 			UiDriverUpdateFrequency(0);
 			break;
-		case STATE_PROCESS_KEYBOARD:
+		case 11:
 			UiDriverProcessKeyboard();
 			break;
-		case STATE_SWITCH_OFF_PTT:
+		case 12:
 			UiDriverSwitchOffPtt();
 			break;
 		default:
@@ -582,89 +471,33 @@ void ui_driver_irq(void)
 //*----------------------------------------------------------------------------
 void ui_driver_toggle_tx(void)
 {
-
-	static bool was_menu = 0;		// used to detect if we *were* in the menu
-	ulong	calc_var;
-
 	// Disable irq processing
 	drv_init = 0;
+
 	if(ts.txrx_mode == TRX_MODE_TX)
 	{
-		//
-		// Below, in VOICE modes we mute the audio BEFORE we activate the PTT.  This is necessary since U3 is switched the instant that we do so,
-		// rerouting audio paths and causing all sorts of disruption including CLICKs and squeaks.
-		// We restore TX audio levels in the function "Codec_RX_TX()" according to operating mode
-		//
-		ts.dsp_inhibit = 1;								// disable DSP when going into TX mode
-		//
-		if(ts.dmod_mode != DEMOD_CW)	{				// are we in a voice mode?
-			if(ts.tx_audio_source != TX_AUDIO_MIC)	{	// yes - are we in LINE IN mode?
-				Codec_Line_Gain_Adj(0);	// yes - momentarily mute LINE IN audio if in LINE IN mode until we have switched to TX
-			}
-			else	{	// we are in MIC IN mode
-				Codec_Line_Gain_Adj(0);			// momentarily mute LINE IN audio until we switch modes because we will blast any connected LINE IN source until we switch
-				ts.tx_mic_gain_mult_temp = ts.tx_mic_gain_mult;		// temporarily hold the mic gain value while we switch
-				ts.tx_mic_gain_mult = 0;		// momentarily set the mic gain to zero while we go to TX
-				Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0016);	// Mute the microphone with the CODEC (this does so without a CLICK)
-			}
-			non_os_delay();		// pause an instant because the codec chip has its own delay before tasks complete!
-		}
-		//
-		PTT_CNTR_PIO->BSRRL  	= PTT_CNTR;		// TX on and switch CODEC audio paths
+		PTT_CNTR_PIO->BSRRL  	= PTT_CNTR;		// TX on
 		RED_LED_PIO->BSRRL 		= RED_LED;		// Red led on
-		//
-		// Set the PA bias according to mode
-		//
-		if((ts.pa_cw_bias) && (ts.dmod_mode == DEMOD_CW))	{	// is CW PA bias non-zero AND are we in CW mode?
-			calc_var = BIAS_OFFSET + (ts.pa_cw_bias * 2);		// use special CW-mode bias setting
-			if(calc_var > 255)
-				calc_var = 255;
-			//
-			// Set DAC Channel 1 DHR12L register
-			DAC_SetChannel2Data(DAC_Align_8b_R,calc_var);		// set PA bias
-		}
-		else	{
-			calc_var = BIAS_OFFSET + (ts.pa_bias * 2);		// use "default" bias setting
-			if(calc_var > 255)
-				calc_var = 255;
-			//
-			// Set DAC Channel 1 DHR12L register
-			DAC_SetChannel2Data(DAC_Align_8b_R,calc_var);		// set PA bias
-		}
-		//
-		//	initialize everything in CW mode
-		if(ts.dmod_mode == DEMOD_CW)	{
-			softdds_setfreq((float)ts.sidetone_freq, ts.samp_rate,0);	// set sidetone frequency in CW mode (this also set TX shift)
-		}
 	}
-	// RX Mode
 	else
 	{
 		PTT_CNTR_PIO->BSRRH  	= PTT_CNTR;		// TX off
 		RED_LED_PIO->BSRRH 		= RED_LED;		// Red led off
-		//
-		UiDriverUpdateBtmMeter(0,0);		// clear bottom meter of any outstanding indication when going back to RX
-		//
 	}
 
-	if((ts.rit_value) || ((ts.iq_freq_mode) && (ts.dmod_mode == DEMOD_CW)))		// Re-set frequency if RIT is non-zero or in CW mode with translate
-		UiDriverUpdateFrequencyFast();
+	// Re-set frequency
+	UiDriverUpdateFrequencyFast();
 
-	if((ts.menu_mode) || (was_menu))	{			// update menu when we are (or WERE) in MENU mode
-		UiDriverUpdateMenu(0);
-		was_menu = 1;
-	}
-
-	if(was_menu)		// if we'd displayed the menu previously, clear the flag
-		was_menu = 0;
-	//
 	// Switch codec mode
 	Codec_RX_TX();
-	//
+
+	// Set filters - complex issue with the CMOS switches
+	// logic is set in unknown state when PTT rise/fall is too
+	// fast or dirty
+	//--UiDriverChangeBandFilter(ts.band_mode,1); -  not working
+
 	// Enable irq processing
 	drv_init = 1;
-	//
-
 }
 
 //*----------------------------------------------------------------------------
@@ -730,538 +563,115 @@ static void UiDriverPublicsInit(void)
 //*----------------------------------------------------------------------------
 static void UiDriverProcessKeyboard(void)
 {
-	uchar temp;
-
-	if(ks.button_processed)	{
-		ts.nb_disable = 1;	// disable noise blanker if button is pressed or held
-		//
+	if(ks.button_processed)
+	{
 		//printf("button process: %02x, debounce time: %d\n\r",ks.button_id,ks.debounce_time);
 
 		// Is it click or hold ?
-		if(!ks.press_hold)	{
+		if(ks.debounce_time < BUTTON_HOLD_TIME)
+		{
 			// Process click
 			switch(ks.button_id)
 			{
-				//
-				case BUTTON_G1_PRESSED:	// BUTTON_G1 - Change operational mode
-					if(!ts.tune)	{	// do NOT allow mode change in TUNE mode
-						UiDriverChangeDemodMode(0);
-						UiCWSidebandMode();
-						if(ts.menu_mode)	// are we in menu mode?
-							UiDriverUpdateMenu(0);	// yes, update display when we change modes
-						//
-						UiCalcTxIqGainAdj();		// update gain and phase values when changing modes
-						UiCalcTxPhaseAdj();
-						UiCalcRxPhaseAdj();
-						UiDriverChangeDSPMode();	// Change DSP display setting as well
-						UiDriverUpdateFrequency(1);	// update frequency display without checking encoder
-						//
-						if(ts.dmod_mode == DEMOD_CW)	{		// update on-screen adjustments
-							UiDriverChangeKeyerSpeed(0);		// emplace keyer speed (WPM) and
-							UiDriverChangeStGain(0);			// sidetone gain when in CW mode
-						}
-						else	{
-							UIDriverChangeAudioGain(0);			// display Line/Mic gain and
-							UiDriverChangeCmpLevel(0);			// Compression level when in voice mode
-						}
-					}
+				// BUTTON_M2
+				case 0:
+					UiDriverChangeEncoderTwoMode(0);
 					break;
-				//
-				case BUTTON_G2_PRESSED:		// BUTTON_G2
-				{
-					if((!(ts.dsp_active & 1)) && (!(ts.dsp_active & 4)))	// both NR and notch are inactive
-						ts.dsp_active |= 1;									// turn on NR
-					else if((ts.dsp_active & 1) && (!(ts.dsp_active & 4))) {	// NR active, notch inactive
-						if(ts.dmod_mode != DEMOD_CW)	{	// NOT in CW mode
-							ts.dsp_active |= 4;									// turn on notch
-							ts.dsp_active &= 0xfe;								// turn off NR
-						}
-						else	{	// CW mode - do not select notches, skip directly to "off"
-							ts.dsp_active &= 0xfa;	// turn off NR and notch
-						}
-					}
-					else if((!(ts.dsp_active & 1)) && (ts.dsp_active & 4))	//	NR inactive, notch active
-						ts.dsp_active |= 1;									// turn on NR
-					//
-					else	{
-						ts.dsp_active &= 0xfa;								// turn off NR and notch
-					}
-					//
-					ts.dsp_active_toggle = ts.dsp_active;	// save update in "toggle" variable
-					//
-					ts.reset_dsp_nr = 1;				// reset DSP NR coefficients
-					audio_driver_set_rx_audio_filter();	// update DSP settings
-					ts.reset_dsp_nr = 0;
-					UiDriverChangeDSPMode();			// update on-screen display
-					//
-					// Update DSP/NB/RFG control display
-					if(ts.enc_two_mode == ENC_TWO_MODE_RF_GAIN)
-						UiDriverChangeSigProc(0);
-					else
-						UiDriverChangeSigProc(1);
-//					}
-					break;
-				}
-				//
-				case BUTTON_G3_PRESSED:		// BUTTON_G3 - Change power setting
+
+				// BUTTON_G2
+				case 1:
 				{
 					ts.power_level++;
 
-					if(ts.power_level >= PA_LEVEL_MAX_ENTRY)
+					if(ts.power_level == PA_LEVEL_MAX_ENTRY)
 						ts.power_level = PA_LEVEL_FULL;
-					//
+
 					UiDriverChangePowerLevel();
-					if(ts.tune)		// recalculate sidetone gain only if transmitting/tune mode
-						Codec_SidetoneSetgain();
-					//
-					if(ts.menu_mode)	// are we in menu mode?
-						UiDriverUpdateMenu(0);	// yes, update display when we change power setting
-					//
+
 					break;
 				}
-				//
-				case BUTTON_G4_PRESSED:		{		// BUTTON_G4 - Change filter bandwidth
-					if(!ts.tune)	{
-						ts.filter_id++;
-						//
-						if(ts.filter_id >= AUDIO_MAX_FILTER)
-							ts.filter_id = AUDIO_MIN_FILTER;
-						//
-						UiDriverProcessActiveFilterScan();	// make sure that filter is active - if not, find next active filter
-						//
-						// Change filter
-						//
-						UiDriverChangeFilter(0);
-						UiCalcRxPhaseAdj();			// We may have changed something in the RX filtering as well - do an update
-						UiDriverChangeDSPMode();	// Change DSP display setting as well
-						//
-						if(ts.menu_mode)	// are we in menu mode?
-							UiDriverUpdateMenu(0);	// yes, update display when we change filters
-						//
-					}
+
+				// BUTTON_G2
+				case 2:
+				{
+					ts.keyer_mode++;
+
+					if(ts.keyer_mode == CW_MAX_MODE)
+						ts.keyer_mode = CW_MODE_IAM_B;
+
+					// Display mode
+					UiDriverChangeKeyerMode();
+
 					break;
 				}
-				//
-				case BUTTON_M1_PRESSED:		// BUTTON_M1
-					UiDriverChangeEncoderOneMode(0);
+
+				// BUTTON_BNDM
+				case 3:
+					UiDriverChangeBand(0);
 					break;
-				//
-				case BUTTON_M2_PRESSED:		// BUTTON_M2
-					UiDriverChangeEncoderTwoMode(0);
+
+				// BUTTON_G4
+				case 4:
+				{
+					ts.filter_id++;
+					if(ts.filter_id == AUDIO_MAX_FIR)
+						ts.filter_id = AUDIO_FIR_1P8KHZ;
+
+					// Change filter
+					UiDriverChangeFilter(0);
+
 					break;
-				//
-				case BUTTON_M3_PRESSED:		// BUTTON_M3
+				}
+
+				// BUTTON_M3
+				case 5:
 					UiDriverChangeEncoderThreeMode(0);
 					break;
-				//
-				case BUTTON_STEPM_PRESSED:		// BUTTON_STEPM
-					if(!(ts.freq_step_config & 0xf0))	// button swap NOT enabled
-						UiDriverChangeTuningStep(0);	// decrease step size
-					else		// button swap enabled
-						UiDriverChangeTuningStep(1);	// increase step size
+
+				// BUTTON_STEPM
+				case 6:
+					UiDriverChangeTunningStep(0);
 					break;
-				//
-				case BUTTON_STEPP_PRESSED:		// BUTTON_STEPP
-					if(!(ts.freq_step_config & 0xf0))	// button swap NOT enabled
-						UiDriverChangeTuningStep(1);	// increase step size
-					else
-						UiDriverChangeTuningStep(0);	// decrease step size
+
+				// BUTTON_STEPP
+				case 7:
+					UiDriverChangeTunningStep(1);
 					break;
-				//
-				case BUTTON_BNDM_PRESSED:		// BUTTON_BNDM
-					temp = ads.af_dissabled;
-					ads.af_dissabled = 0;
-					//
-					ts.dsp_timed_mute = 1;		// disable DSP when changing bands
-					ts.dsp_inhibit = 1;
-					ts.dsp_inhibit_timing = ts.sysclock + DSP_BAND_CHANGE_DELAY;	// set time to re-enable DSP
-					//
-					if(ts.misc_flags1 & 2)		// band up/down button swapped?
-						UiDriverChangeBand(1);	// yes - go up
-					else
-						UiDriverChangeBand(0);	// not swapped, go down
-					//
-					UiCWSidebandMode();
-					UiDriverShowMode();
-					UiDriverUpdateFrequency(1);	// update frequency display without checking encoder
-					if(ts.menu_mode)	// are we in menu mode?
-						UiDriverUpdateMenu(0);	// yes, update menu display when we change bands
-					//
-					ads.af_dissabled =  temp;
+
+				// BUTTON_M1
+				case 8:
+					UiDriverChangeEncoderOneMode(0);
 					break;
-				//
-				case BUTTON_BNDP_PRESSED:	// BUTTON_BNDP
-					temp = ads.af_dissabled;
-					ads.af_dissabled = 0;
-					//
-					ts.dsp_timed_mute = 1;		// disable DSP when changing bands
-					ts.dsp_inhibit = 1;
-					ts.dsp_inhibit_timing = ts.sysclock + DSP_BAND_CHANGE_DELAY;	// set time to re-enable DSP
-					//
-					if(ts.misc_flags1 & 2)		// band up/down button swapped?
-						UiDriverChangeBand(0);	// yes, go down
-					else
-						UiDriverChangeBand(1);	// no, go up
-					//
-					UiCWSidebandMode();
-					UiDriverShowMode();
-					UiDriverUpdateFrequency(1);	// update frequency display without checking encoder
-					if(ts.menu_mode)	// are we in menu mode?
-						UiDriverUpdateMenu(0);	// yes, update display when we change bands
-					//
-					ads.af_dissabled = temp;
+
+				// BUTTON_BNDP
+				case 13:
+					UiDriverChangeBand(1);
 					break;
-				//
-				case BUTTON_POWER_PRESSED:
-					ts.lcd_backlight_brightness++;
-					ts.lcd_backlight_brightness &= 3;	// limit range of brightness to 0-3
+
+				// BUTTON_G1
+				case 15:
+					UiDriverChangeDemodMode();
 					break;
+
 				default:
 					UiDriverProcessFunctionKeyClick(ks.button_id);
 					break;
 			}
 		}
-		else	{
-			//
-			// *******************************************************************************
-			// Process press-and-hold of button(s).  Note that this can accommodate multiple buttons at once.
-			// *******************************************************************************
-			//
-			switch(ks.button_id)	{
-				case BUTTON_F1_PRESSED:	// Press-and-hold button F1:  Write settings to EEPROM
-					if(ts.txrx_mode == TRX_MODE_RX)	{				// only allow EEPROM write in receive mode
-						if(!ts.menu_mode)	{						// Clear spectrum scope when NOT in menu mode
-							UiDriverClearSpectrumDisplay();			// clear display under spectrum scope
-							UiLcdHy28_PrintText(80,160," Saving settings to EEPROM ",Blue,Black,0);
-							UiDriverSaveEepromValuesPowerDown();	// save settings to EEPROM
-							for(temp = 0; temp < 6; temp++)			// delay so that it may be read
-								non_os_delay();
-								//
-							UiDriverClearSpectrumDisplay();			// clear display under spectrum scope
-							UiDriverCreateSpectrumScope();
-							ts.menu_mode = 0;
-						}
-						else	// If in menu mode, just save data, but don't clear screen area
-							UiDriverSaveEepromValuesPowerDown();	// save settings to EEPROM
-						//
-						ts.menu_var_changed = 0;					// clear "EEPROM SAVE IS NECESSARY" indicators
-					}
-					//
-					if(!ts.menu_mode)	// are we in menu mode?
-						UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MENU  ",White,Black,0);	// no - update menu button to reflect no memory save needed
-					else
-						UiDriverUpdateMenu(0);	// update menu display to remove indicator to do power-off to save EEPROM value
-					break;
-				case BUTTON_F3_PRESSED:	// Press-and-hold button F3
-					// Move to the BEGINNING of the current menu structure
-					if(ts.menu_mode)	{		// Are we in menu mode?
-						if(ts.menu_item < MAX_MENU_ITEM)	{	// Yes - Is this within the main menu?
-							if(ts.menu_item)	// is this NOT the first menu item?
-								ts.menu_item = 0;	// yes - set it to the beginning of the first menu
-							else	{			// this IS the first menu item
-								if(ts.radio_config_menu_enable)		// yes - is the configuration menu enabled?
-									ts.menu_item = (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS)-1;	// move to the last config/adjustment menu item
-								else								// configuration menu NOT enabled
-									ts.menu_item = MAX_MENU_ITEM - 1;
-							}
-						}
-						else	{		// we are within the CONFIGURATION menu
-							if(ts.menu_item > MAX_MENU_ITEM)		// is this NOT at the first entry of the configuration menu?
-								ts.menu_item = MAX_MENU_ITEM;	// yes, go to the first entry of the configuration item
-							else		// this IS the first entry of the configuration menu
-								ts.menu_item = MAX_MENU_ITEM - 1;	// go to the last entry of the main menu
-						}
-						UiDriverUpdateMenu(0);	// update menu display
-						UiDriverUpdateMenu(1);	// update cursor
-					}
-					break;
-				case BUTTON_F4_PRESSED:	// Press-and-hold button F4
-					//
-					// Move to the END of the current menu structure
-					if(ts.menu_mode){		// are we in menu mode?
-						if(ts.menu_item < MAX_MENU_ITEM)	{	// Yes - Is this within the main menu?
-							if(ts.menu_item == MAX_MENU_ITEM-1)	{	// are we on the LAST menu item of the main menu?
-								if(ts.radio_config_menu_enable)		// Yes - is the configuration menu enabled?
-									ts.menu_item = MAX_MENU_ITEM;	// yes - go to the FIRST item of the configuration menu
-								else								// configuration menu NOT enabled
-									ts.menu_item = 0;				// go to the FIRST menu main menu item
-							}
-							else									// we had not been on the last item of the main menu
-								ts.menu_item = MAX_MENU_ITEM-1;		// go to the last item in the main menu
-						}
-						else	{		// we were NOT in the main menu, but in the configuration menu!
-							if(ts.menu_item == (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS-1))		// are we on the last item of the configuration menu?
-								ts.menu_item = 0;					// yes - go to the first item of the main menu
-							else	{		// we are NOT on the last item of the configuration menu
-								ts.menu_item = (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS) - 1;		// go to the last item in the configuration menu
-							}
-						}
-						UiDriverUpdateMenu(0);	// update menu display
-						UiDriverUpdateMenu(1);	// update cursor
-					}
-					break;
-				case BUTTON_F5_PRESSED:			// Button F5 was pressed-and-held - Toggle TX Disable
-					if(ts.tx_disable)	{
-						ts.tx_disable = 0;		// Enable TX
-						UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  TUNE",White,Black,0);	// Make TUNE button White
-					}
-					else	{
-						ts.tx_disable = 1;		// Disable TX
-						UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  TUNE",Grey1,Black,0);	// Make TUNE button Grey
-					}
-					break;
-				case BUTTON_G1_PRESSED:	// Press-and-hold button G1 - Change operational mode, but include "disabled" modes
-					if(!ts.tune)	{	// do NOT allow mode change in TUNE mode
-						UiDriverChangeDemodMode(1);		// include any disabled modes
-						UiCWSidebandMode();
-						if(ts.menu_mode)	// are we in menu mode?
-							UiDriverUpdateMenu(0);	// yes, update display when we change modes
-						//
-						UiCalcTxIqGainAdj();		// update gain and phase values when changing modes
-						UiCalcTxPhaseAdj();
-						UiCalcRxPhaseAdj();
-						UiDriverChangeDSPMode();	// Change DSP display setting as well
-						UiDriverUpdateFrequency(1);	// update frequency display without checking encoder
-						//
-						if(ts.dmod_mode == DEMOD_CW)	{		// update on-screen adjustments
-							UiDriverChangeKeyerSpeed(0);		// emplace keyer speed (WPM) and
-							UiDriverChangeStGain(0);			// sidetone gain when in CW mode
-						}
-						else	{
-							UIDriverChangeAudioGain(0);			// display Line/Mic gain and
-							UiDriverChangeCmpLevel(0);			// Compression level when in voice mode
-						}
-					}
-					break;
-				//
-				case BUTTON_G2_PRESSED:		// Press and hold of BUTTON_G2 - turn DSP off
-//					if(ts.filter_id != AUDIO_10KHZ)	{		// do not allow change of mode when set to 10 kHz
-						if(ts.dsp_active & 5)	{			// is DSP NR or NOTCH active?
-							ts.dsp_active_toggle = ts.dsp_active;	// save setting for future toggling
-							ts.dsp_active &= 0xfa;				// turn off NR and notch
-						}
-						else	{		// neither notch or NR was active
-							if(ts.dsp_active_toggle != 0xff)	{	// has this holder been used before?
-								ts.dsp_active = ts.dsp_active_toggle;	// yes - load value
-							}
-						}
-						audio_driver_set_rx_audio_filter();	// update DSP settings
-						UiDriverChangeDSPMode();			// update on-screen display
-						//
-						// Update DSP/NB/RFG control display
-						if(ts.enc_two_mode == ENC_TWO_MODE_RF_GAIN)
-							UiDriverChangeSigProc(0);
-						else
-							UiDriverChangeSigProc(1);
-//					}
-					break;
-				case BUTTON_G4_PRESSED:		{	// Press-and-hold button G4 - Change filter bandwidth, allowing disabled filters
-					if(!ts.tune)	{
-						ts.filter_id++;
-						//
-						if(ts.filter_id >= AUDIO_MAX_FILTER)
-							ts.filter_id = AUDIO_MIN_FILTER;
-						//
-						// Change filter
-						//
-						UiDriverChangeFilter(0);
-						UiCalcRxPhaseAdj();			// We may have changed something in the RX filtering as well - do an update
-						UiDriverChangeDSPMode();	// Change DSP display setting as well
-						//
-						if(ts.menu_mode)	// are we in menu mode?
-							UiDriverUpdateMenu(0);	// yes, update display when we change filters
-						//
-					}
-					break;
-				}
-				case BUTTON_M2_PRESSED:	// Press-and-hold button M2:  Switch display between DSP "strength" setting and NB (noise blanker) mode
-					ts.dsp_active ^= 8;	// toggle whether or not DSP or NB is to be displayed
-					//
-					if(ts.enc_two_mode == ENC_TWO_MODE_RF_GAIN)
-						UiDriverChangeSigProc(0);
-					else
-						UiDriverChangeSigProc(1);
-					break;
-				case BUTTON_M3_PRESSED:	// Press-and-hold button M3:  Switch display between MIC and Line-In mode
-					if(ts.dmod_mode != DEMOD_CW)	{
-						if(ts.tx_audio_source == TX_AUDIO_MIC)
-							ts.tx_audio_source = TX_AUDIO_LINEIN;
-						else
-							ts.tx_audio_source = TX_AUDIO_MIC;
-						//
-						if(ts.enc_thr_mode == ENC_THREE_MODE_RIT)	// if encoder in RIT mode, grey out audio gain control
-							UIDriverChangeAudioGain(0);
-						else									// not RIT mode - don't grey out
-							UIDriverChangeAudioGain(1);
-					}
-					break;
-				case BUTTON_POWER_PRESSED:
-					if(ts.txrx_mode == TRX_MODE_RX)		// only allow power-off in RX mode
-						mchf_board_power_off();
-					break;
-				case BUTTON_STEPM_PRESSED:
-					if(!UiDriverButtonCheck(BUTTON_STEPP_PRESSED))	{	// was button STEP+ pressed at the same time?
-						ts.frequency_lock = !ts.frequency_lock;
-						ts.refresh_freq_disp = 1;		// force update of all digits
-						UiDriverUpdateFrequency(1);		// Update display of frequency to change color
-						ts.refresh_freq_disp = 0;
-					}
-					else	{
-						if(!(ts.freq_step_config & 0xf0))	// button swap NOT enabled
-							UiDriverPressHoldStep(0);	// decrease step size
-						else		// button swap enabled
-							UiDriverPressHoldStep(1);	// increase step size
-					}
-					//
-					break;
-				case BUTTON_STEPP_PRESSED:
-					if(!UiDriverButtonCheck(BUTTON_STEPM_PRESSED))	{	// was button STEP+ pressed at the same time?
-						ts.frequency_lock = !ts.frequency_lock;
-						ts.refresh_freq_disp = 1;		// force update of all digits
-						UiDriverUpdateFrequency(1);		// Update display of frequency to change color
-						ts.refresh_freq_disp = 0;
-					}
-					else	{
-						if(!(ts.freq_step_config & 0xf0))	// button swap NOT enabled
-							UiDriverPressHoldStep(1);	// increase step size
-						else		// button swap enabled
-							UiDriverPressHoldStep(0);	// decrease step size
-					}
-					break;
+		else
+		{
+			// Process hold
+			switch(ks.button_id)
+			{
 				default:
 					break;
 			}
 		}
-		//
-		ts.nb_disable = 0;	// re-enable noise blanker when done processing buttons
-		//
+
 		// Reset flag, allow other buttons to be checked
 		ks.button_processed = 0;
 		ks.debounce_time	= 0;
 	}
-}
-//
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverPressHoldStep
-//* Object              : Select the step size for the press-and-hold of the step size button
-//* Input Parameters    : 0=Decrease step size, 1=Increase step size
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriverPressHoldStep(uchar is_up)
-{
-	ulong	minus_idx, plus_idx;
-
-	switch(df.selected_idx)	{		// select appropriate "alternate" step size based on current step size
-		case T_STEP_1HZ_IDX:	// 1Hz step size
-		case T_STEP_10HZ_IDX:	// 10Hz step size
-			minus_idx = T_STEP_1HZ_IDX;		// use 1 Hz as small step size
-			plus_idx = T_STEP_1KHZ_IDX;		// use 1 kHz as large step size
-			break;
-		case T_STEP_100HZ_IDX:	// 100Hz step size
-			minus_idx = T_STEP_10HZ_IDX;		// use 10 Hz as small step size
-			plus_idx = T_STEP_1KHZ_IDX;		// use 1 kHz as large step size
-			break;
-		case T_STEP_10KHZ_IDX:	// 10 kHz step size
-		case T_STEP_100KHZ_IDX:	// 100 kHz step size
-			minus_idx = T_STEP_100HZ_IDX;	// use 100 Hz as small step size
-			plus_idx = T_STEP_100KHZ_IDX;	// use 100 kHz as large step size
-			break;
-		case T_STEP_1KHZ_IDX:	// 1 kHz step size
-		default:
-			minus_idx = T_STEP_10HZ_IDX;	// use 10 Hz as small step size
-			plus_idx = T_STEP_10KHZ_IDX;	// use 10 kHz as large step size
-			break;
-	}
-
-	if(!is_up)	{		// temporary decrease of step size
-		ts.tune_step = STEP_PRESS_MINUS;
-		ts.tune_step_idx_holder = df.selected_idx;
-		if(df.selected_idx)
-		df.tuning_step	= tune_steps[minus_idx];
-		df.selected_idx = minus_idx;
-	}
-	else	{			// temporary increase of step size
-		ts.tune_step = STEP_PRESS_PLUS;
-		ts.tune_step_idx_holder = df.selected_idx;
-		df.tuning_step	= tune_steps[plus_idx];
-		df.selected_idx = plus_idx;
-	}
-	//
-	UiDriverShowStep(df.selected_idx);		// update display
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverProcessActiveFilterScan
-//* Object              : verify that currently-selected filter is active and if not, select
-//* Object              : next active filter
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriverProcessActiveFilterScan(void)
-{
-uchar filter_scan = 0;
-
-bool	voice_mode, select_10k, select_3k6;
-
-	//
-	// Scan through filters to determine if the selected filter is disabled - and skip if it is.
-	// NOTE:  The 2.3 kHz filter CANNOT be disabled
-	//
-	// This also handles filters that are disabled according to mode (e.g. CW filters in SSB mode, SSB filters in CW mode)
-	//
-
-	if((ts.dmod_mode == DEMOD_USB) || (ts.dmod_mode == DEMOD_LSB) || (ts.dmod_mode == DEMOD_AM))	// check to see if we are set to a "voice" mode
-		voice_mode = 1;
-	else					// not in voice mode
-		voice_mode = 0;
-
-	if((ts.filter_10k_select) || (ts.dmod_mode == DEMOD_AM))	// is 10k filter to be enabled?
-		select_10k = 1;				// yes - and it should always be available in AM mode
-	else
-		select_10k = 0;				// it is not to be enabled
-
-	if((ts.filter_3k6_select) || (ts.dmod_mode == DEMOD_AM))	// is 3.6k filter to be enabled?
-		select_3k6 = 1;				// yes - and it should always be available in AM mode
-	else
-		select_3k6 = 0;				// it is not to be enabled
-
-
-	first_filter:
-		//
-		if((ts.filter_id == AUDIO_300HZ) && (!ts.filter_300Hz_select))
-			ts.filter_id++;
-		//
-		if((ts.filter_id == AUDIO_300HZ) && ((ts.filter_ssb_narrow_disable) && (voice_mode)))
-			ts.filter_id++;
-		//
-		if((ts.filter_id == AUDIO_500HZ) && (!ts.filter_500Hz_select))
-			ts.filter_id++;
-		//
-		if((ts.filter_id == AUDIO_500HZ) && ((ts.filter_ssb_narrow_disable) && (voice_mode)))
-			ts.filter_id++;
-		//
-		if((ts.filter_id == AUDIO_1P8KHZ) && (!ts.filter_1k8_select))
-			ts.filter_id++;
-		//
-		// At this point we would hit the 2.3 kHz filter, which is ALWAYS enabled!
-		//
-		if((ts.filter_id == AUDIO_3P6KHZ) && (!select_3k6))
-			ts.filter_id++;
-		//
-		if(ts.filter_id == AUDIO_3P6KHZ && ((ts.filter_cw_wide_disable) && (ts.dmod_mode == DEMOD_CW)))
-			ts.filter_id++;
-		//
-		if(((ts.filter_id == AUDIO_10KHZ) && (!select_10k)) || ((ts.filter_id == AUDIO_10KHZ) && (ts.dmod_mode == DEMOD_CW) && ts.filter_cw_wide_disable))	{
-			ts.filter_id = AUDIO_MIN_FILTER;
-			filter_scan++;
-			if(filter_scan <= 1)	// Is this the first time here?
-				goto first_filter;	// Yes - wrap around to find the other filters
-			else	// second time around?
-				ts.filter_id = AUDIO_2P3KHZ;	// Force selection of 2.3 kHz filter as all others are disabled
-		}
 }
 
 //*----------------------------------------------------------------------------
@@ -1274,246 +684,199 @@ bool	voice_mode, select_10k, select_3k6;
 //*----------------------------------------------------------------------------
 static void UiDriverProcessFunctionKeyClick(ulong id)
 {
-	static bool is_last_menu_item = 0;
 	//printf("button: %02x\n\r",id);
 
 	// --------------------------------------------
 	// F1 process
-	if(id == BUTTON_F1_PRESSED)
+	if(id == 10)
 	{
-		if(!ts.calib_mode)	{			// allow only if NOT in calibrate mode
-			if(!ts.menu_mode)	{
-				ts.menu_mode = 1;
-				is_last_menu_item = 0;	// clear last screen detect flag
-				UiDriverClearSpectrumDisplay();
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," EXIT  ",Yellow,Black,0);
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y," DEFLT",Yellow,Black,0);
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,"  PREV",Yellow,Black,0);
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,"  NEXT",Yellow,Black,0);
-				//
-								//
-				// Grey out adjustments using to put encoders in known states
-				//
-				if(ts.dmod_mode == DEMOD_CW)
-					UiDriverChangeStGain(0);
-				else
-					UiDriverChangeCmpLevel(0);
-				//
-				UiDriverChangeSigProc(0);
-				UiDriverChangeRfGain(0);
-				if(ts.dmod_mode == DEMOD_CW)
-					UiDriverChangeKeyerSpeed(0);
-				else
-					UIDriverChangeAudioGain(0);
-				//
-				UiDriverChangeRit(0);
-				//
-				// Enable volume control when in MENU mode
-				//
-				UiDriverChangeAfGain(1);
-				//
-				ts.menu_var = 0;
-				//
-				UiDriverUpdateMenu(0);	// Draw the menu the first time
-				UiDriverUpdateMenu(1);	// Do update of the first menu item
-			}
-			else	{
-				ts.menu_mode = 0;
-				UiDriverClearSpectrumDisplay();		// clear screen under spectrum display
-				UiDriverCreateSpectrumScope();
-				//
-				// Restore encoder displays to previous modes
-				UiDriverChangeEncoderOneMode(0);
-				UiDriverChangeEncoderTwoMode(0);
-				UiDriverChangeEncoderThreeMode(0);
-				// Call twice since the function TOGGLES, not just enables (need to fix this at some point!)
-				UiDriverChangeEncoderOneMode(0);
-				UiDriverChangeEncoderTwoMode(0);
-				UiDriverChangeEncoderThreeMode(0);
-				//
-				if(!ts.menu_var_changed)
-					UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MENU  ",White,Black,0);
-				else		// Asterisk indicates that a change has been made and that an EEPROM save should be done
-					UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MENU *",Orange,Black,0);
-				//
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y," METER",White,Black,0);
-				/*
-				switch(ts.tx_meter_mode)	{	// redraw button according to meter mode
-				case METER_SWR:
-					UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  SWR ",White,Black,0);
-					break;
-				case METER_ALC:
-					UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  ALC ",White,Black,0);
-					break;
-				case METER_AUDIO:
-					UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y," AUDIO",White,Black,0);
-					break;
-				default:
-					break;
-				}
-				*/
-				//
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,"      ",Yellow,Black,0);
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,"      ",Yellow,Black,0);
-			}
+		if(!ts.calib_mode)	// normal mode
+		{
+			// Increase
+			ts.tx_audio_source++;
+			if(ts.tx_audio_source == TX_AUDIO_MAX_ITEMS)
+				ts.tx_audio_source = TX_AUDIO_MIC;
+
+			// Change button caption
+			if(ts.tx_audio_source == TX_AUDIO_MIC)
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y,"  MIC  ",White,Black,0);
+			else
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y,"  LINE ",White,Black,0);
+		}
+		else	// calibration mode F1 function
+		{
+			// Toggle
+			ts.mic_boost = !ts.mic_boost;
+
+			if(!ts.mic_boost)
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MB OFF",White,Black,0);
+			else
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MB ON ",White,Black,0);
 		}
 	}
 
 	// --------------------------------------------
 	// F2 process
-	if(id == BUTTON_F2_PRESSED)
+	if(id == 11)
 	{
-		//
-		// If in MENU mode, this restores the DEFAULT setting
-		//
-		if(ts.menu_mode)	{		// Button F2 restores default setting of selected item
-			UiDriverUpdateMenu(3);
-			ts.menu_var_changed = 1;
+		// No need to process this menu if no chip avail
+		if(lo.sensor_present)
+			return;
+
+		// Toggle soft tcxo
+		df.temp_enabled = !df.temp_enabled;
+
+		// Change button color
+		if(df.temp_enabled)
+		{
+			// Button caption
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  TCXO",Blue,Black,0);
+
+			// Indicator on
+			UiDriverCreateTemperatureDisplay(1,0);
 		}
-		else	{	// Not in MENU mode - select the meter mode
-			ts.tx_meter_mode++;
-			if(ts.tx_meter_mode > METER_MAX)
-				ts.tx_meter_mode = 0;
-			//
-			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y," METER",White,Black,0);
-			//
-			/*
-			switch(ts.tx_meter_mode)	{	// redraw button according to meter mode
-			case METER_SWR:
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  SWR ",White,Black,0);
-				break;
-			case METER_ALC:
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  ALC ",White,Black,0);
-				break;
-			case METER_AUDIO:
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y," AUDIO",White,Black,0);
-				break;
-			default:
-				break;
-			}
-			*/
-			//
-			UiDriverDeleteSMeter();
-			UiDriverCreateSMeter();	// redraw meter
+		else
+		{
+			// Button caption
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,"  TCXO",White,Black,0);
+
+			// Indicator off
+			UiDriverCreateTemperatureDisplay(0,0);
+
+			// Reset temp compensation value
+			df.temp_factor = 0;
+			UiDriverUpdateFrequencyFast();
+
+			// Reset to default, so when turned off routine will work as expected
+			lo.comp = 0;
 		}
 	}
 
 	// --------------------------------------------
 	// F3 process
-	if(id == BUTTON_F3_PRESSED)	{
-		//
-		//
-		if(ts.menu_mode)	{		// Previous screen
-			is_last_menu_item = 0;	// clear last screen detect flag
-			if(ts.menu_item < 6)	{	// are we less than one screen away from the beginning?
-				if(!ts.radio_config_menu_enable)	// yes - config/adjust menu not enabled?
-					ts.menu_item = MAX_MENU_ITEM-1;	// yes, go to last item in normal menu
-				else
-					ts.menu_item = (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS)-1;	// move to the last config/adjustment menu item
-			}
-			else
-				ts.menu_item -= 6;	// not less than 6, so we subtract!
-			//
-			ts.menu_var = 0;			// clear variable that is used to change a menu item
-			UiDriverUpdateMenu(1);		// Update that menu item
+	if(id == 9)
+	{
+		// Toggle state
+		kd.enabled = !kd.enabled;
+
+		// Change button color
+		if(kd.enabled)
+		{
+			// Button caption
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,"  CAT ",Blue,Black,0);
+
+			// Start driver
+			cat_driver_init();
 		}
-		//
-		//
+		else
+		{
+			// Button caption
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,"  CAT ",White,Black,0);
+
+			cat_driver_stop();
+		}
 	}
 
 	// --------------------------------------------
 	// F4 process
-	if(id == BUTTON_F4_PRESSED)	{
-		//
-		if(ts.menu_mode)	{		// Next screen
-			if(!ts.radio_config_menu_enable)	{	// Not in config/calibrate menu mode
-				if(ts.menu_item == MAX_MENU_ITEM - 1)	{	// already at last item?
-					is_last_menu_item = 0;				// make sure flag is clear
-					ts.menu_item = 0;					// to to first item
-				}
-				else	{	// not at last item - go ahead
-					ts.menu_item += 6;
-					if(ts.menu_item >= MAX_MENU_ITEM - 1)	{	// were we at last item?
-						if(!is_last_menu_item)	{	// have we NOT seen the last menu item flag before?
-							ts.menu_item = MAX_MENU_ITEM - 1;	// set to last menu item
-							is_last_menu_item = 1;		// set flag indicating that we are at last menu item
-						}
-						else	{	// last menu item flag was set
-							ts.menu_item = 0;				// yes, wrap around
-							is_last_menu_item = 0;				// clear flag
-						}
-					}
-				}
-			}
-			else	{	// in calibrate/adjust menu mode
-				if(ts.menu_item == (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS-1))	{	// already at last item?
-					is_last_menu_item = 0;				// make sure flag is clear
-					ts.menu_item = 0;					// to to first item
-				}
-				else	{	// not at last item - go ahead
-					ts.menu_item += 6;
-					if(ts.menu_item >= (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS-1))	{	// were we at last item?
-						if(!is_last_menu_item)	{	// have we NOT seen the last menu item flag before?
-							ts.menu_item = MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS-1;	// set to last menu item
-							is_last_menu_item = 1;		// set flag indicating that we are at last menu item
-						}
-						else	{	// last menu item flag was set
-							ts.menu_item = 0;				// yes, wrap around
-							is_last_menu_item = 0;				// clear flag
-						}
-					}
-				}
-			}
-			//
-			ts.menu_var = 0;			// clear variable that is used to change a menu item
-			UiDriverUpdateMenu(1);		// Update that menu item
+	if(id == 12)
+	{
+		// Toggle tune
+		ts.tune = !ts.tune;
+
+		// Change button color
+		if(ts.tune)
+		{
+			// DDS on
+			softdds_setfreq(CW_SIDETONE_OFFCET,ts.samp_rate,0);
+
+			// To TX
+			ts.txrx_mode = TRX_MODE_TX;
+			ui_driver_toggle_tx();				// tune
+
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,"  TUNE",Red,Black,0);
 		}
-		//
-		//
+		else
+		{
+			// DDS off
+			softdds_setfreq(0.0,ts.samp_rate,0);
+
+			// Back to RX
+			ts.txrx_mode = TRX_MODE_RX;
+			ui_driver_toggle_tx();				// tune
+
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,"  TUNE",White,Black,0);
+		}
 	}
 
 	// --------------------------------------------
 	// F5 process
-	if(id == BUTTON_F5_PRESSED)
+	if(id == 14)
 	{
-		if(!ts.tx_disable)	{	// Allow TUNE mode only if TX is NOT disabled
-			// Toggle tune
-			ts.tune = !ts.tune;
+		// Toggle calibration mode
+		ts.calib_mode = !ts.calib_mode;
 
-			if(ts.dmod_mode == DEMOD_AM)
-				ts.tune = 0;	// no TUNE mode in AM!
+		// Change button color
+		if(ts.calib_mode)
+		{
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  CAL ",Red,Black,0);
 
-			// Change button color
-			if(ts.tune)
-			{
-				if((ts.dmod_mode == DEMOD_USB) || (ts.dmod_mode == DEMOD_LSB))
-					softdds_setfreq(SSB_TUNE_FREQ, ts.samp_rate,0);		// generate tone for setting TX IQ phase
-				// DDS on
-				else
-					softdds_setfreq(CW_SIDETONE_FREQ_DEFAULT,ts.samp_rate,0);
+			// Show calibration controls
+			UiDriverChangePaBias		(1,1);
+			UiDriverChangeIQGainBalance	(1,1);
+			UiDriverChangeIQPhaseBalance(1,1);
 
-				// To TX
-				ts.txrx_mode = TRX_MODE_TX;
-				ui_driver_toggle_tx();				// tune
+			// Disable other pots
+			UiDriverChangeEncoderOneMode(1);
+			UiDriverChangeEncoderTwoMode(1);
+			UiDriverChangeEncoderThreeMode(1);
 
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  TUNE",Red,Black,0);
-				//
-			}
+			// Change F1 caption in Calibration Mode
+			if(!ts.mic_boost)
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MB OFF",White,Black,0);
 			else
-			{
-				if((ts.dmod_mode == DEMOD_USB) || (ts.dmod_mode == DEMOD_LSB))	// DDS off if voice mode
-					softdds_setfreq(0.0,ts.samp_rate,0);
-				else if(ts.dmod_mode == DEMOD_CW)	{	// DDS reset to proper sidetone freq. if CW mode
-					cw_gen_init();
-					softdds_setfreq((float)ts.sidetone_freq,ts.samp_rate,0);
-				}
-				//
-				// Back to RX
-				ts.txrx_mode = TRX_MODE_RX;
-				ui_driver_toggle_tx();				// tune
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y," MB ON ",White,Black,0);
+		}
+		else
+		{
+			ushort value;
 
-				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  TUNE",White,Black,0);
-				//
+			UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,"  CAL ",White,Black,0);
+
+			// Hide calibration controls
+			UiDriverChangePaBias		(0,0);
+			UiDriverChangeIQGainBalance	(0,0);
+			UiDriverChangeIQPhaseBalance(0,0);
+
+			// Reset pots
+			UiDriverChangeEncoderOneMode(0);
+			UiDriverChangeEncoderTwoMode(0);
+			UiDriverChangeEncoderThreeMode(0);
+
+			// Restore F1 caption in Normal Mode
+			if(ts.tx_audio_source == TX_AUDIO_MIC)
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y,"  MIC  ",White,Black,0);
+			else
+				UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y,"  LINE ",White,Black,0);
+
+			// Save bias if changed
+			if(EE_ReadVariable(VirtAddVarTab[EEPROM_PA_BIAS], &value) == 0)
+			{
+				if(ts.pa_bias != value)
+				{
+					EE_WriteVariable(VirtAddVarTab[EEPROM_PA_BIAS],ts.pa_bias);
+					//printf("-->PA BIAS saved\n\r");
+				}
+			}
+
+			// Save mic boost state if changed
+			if(EE_ReadVariable(VirtAddVarTab[EEPROM_MIC_BOOST], &value) == 0)
+			{
+				if(ts.mic_boost != value)
+				{
+					EE_WriteVariable(VirtAddVarTab[EEPROM_MIC_BOOST],ts.mic_boost);
+					//printf("-->MIC BOOST state saved\n\r");
+				}
 			}
 		}
 	}
@@ -1526,7 +889,8 @@ static void UiDriverProcessFunctionKeyClick(ulong id)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverShowMode(void)	{
+static void UiDriverShowMode(void)
+{
 	// Clear control
 	UiLcdHy28_DrawFullRect(POS_DEMOD_MODE_MASK_X,POS_DEMOD_MODE_MASK_Y,POS_DEMOD_MODE_MASK_H,POS_DEMOD_MODE_MASK_W,Blue);
 
@@ -1543,10 +907,7 @@ void UiDriverShowMode(void)	{
 			UiLcdHy28_PrintText((POS_DEMOD_MODE_X + 12),POS_DEMOD_MODE_Y,"AM",Cream,Blue,0);
 			break;
 		case DEMOD_CW:
-			if(ts.cw_lsb)	// determine if CW is USB or LSB mode
-				UiLcdHy28_PrintText((POS_DEMOD_MODE_X + 4),POS_DEMOD_MODE_Y,"CW-L",Cream,Blue,0);
-			else
-				UiLcdHy28_PrintText((POS_DEMOD_MODE_X + 4),POS_DEMOD_MODE_Y,"CW-U",Cream,Blue,0);
+			UiLcdHy28_PrintText((POS_DEMOD_MODE_X + 12),POS_DEMOD_MODE_Y,"CW",Cream,Blue,0);
 			break;
 		default:
 			break;
@@ -1560,65 +921,35 @@ void UiDriverShowMode(void)	{
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverShowStep(ulong step)
+static void UiDriverShowStep(ulong step)
 {
-
-	ulong	line_loc;
-	static	bool	step_line = 0;	// used to indicate the presence of a step line
-	ulong	color;
-
-	if(ts.tune_step)		// is this a "Temporary" step size from press-and-hold?
-		color = Cyan;	// yes - display step size in Cyan
-	else				// normal mode
-		color = White;	// step size in white
-
-	if(step_line)	{	// Remove underline indicating step size if one had been drawn
-		UiLcdHy28_DrawStraightLine((POS_TUNE_FREQ_X + (LARGE_FONT_WIDTH * 3)),(POS_TUNE_FREQ_Y + 24),(LARGE_FONT_WIDTH*7),LCD_DIR_HORIZONTAL,Black);
-		UiLcdHy28_DrawStraightLine((POS_TUNE_FREQ_X + (LARGE_FONT_WIDTH * 3)),(POS_TUNE_FREQ_Y + 25),(LARGE_FONT_WIDTH*7),LCD_DIR_HORIZONTAL,Black);
-	}
-
-	// Blank old step size
+	// Clear control
 	UiLcdHy28_DrawFullRect(POS_TUNE_STEP_MASK_X,POS_TUNE_STEP_MASK_Y,POS_TUNE_STEP_MASK_H,POS_TUNE_STEP_MASK_W,Black);
 
 	// Create Step Mode
-	switch(df.tuning_step)
+	switch(df.tunning_step)
 	{
 		case T_STEP_1HZ:
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*3),POS_TUNE_STEP_Y,"1Hz",color,Black,0);
-			line_loc = 9;
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*3),POS_TUNE_STEP_Y,"1Hz",White,Black,0);
 			break;
 		case T_STEP_10HZ:
-			line_loc = 8;
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*2),POS_TUNE_STEP_Y,"10Hz",color,Black,0);
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*2),POS_TUNE_STEP_Y,"10Hz",White,Black,0);
 			break;
 		case T_STEP_100HZ:
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*1),POS_TUNE_STEP_Y,"100Hz",color,Black,0);
-			line_loc = 7;
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*1),POS_TUNE_STEP_Y,"100Hz",White,Black,0);
 			break;
 		case T_STEP_1KHZ:
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*2),POS_TUNE_STEP_Y,"1kHz",color,Black,0);
-			line_loc = 5;
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*2),POS_TUNE_STEP_Y,"1kHz",White,Black,0);
 			break;
 		case T_STEP_10KHZ:
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*1),POS_TUNE_STEP_Y,"10kHz",color,Black,0);
-			line_loc = 4;
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*1),POS_TUNE_STEP_Y,"10kHz",White,Black,0);
 			break;
 		case T_STEP_100KHZ:
-			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*0),POS_TUNE_STEP_Y,"100kHz",color,Black,0);
-			line_loc = 3;
+			UiLcdHy28_PrintText((POS_TUNE_STEP_X + SMALL_FONT_WIDTH*0),POS_TUNE_STEP_Y,"100kHz",White,Black,0);
 			break;
 		default:
 			break;
 	}
-	//
-	if(ts.freq_step_config & 0x0f)	{		// is frequency step marker line enabled?
-		UiLcdHy28_DrawStraightLine((POS_TUNE_FREQ_X + (LARGE_FONT_WIDTH * line_loc)),(POS_TUNE_FREQ_Y + 24),(LARGE_FONT_WIDTH),LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_TUNE_FREQ_X + (LARGE_FONT_WIDTH * line_loc)),(POS_TUNE_FREQ_Y + 25),(LARGE_FONT_WIDTH),LCD_DIR_HORIZONTAL,White);
-		step_line = 1;	// indicate that a line under the step size had been drawn
-	}
-	else	// marker line not enabled
-		step_line = 0;	// we don't need to erase "step size" marker line in the future
-
 }
 
 //*----------------------------------------------------------------------------
@@ -1672,10 +1003,6 @@ static void UiDriverShowBand(uchar band)
 			UiLcdHy28_PrintText(POS_BAND_MODE_X,POS_BAND_MODE_Y,"10m",Orange,Black,0);
 			break;
 
-		case BAND_MODE_GEN:
-			UiLcdHy28_PrintText(POS_BAND_MODE_X,POS_BAND_MODE_Y,"Gen",Orange,Black,0);
-			break;
-
 		default:
 			break;
 	}
@@ -1691,7 +1018,7 @@ static void UiDriverShowBand(uchar band)
 //
 // -------------------------------------------
 //
-void UiDriverChangeBandFilter(uchar band,uchar bpf_only)
+static void UiDriverChangeBandFilter(uchar band,uchar bpf_only)
 {
 	if(bpf_only)
 		goto do_bpf;
@@ -1867,16 +1194,16 @@ static void UiDriverCreateDesktop(void)
 	UiLcdHy28_LcdClear(Black);
 
 	// Create Band value
-	UiDriverShowBand(ts.band);
+	UiDriverShowBand(ts.band_mode);
 
 	// Set filters
-	UiDriverChangeBandFilter(ts.band,0);
+	UiDriverChangeBandFilter(ts.band_mode,0);
 
 	// Create Decode Mode (USB/LSB/AM/FM/CW)
 	UiDriverShowMode();
 
 	// Create Step Mode
-	UiDriverShowStep(df.tuning_step);
+	UiDriverShowStep(df.tunning_step);
 
 	// Frequency
 	UiLcdHy28_PrintText(POS_TUNE_FREQ_X,POS_TUNE_FREQ_Y,"14.000.000",White,Black,1);
@@ -1898,12 +1225,8 @@ static void UiDriverCreateDesktop(void)
 	// -----------------
 	//  Audio gain
 	UiDriverChangeAfGain(1);
-	//
-	if(ts.dmod_mode == DEMOD_CW)
-		UiDriverChangeStGain(0);
-	else
-		UiDriverChangeCmpLevel(0);
-	//
+	// Sidetone gain
+	UiDriverChangeStGain(0);
 
 	// -----------------
 	// Encoder two modes
@@ -1911,23 +1234,29 @@ static void UiDriverCreateDesktop(void)
 	// RF gain
 	UiDriverChangeRfGain(1);
 	// RF Attenuator
-	UiDriverChangeSigProc(0);
+	UiDriverChangeRfAttenuator(0);
 
 	// -----------------
 	// Encoder three modes
 	// -----------------
 	// RIT
 	UiDriverChangeRit(1);
-	//
-	if(ts.dmod_mode == DEMOD_CW)
-		UiDriverChangeKeyerSpeed(0);
-	else
-		UIDriverChangeAudioGain(0);
-	//
-	cw_gen_init();
+	// Keyer speed
+	UiDriverChangeKeyerSpeed(0);
 
-	// DSP mode change
-	UiDriverChangeDSPMode();
+	// -----------------
+	// Calib mode
+	// -----------------
+	// IQ balance
+//	UiDriverChangeIQGainBalance(0);
+	// IQ balance
+//	UiDriverChangeIQPhaseBalance(0);
+	// PA bias
+//	UiDriverChangePaBias(0);
+
+
+	// Keyer mode
+	UiDriverChangeKeyerMode();
 
 	// Power level
 	UiDriverChangePowerLevel();
@@ -1947,7 +1276,7 @@ static void UiDriverCreateDesktop(void)
 	UiLcdHy28_PrintText			(POS_PWR_IND_X,POS_PWR_IND_Y,   "12.00V",  COL_PWR_IND,Black,0);
 
 	// Create temperature
-	if((lo.sensor_present == 0) && (df.temp_enabled & 0x0f))
+	if((lo.sensor_present == 0) && (df.temp_enabled))
 		UiDriverCreateTemperatureDisplay(1,1);
 	else
 		UiDriverCreateTemperatureDisplay(0,1);
@@ -1969,7 +1298,6 @@ static void UiDriverCreateDesktop(void)
 static void UiDriverCreateFunctionButtons(bool full_repaint)
 {
 	char cap1[20],cap2[20],cap3[20],cap4[20],cap5[20];
-	ulong	clr;
 
 	// Create bottom bar
 	if(full_repaint)
@@ -1981,110 +1309,30 @@ static void UiDriverCreateFunctionButtons(bool full_repaint)
 		UiLcdHy28_DrawBottomButton((POS_BOTTOM_BAR_X + POS_BOTTOM_BAR_BUTTON_W*4 + 8),(POS_BOTTOM_BAR_Y - 4),POS_BOTTOM_BAR_BUTTON_H,(POS_BOTTOM_BAR_BUTTON_W + 1),Grey);
 	}
 
-	strcpy(cap1,"  MENU");
-	strcpy(cap2," METER");
-	strcpy(cap3,"      ");
-	strcpy(cap4,"      ");
-	strcpy(cap5,"  TUNE");
+	// Change button caption
+	if(ts.tx_audio_source == TX_AUDIO_MIC)
+		strcpy(cap1,"  MIC ");
+	else
+		strcpy(cap1,"  LINE");
+
+	strcpy(cap2,"  TCXO");
+	strcpy(cap3,"  CAT ");
+	strcpy(cap4,"  TUNE");
+	strcpy(cap5,"  CAL ");
 
 	// Draw buttons text
 	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F1_X,POS_BOTTOM_BAR_F1_Y,cap1,White,Black,0);
-	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,cap2,White,Black,0);
+
+	if((lo.sensor_present == 0) && (df.temp_enabled))
+		UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,cap2,Blue,Black,0); // enabled
+	else
+		UiLcdHy28_PrintText(POS_BOTTOM_BAR_F2_X,POS_BOTTOM_BAR_F2_Y,cap2,White,Black,0);
+
 	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,cap3,White,Black,0);
 	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,cap4,White,Black,0);
-	//
-	if(ts.tx_disable)	// is transmit disabled?
-		clr = Grey1;	// Yes - make TUNE button gray
-	else
-		clr = White;	// Not disabled, it is white
-
-	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,cap5,clr,Black,0);
+	UiLcdHy28_PrintText(POS_BOTTOM_BAR_F5_X,POS_BOTTOM_BAR_F5_Y,cap5,White,Black,0);
 }
 
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverDrawWhiteSMeter
-//* Object              : draw the white part of the S meter to clear the red S-meter (below)
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriverDrawWhiteSMeter(void)
-{
-	uchar 	i,v_s;
-
-// Draw top line
-	UiLcdHy28_DrawStraightLine((POS_SM_IND_X +  18),(POS_SM_IND_Y + 20),92,LCD_DIR_HORIZONTAL,White);
-	UiLcdHy28_DrawStraightLine((POS_SM_IND_X +  18),(POS_SM_IND_Y + 21),92,LCD_DIR_HORIZONTAL,White);
-
-	// Draw s markers on top white line
-	for(i = 0; i < 10; i++)
-	{
-		// Draw s text, only odd numbers
-		if(i%2)
-		{
-			v_s = 5;
-		}
-		else
-			v_s = 3;
-
-		// Lines
-		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 20) - v_s),v_s,LCD_DIR_VERTICAL,White);
-		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 20) - v_s),v_s,LCD_DIR_VERTICAL,White);
-	}
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverDrawRedSMeter
-//* Object              : draw the part of the S meter in red to indicate A/D overload
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriverDrawRedSMeter(void)
-{
-	uchar 	i,v_s;
-
-// Draw top line
-	UiLcdHy28_DrawStraightLine((POS_SM_IND_X +  18),(POS_SM_IND_Y + 20),92,LCD_DIR_HORIZONTAL,Red);
-	UiLcdHy28_DrawStraightLine((POS_SM_IND_X +  18),(POS_SM_IND_Y + 21),92,LCD_DIR_HORIZONTAL,Red);
-
-	// Draw s markers on top white line
-	for(i = 0; i < 10; i++)
-	{
-
-		// Draw s text, only odd numbers
-		if(i%2)
-		{
-			v_s = 5;
-		}
-		else
-			v_s = 3;
-
-		// Lines
-		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 20) - v_s),v_s,LCD_DIR_VERTICAL,Red);
-		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 20) - v_s),v_s,LCD_DIR_VERTICAL,Red);
-	}
-}
-//
-
-
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverDeleteSMeter
-//* Object              : delete the S meter
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-static void UiDriverDeleteSMeter(void)
-{
-	ulong i;
-
-	for(i = POS_SM_IND_Y; i < POS_SM_IND_Y + 72; i+=8)	{	// Y coordinate of blanking line
-		UiLcdHy28_PrintText(POS_SM_IND_X + 6,((POS_SM_IND_Y + 5) +  i),"                                ",  White,Black,4);
-	}
-}
-
-//
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverCreateSMeter
 //* Object              : draw the S meter
@@ -2110,6 +1358,7 @@ static void UiDriverCreateSMeter(void)
 	// Leading text
 	UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y +  5),"S",  White,Black,4);
 	UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y + 36),"P",  White,Black,4);
+	UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y + 59),"SWR",White,Black,4);
 
 	// Trailing text
 	UiLcdHy28_PrintText((POS_SM_IND_X + 185),(POS_SM_IND_Y + 5), "dB",Green,Black,4);
@@ -2135,7 +1384,7 @@ static void UiDriverCreateSMeter(void)
 		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 20) - v_s),v_s,LCD_DIR_VERTICAL,White);
 	}
 
-	// Draw s markers on top green line
+	// Draw s markers on top red line
 	for(i = 0; i < 4; i++)
 	{
 		// Prepare text
@@ -2193,119 +1442,42 @@ static void UiDriverCreateSMeter(void)
 		}
 	}
 
+	// Draw bottom line
+	UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 55), 62,LCD_DIR_HORIZONTAL,White);
+	UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 56), 62,LCD_DIR_HORIZONTAL,White);
+	UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 55),105,LCD_DIR_HORIZONTAL,Red);
+	UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 56),105,LCD_DIR_HORIZONTAL,Red);
+	col = White;
 
-	if(ts.tx_meter_mode == METER_SWR)	{
-		UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y + 59),"SWR",Red2,Black,4);
+	// Draw S markers on middle white line
+	for(i = 0; i < 12; i++)
+	{
+		if(i > 6) col = Red;
 
-		// Draw bottom line for SWR indicator
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 55), 62,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 56), 62,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 55),105,LCD_DIR_HORIZONTAL,Red);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 56),105,LCD_DIR_HORIZONTAL,Red);
-		col = White;
-
-		// Draw S markers on middle white line
-		for(i = 0; i < 12; i++)
+		if(!(i%2))
 		{
-			if(i > 6) col = Red;
-
-			if(!(i%2))
+			if(i)
 			{
-				if(i)
-				{
-					num[0] = i/2 + 0x30;
-					num[1] = 0;
+				num[0] = i/2 + 0x30;
+				num[1] = 0;
 
-					// Text
-					UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 3 + i*10),(POS_SM_IND_Y + 59),num,White,Black,4);
+				// Text
+				UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 3 + i*10),(POS_SM_IND_Y + 59),num,White,Black,4);
 
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-				}
-				else
-				{
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-				}
+				UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
+				UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
+			}
+			else
+			{
+				UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
+				UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
 			}
 		}
 	}
-	else if(ts.tx_meter_mode == METER_ALC)	{
-		UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y + 59),"ALC",Yellow,Black,4);
 
-		// Draw bottom line for SWR indicator
-//		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 55), 108,LCD_DIR_HORIZONTAL,White);
-//		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 56), 108,LCD_DIR_HORIZONTAL,White);
-//		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 129),(POS_SM_IND_Y + 55),59,LCD_DIR_HORIZONTAL,Red);
-//		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 129),(POS_SM_IND_Y + 56),59,LCD_DIR_HORIZONTAL,Red);
-
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 55), 62,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 56), 62,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 55),105,LCD_DIR_HORIZONTAL,Red);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 83),(POS_SM_IND_Y + 56),105,LCD_DIR_HORIZONTAL,Red);
-
-		col = White;
-
-		// Draw markers on middle line
-		for(i = 0; i < 17; i++)
-		{
-			if(i > 6) col = Red;
-			if(!(i%2))
-			{
-				if(i)
-				{
-					sprintf(num,"%d",(i*2));
-					// Text
-					UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 3 + i*10),(POS_SM_IND_Y + 59),num,White,Black,4);
-
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-				}
-				else
-				{
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-				}
-			}
-		}
-	}
-	else if(ts.tx_meter_mode == METER_AUDIO)	{
-		UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 12),(POS_SM_IND_Y + 59),"AUD",Cyan,Black,4);
-
-		// Draw bottom line for SWR indicator
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 55), 108,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 18),(POS_SM_IND_Y + 56), 108,LCD_DIR_HORIZONTAL,White);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 129),(POS_SM_IND_Y + 55),59,LCD_DIR_HORIZONTAL,Red);
-		UiLcdHy28_DrawStraightLine((POS_SM_IND_X + 129),(POS_SM_IND_Y + 56),59,LCD_DIR_HORIZONTAL,Red);
-		col = White;
-
-		// Draw markers on middle line
-		for(i = 0; i < 17; i++)
-		{
-			if(i > 10) col = Red;
-			if(!(i%2))
-			{
-				if(i)
-				{
-					sprintf(num,"%d",(i*2)-20);
-					// Text
-					UiLcdHy28_PrintText(((POS_SM_IND_X + 18) - 3 + i*10),(POS_SM_IND_Y + 59),num,White,Black,4);
-
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 2),2,LCD_DIR_VERTICAL,col);
-				}
-				else
-				{
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-					UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 19) + i*10),((POS_SM_IND_Y + 55) - 7),7,LCD_DIR_VERTICAL,col);
-				}
-			}
-		}
-	}
 	// Draw meters
 	UiDriverUpdateTopMeterA(0,0);
-	UiDriverUpdateBtmMeter(0, 0);
-
+	UiDriverUpdateBtmMeter(0);
 }
 
 //*----------------------------------------------------------------------------
@@ -2408,11 +1580,10 @@ static void UiDriverCreateSMeter(void)
 static void UiDriverUpdateTopMeterA(uchar val,uchar old)
 {
 	uchar 	i,v_s;
-	int		col = Blue2;
+	int		col = Blue;
 
-
-	// Do not waste time redrawing if outside of the range or if the meter has not changed
-	if((val > 34) || (val == old))
+	// Do not waste time redrawing if outside of the range
+	if(val > 34)
 		return;
 
 	// Indicator height
@@ -2422,7 +1593,7 @@ static void UiDriverUpdateTopMeterA(uchar val,uchar old)
 	for(i = 1; i < 34; i++)
 	{
 		if(val < i)
-			col = Grid;
+			col = Grey;
 
 		// Lines
 		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*5),((POS_SM_IND_Y + 28) - v_s),v_s,LCD_DIR_VERTICAL,col);
@@ -2434,14 +1605,14 @@ static void UiDriverUpdateTopMeterA(uchar val,uchar old)
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverUpdateBtmMeter
 //* Object              : redraw indicator
-//* Input Parameters    : val=indicated value, warn=red warning threshold
-//* Output Parameters   :
+//* Input Parameters    :
+//* Output Parameters   : ToDo: Old value public, so to skip refresh!!!
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverUpdateBtmMeter(uchar val, uchar warn)
+static void UiDriverUpdateBtmMeter(uchar val)
 {
 	uchar 	i,v_s;
-	int		col = Cyan;
+	int		col = Blue;
 
 	// Do not waste time redrawing if outside of the range
 	if(val > 34)
@@ -2450,14 +1621,11 @@ static void UiDriverUpdateBtmMeter(uchar val, uchar warn)
 	// Indicator height
 	v_s = 3;
 
-
-	// Draw indicator
+	// Draw first indicator
 	for(i = 1; i < 34; i++)
 	{
 		if(val < i)
-			col = Grid;
-		else if((i >= warn) && warn)	// is level above "warning" color? (is "warn" is zero, disable warning)
-			col = Red2;					// yes - display values above that color in red
+			col = Grey;
 
 		// Lines
 		UiLcdHy28_DrawStraightLine(((POS_SM_IND_X + 18) + i*5),((POS_SM_IND_Y + 51) - v_s),v_s,LCD_DIR_VERTICAL,col);
@@ -2466,140 +1634,6 @@ static void UiDriverUpdateBtmMeter(uchar val, uchar warn)
 	}
 }
 
-
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDrawSpectrumScopeFrequencyBarText
-//* Object              : Draw the frequency information on the frequency bar at the bottom of the spectrum scope based on the current frequency
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiDrawSpectrumScopeFrequencyBarText(void)
-{
-	ulong	freq_calc;
-	ulong	i, clr;
-	char	txt[16], *c;
-	ulong	grat;
-
-	grat = 6;	// Default - Magnify mode OFF, graticules spaced 6 kHz
-	//
-	if(sd.magnify)			// magnify mode on - only available when NOT in translate mode
-		grat = 3;	// graticules spaced 3 kHz
-
-	//
-	// This function draws the frequency bar at the bottom of the spectrum scope, putting markers every at every graticule and the full frequency
-	// (rounded to the nearest kHz) in the center.  (by KA7OEI, 20140913)
-	//
-	// get color for frequency scale
-	//
-	if(ts.scope_scale_colour == SPEC_GREY)
-		clr = Grey;
-	else if(ts.scope_scale_colour == SPEC_BLUE)
-		clr = Blue;
-	else if(ts.scope_scale_colour == SPEC_RED)
-		clr = Red;
-	else if(ts.scope_scale_colour == SPEC_MAGENTA)
-		clr = Magenta;
-	else if(ts.scope_scale_colour == SPEC_GREEN)
-		clr = Green;
-	else if(ts.scope_scale_colour == SPEC_CYAN)
-		clr = Cyan;
-	else if(ts.scope_scale_colour == SPEC_YELLOW)
-		clr = Yellow;
-	else if(ts.scope_scale_colour == SPEC_BLACK)
-		clr = Black;
-	else if(ts.scope_scale_colour == SPEC_ORANGE)
-		clr = Orange;
-	else
-		clr = White;
-
-	freq_calc = df.tune_new/4;		// get current frequency in Hz
-
-	if(ts.iq_freq_mode == 1)			// Is "RX LO HIGH" translate mode active?
-		freq_calc += FREQ_SHIFT_MAG;	// Yes, shift receive frequency to left of center
-	else if(ts.iq_freq_mode == 2)		// it is "RX LO LOW" in translate mode
-		freq_calc -= FREQ_SHIFT_MAG;	// shift receive frequency to right of center
-
-	freq_calc = (freq_calc + 500)/1000;	// round graticule frequency to the nearest kHz
-
-	//
-
-	if(ts.iq_freq_mode == 0)	{	// Translate mode is OFF
-		sprintf(txt, "  %u  ", (unsigned)freq_calc);	// build string for center frequency
-		i = 130-((strlen(txt)-2)*4);	// calculate position of center frequency text
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + i),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),txt,clr,Black,4);
-
-		sprintf(txt, " %u ", (unsigned)freq_calc-(unsigned)grat);	// build string for left-of-center frequency
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +  90),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-		//
-
-		sprintf(txt, " %u ", (unsigned)freq_calc+(unsigned)grat);	// build string for marker right of center
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 154),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	}
-	else if(ts.iq_freq_mode == 1)	{	// Translate mode is ON (LO is HIGH, center is left of middle of display
-		sprintf(txt, "  %u  ", (unsigned)freq_calc-(unsigned)grat);	// build string for center frequency
-		i = 94-((strlen(txt)-2)*4);	// calculate position of center frequency text
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + i),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),txt,clr,Black,4);
-
-		sprintf(txt, " %u ", (unsigned)freq_calc);	// build string for center marker
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +  122),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-		//
-		sprintf(txt, " %u ", (unsigned)freq_calc+(unsigned)grat);	// build string for marker right of center
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 154),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	}
-	else if(ts.iq_freq_mode == 2)	{	// Translate mode is ON (LO is LOW, center is to the right of middle of display)
-		sprintf(txt, "  %u  ", (unsigned)freq_calc+(unsigned)grat);	// build string for center frequency
-		i = 160-((strlen(txt)-2)*4);	// calculate position of center frequency text
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + i),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),txt,clr,Black,4);
-
-		sprintf(txt, " %u ", (unsigned)freq_calc-(unsigned)grat);	// build string for left-of-center frequency
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +  90),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-		//
-
-		sprintf(txt, " %u ", (unsigned)freq_calc);	// build string for frequency in center of display
-		c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-		UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 122),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	}
-
-	// remainder of frequency/graticule markings
-
-	sprintf(txt, " %u ", (unsigned)freq_calc-(2*(unsigned)grat));	// build string for middle-left frequency
-	c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +  58),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	//
-
-	sprintf(txt, " %u ", (unsigned)freq_calc+(2*(unsigned)grat));	// build string for middle-right frequency
-	c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 186),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-
-	sprintf(txt, "%u ", (unsigned)freq_calc-(4*(unsigned)grat));	// build string for left-most frequency
-	c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X ),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	//
-
-	sprintf(txt, "%u ", (unsigned)freq_calc-(3*(unsigned)grat));	// build string for right of left-most frequency
-	c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +   26),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	//
-
-	sprintf(txt, " %u ", (unsigned)freq_calc+(3*(unsigned)grat));	// build string for left of far-right frequency
-	c = &txt[strlen(txt)-3];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 218),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-	//
-
-	sprintf(txt, " %u", (unsigned)freq_calc+(4*(unsigned)grat));	// build string for far-right frequency
-	c = &txt[strlen(txt)-2];  // point at 2nd character from the end
-	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 242),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),c,clr,Black,4);
-
-}
-
-//
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverCreateSpectrumScope
 //* Object              : draw the spectrum scope control
@@ -2610,34 +1644,6 @@ void UiDrawSpectrumScopeFrequencyBarText(void)
 static void UiDriverCreateSpectrumScope(void)
 {
 	ulong i;
-
-	//
-	// get grid colour
-	//
-	if(ts.scope_grid_colour == SPEC_GREY)
-		ts.scope_grid_colour_active = Grid;
-	else if(ts.scope_grid_colour == SPEC_BLUE)
-		ts.scope_grid_colour_active = Blue;
-	else if(ts.scope_grid_colour == SPEC_RED)
-		ts.scope_grid_colour_active = Red;
-	else if(ts.scope_grid_colour == SPEC_MAGENTA)
-		ts.scope_grid_colour_active = Magenta;
-	else if(ts.scope_grid_colour == SPEC_GREEN)
-		ts.scope_grid_colour_active = Green;
-	else if(ts.scope_grid_colour == SPEC_CYAN)
-		ts.scope_grid_colour_active = Cyan;
-	else if(ts.scope_grid_colour == SPEC_YELLOW)
-		ts.scope_grid_colour_active = Yellow;
-	else if(ts.scope_grid_colour == SPEC_BLACK)
-		ts.scope_grid_colour_active = Black;
-	else if(ts.scope_grid_colour == SPEC_ORANGE)
-		ts.scope_grid_colour_active = Orange;
-	else
-		ts.scope_grid_colour_active = White;
-
-	// Clear screen where frequency information will be under graticule
-	//
-	UiLcdHy28_PrintText(POS_SPECTRUM_IND_X - 2, POS_SPECTRUM_IND_Y + 60, "                                 ", Black, Black, 0);
 
 	// Draw top band
 	for(i = 0; i < 16; i++)
@@ -2664,22 +1670,24 @@ static void UiDriverCreateSpectrumScope(void)
 									(POS_SPECTRUM_IND_Y - 20),
 									(POS_SPECTRUM_IND_H + 12),
 									LCD_DIR_VERTICAL,
-//									RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD));
-									ts.scope_grid_colour_active);
+									RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD));
 
 		UiLcdHy28_DrawStraightLine(	(POS_SPECTRUM_IND_X + POS_SPECTRUM_IND_W - 2 + i),
 									(POS_SPECTRUM_IND_Y - 20),
 									(POS_SPECTRUM_IND_H + 12),
 									LCD_DIR_VERTICAL,
-//									RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD));
-									ts.scope_grid_colour_active);
+									RGB(COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD,COL_SPECTRUM_GRAD));
 	}
 
 	// Frequency bar separator
 	UiLcdHy28_DrawHorizLineWithGrad(POS_SPECTRUM_IND_X,(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 20),POS_SPECTRUM_IND_W,COL_SPECTRUM_GRAD);
 
-	// Draw Frequency bar text
-	UiDrawSpectrumScopeFrequencyBarText();
+	// Frequency bar text
+	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +   1),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),"24",Grey,Black,4);
+	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 239),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),"24",Grey,Black,4);
+	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X +  58),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),"12",Grey,Black,4);
+	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 186),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17),"12",Grey,Black,4);
+	UiLcdHy28_PrintText((POS_SPECTRUM_IND_X + 126),(POS_SPECTRUM_IND_Y + POS_SPECTRUM_IND_H - 17), "0",Grey,Black,4);
 
 	// Horizontal grid lines
 	for(i = 1; i < 4; i++)
@@ -2692,8 +1700,8 @@ static void UiDriverCreateSpectrumScope(void)
 									sd.horz_grid_id[i - 1],
 									POS_SPECTRUM_IND_W,
 									LCD_DIR_HORIZONTAL,
-//									RGB((COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD)));
-									ts.scope_grid_colour_active);
+									RGB((COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD)));
+
 		//printf("vy: %d\n\r",sd.horz_grid_id[i - 1]);
 	}
 
@@ -2708,37 +1716,9 @@ static void UiDriverCreateSpectrumScope(void)
 									(POS_SPECTRUM_IND_Y -  4),
 									(POS_SPECTRUM_IND_H - 15),
 									LCD_DIR_VERTICAL,
-//									RGB((COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD)));
-									ts.scope_grid_colour_active);
+									RGB((COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD),(COL_SPECTRUM_GRAD)));
 
 		//printf("vx: %d\n\r",sd.vert_grid_id[i - 1]);
-	}
-
-	if(!ts.scope_speed)			// print "disabled" in the middle of the screen if the spectrum scope was disabled
-		UiLcdHy28_PrintText(			(POS_SPECTRUM_IND_X + 72),
-											(POS_SPECTRUM_IND_Y + 18),
-											"   DISABLED   ",
-											Grey,
-											RGB((COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2),(COL_SPECTRUM_GRAD*2)),0);
-
-
-
-}
-
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverClearSpectrumDisplay
-//* Object              : Clears the spectrum display
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiDriverClearSpectrumDisplay(void)
-{
-	ulong i;
-
-	for(i = 0; i < 8; i++)	{
-		UiLcdHy28_PrintText(POS_SPECTRUM_IND_X - 2, (POS_SPECTRUM_IND_Y - 22) + (i* 12), "                                 ", Black, Black, 0);
 	}
 }
 
@@ -2856,7 +1836,6 @@ static void UiDriverInitFrequency(void)
 	{
 		band_dial_value[i] = 0xFFFFFFFF;	// clear dial values
 		band_decod_mode[i] = DEMOD_USB; 	// clear decode mode
-		band_filter_mode[i] = AUDIO_DEFAULT_FILTER;	// clear filter mode
 	}
 
 	// Lower bands default to LSB mode
@@ -2866,15 +1845,15 @@ static void UiDriverInitFrequency(void)
 	// Init frequency publics(set diff values so update on LCD will be done)
 	df.value_old	= 0;
 	df.value_new	= 0;
-	df.tune_old 	= tune_bands[ts.band];
-	df.tune_new 	= tune_bands[ts.band];
+	df.tune_old 	= tune_bands[ts.band_mode];
+	df.tune_new 	= tune_bands[ts.band_mode];
 	df.selected_idx = 3; 		// 1 Khz startup step
-	df.tuning_step	= tune_steps[df.selected_idx];
+	df.tunning_step	= tune_steps[df.selected_idx];
 	df.update_skip	= 0;		// skip value to compensate for fast dial rotation - test!!!
 	df.temp_factor	= 0;
 	df.temp_enabled = 0;		// startup state of TCXO
 
-	//if(ts.band == BAND_MODE_4)
+	//if(ts.band_mode == BAND_MODE_4)
 	//	df.transv_freq = TRANSVT_FREQ_A;
 	//else
 	df.transv_freq	= 0;	// LO freq, zero on HF, 42 Mhz on 4m
@@ -2892,87 +1871,17 @@ static void UiDriverInitFrequency(void)
 	df.dial_010_hz	= 0;
 	df.dial_001_hz	= 0;
 }
-//
-//
+
 //*----------------------------------------------------------------------------
-//* Function Name       : UiDriverCheckFilter
-//* Object              : Sets the filter appropriate for the currently-tuned frequency
+//* Function Name       : UiDriverUpdateFrequency
+//* Object              :
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverCheckFilter(ulong freq)
+static void UiDriverUpdateFrequency(char skip_encoder_check)
 {
-	static ushort bandnum = 0;		// this assures that the filter change occurs only if needed
-
-	if(freq < BAND_FILTER_UPPER_80)	{	// are we low enough if frequency for the 80 meter filter?
-		if(bandnum != 1)	{
-			UiDriverChangeBandFilter(BAND_MODE_80, 0);	// yes - set to 80 meters
-			bandnum = 1;
-		}
-	}
-	else if(freq < BAND_FILTER_UPPER_40)	{
-		if(bandnum != 2)	{
-			UiDriverChangeBandFilter(BAND_MODE_40, 0);	// yes - set to 40 meters
-			bandnum = 2;
-		}
-	}
-	else if(freq < BAND_FILTER_UPPER_20)	{
-		if(bandnum != 3)	{
-			UiDriverChangeBandFilter(BAND_MODE_20, 0);	// yes - set to 20 meters
-			bandnum = 3;
-		}
-	}
-	else if(freq >= BAND_FILTER_UPPER_20)	{
-		if(bandnum != 4)	{
-			UiDriverChangeBandFilter(BAND_MODE_10, 0);	// yes - set to 10 meters
-			bandnum = 4;
-		}
-	}
-}
-
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverCheckBand
-//* Object              : Checks in which band the current frequency lies
-//* Input Parameters    : frequency in Hz * 4, update = TRUE if display should be updated
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-uchar UiDriverCheckBand(ulong freq, ushort update)
-{
-	uchar	band_scan;
-	bool flag;
-	static	uchar band_scan_old = 99;
-
-	band_scan = 0;
-	flag = 0;
-
-	while((!flag) && (band_scan < MAX_BANDS))	{
-		if((freq >= tune_bands[band_scan]) && (freq <= (tune_bands[band_scan] + size_bands[band_scan])))	// Is this frequency within this band?
-			flag = 1;	// yes - stop the scan
-		else	// no - not in this band
-			band_scan++;	// scan the next band
-	}
-	//
-	if(update)	{		// are we to update the display?
-		if(band_scan != band_scan_old)		// yes, did the band actually change?
-			UiDriverShowBand(band_scan);	// yes, update the display with the current band
-	}
-	band_scan_old = band_scan;	// update band change detector
-
-	return band_scan;		// return with the band
-
-}
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverUpdateFrequency
-//* Object              :
-//* Input Parameters    : If TRUE, do not check encoder
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiDriverUpdateFrequency(char skip_encoder_check)
-{
-	ulong		loc_tune_new, dial_freq, second_freq;
+	ulong		loc_tune_new,dial_freq,tune_freq;
 	//uchar		old_rf_gain = ts.rf_gain;
 	ushort		col = White;
 
@@ -2986,88 +1895,65 @@ void UiDriverUpdateFrequency(char skip_encoder_check)
 
 skip_check:
 
+	// Mute Audio - codec or rf gain
+	//Codec_Volume(0);					- old code
+	Codec_Mute(1);
+
 	// Get value, while blocking update
 	loc_tune_new = df.tune_new;
 
 	// Calculate display frequency
 	dial_freq = ((loc_tune_new/4) + df.transv_freq);
 
-	//
-	// Do "Icom" style frequency offset of the LO if in "CW OFFSET" mode.  (Display freq. is also offset!)
-	//
-	if(ts.dmod_mode == DEMOD_CW)	{		// In CW mode?
-		if(ts.cw_offset_mode == CW_OFFSET_USB_SHIFT)	// Yes - USB?
-			dial_freq -= ts.sidetone_freq;				// lower LO by sidetone amount
-		else if(ts.cw_offset_mode == CW_OFFSET_LSB_SHIFT)	// LSB?
-			dial_freq += ts.sidetone_freq;				// raise LO by sidetone amount
-		else if(ts.cw_offset_mode == CW_OFFSET_AUTO_SHIFT)	{	// Auto mode?  Check flag
-			if(ts.cw_lsb)
-				dial_freq += ts.sidetone_freq;			// it was LSB - raise by sidetone amount
-			else
-				dial_freq -= ts.sidetone_freq;			// it was USB - lower by sidetone amount
-		}
-	}
+	// Clear not used segments on display frequency
+	dial_freq /= df.tunning_step;
+	dial_freq *= df.tunning_step;
 
 	// Calculate actual tune frequency
-	ts.tune_freq = (dial_freq - df.transv_freq)*4;
-	second_freq = ts.tune_freq;					// get copy for secondary display
-
-	//
-	// Offset dial frequency if the RX/TX frequency translation is active and we are not transmitting in CW mode
-	//
-	if(!((ts.dmod_mode == DEMOD_CW) && (ts.txrx_mode == TRX_MODE_TX)))	{
-		if(ts.iq_freq_mode == 1)
-			ts.tune_freq += FREQ_SHIFT_MAG * 4;
-		else if(ts.iq_freq_mode == 2)
-			ts.tune_freq -= FREQ_SHIFT_MAG * 4;
-	}
+	tune_freq = (dial_freq - df.transv_freq)*4;
 
 	// Frequency range check, moved from si570 routine here
-	if((ts.tune_freq > SI570_MAX_FREQ) || (ts.tune_freq < SI570_MIN_FREQ))
+	if((tune_freq > SI570_MAX_FREQ) || (tune_freq < SI570_MIN_FREQ))
 	{
+		Codec_Mute(0);
+
 		//printf("out of freq err: %d\n\r",tune_freq);
 		df.tune_new = df.tune_old;						// reload old value
 		return;
 	}
 
-	// Extra tuning actions
-	if(ts.txrx_mode == TRX_MODE_RX)		{
-		ts.tune_freq += (ts.rit_value*80);	// Add RIT on receive
+	// Extra tunning actions
+	if(ts.txrx_mode == TRX_MODE_RX)
+	{
+		// Add RIT on receive
+		tune_freq += (ts.rit_value*80);
+	}
+	else
+	{
+		// Substract CW offcet on TX
+		if(ts.dmod_mode == DEMOD_CW)
+			tune_freq -= CW_SIDETONE_OFFCET;
 	}
 
 	//printf("--------------------\n\r");
 	//printf("dial: %dHz, tune: %dHz\n\r",dial_freq,tune_freq);
 
-	if(ts.tune_freq == ts.tune_freq_old)	// has the frequency changed?
-		return;								// no - bail out
-
-	ts.tune_freq_old = ts.tune_freq;		// frequency change required - update change detector
-
-	//
-	ads.agc_holder = ads.agc_val;	// grab current AGC value as synthesizer "click" can momentarily desense radio as we tune
-//	dsp_temp = ts.dsp_inhibit;		// get current status of DSP muting
-	Codec_Mute(1);					// mute audio when tuning
-//	ts.dsp_inhibit = 1;				// disable DSP during tuning
 	// Set frequency
-	if(ui_si570_set_frequency(ts.tune_freq,ts.freq_cal,df.temp_factor))
+	if(ui_si570_set_frequency(tune_freq,CALIB_FREQ,df.temp_factor))
 	{
-		if(ui_si570_set_frequency(ts.tune_freq,ts.freq_cal,df.temp_factor))	// Try again if it didn't work the first time
-			col = Red;	// Color in red if there was a problem setting frequency
+		// Color in red
+		col = Red;
 	}
-	//
-//	ts.dsp_inhibit = dsp_temp;		// restore status of DSP muting
-	//
-	// Update main frequency display
-	//
+
+	// Update LCD
 	UiDriverUpdateLcdFreq(dial_freq,col);
-	//
-	// Update second display to reflect RX frequency with RIT
-	//
-	UiDriverUpdateSecondLcdFreq(second_freq/4);
-	//
-	UiDriverCheckFilter(ts.tune_freq/4);	// check the filter status with the new frequency update
-	UiDriverCheckBand(ts.tune_freq, 1);		// check which band in which we are currently tuning and update the display
-	//
+
+	// Display second freq if RIT on or in TX mode with shift
+	//if((ts.rit_value != 0) || (df.tx_shift != 0))
+	//	UiDriverUpdateSecondLcdFreq(tune_freq/4 + df.tx_shift);
+	if(ts.rit_value != 0)
+		UiDriverUpdateSecondLcdFreq(tune_freq/4);
+
 	// Allow clear of spectrum display in its state machine
 	sd.dial_moved = 1;
 
@@ -3077,24 +1963,34 @@ skip_check:
 	// Save the tuning step used during the last dial update
 	// - really important so we know what segments to clear
 	// during tune step change
-//	df.last_tune_step = df.tuning_step;
-	//
-	ads.agc_val = ads.agc_holder;	// restore stored AGC value
-	//
+	df.last_tune_step = df.tunning_step;
 
-	Codec_Mute(0);	// un-mute audio
+	// Save to Eeprom
+	//TRX4M_VE_WriteFreq(loc_tune_new);
+
+	// Unmute Audio
+	// Update codec volume
+	//  0 - 10: via codec command
+	// 10 - 20: soft gain after decoder
+	//if(ts.audio_gain < 10)
+	//Codec_Volume((ts.audio_gain*8)); - old code
+	Codec_Mute(0);
+
+	// Prevent eeprom save on fast knob rotation
+	// by resetting its flag
+	es.skip = 0;
 }
 
 //*----------------------------------------------------------------------------
-//* Function Name       :
+//* Function Name       : UiDriverUpdateFrequencyFast
 //* Object              : like upper, but no UI update
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverUpdateFrequencyFast(void)
+static void UiDriverUpdateFrequencyFast(void)
 {
-	ulong		loc_tune_new,dial_freq;
+	ulong		loc_tune_new,dial_freq,tune_freq;
 
 	// Get value, while blocking update
 	loc_tune_new = df.tune_new;
@@ -3102,62 +1998,31 @@ void UiDriverUpdateFrequencyFast(void)
 	// Calculate display frequency
 	dial_freq = ((loc_tune_new/4) + df.transv_freq);
 
-	//
-	// Do "Icom" style frequency offset of the LO if in "CW OFFSET" mode.  (Display freq. is also offset!)
-	//
-	if(ts.dmod_mode == DEMOD_CW)	{		// In CW mode?
-		if(ts.cw_offset_mode == CW_OFFSET_USB_SHIFT)	// Yes - USB?
-			dial_freq -= ts.sidetone_freq;				// lower LO by sidetone amount
-		else if(ts.cw_offset_mode == CW_OFFSET_LSB_SHIFT)	// LSB?
-			dial_freq += ts.sidetone_freq;				// raise LO by sidetone amount
-		else if(ts.cw_offset_mode == CW_OFFSET_AUTO_SHIFT)	{	// Auto mode?  Check flag
-			if(ts.cw_lsb)
-				dial_freq += ts.sidetone_freq;			// it was LSB - raise by sidetone amount
-			else
-				dial_freq -= ts.sidetone_freq;			// it was USB - lower by sidetone amount
-		}
-	}
-
-
 	// Clear not used segments on display frequency
-/*	Commented out so that numbers to right of the selected step are NOT cleared - 20140906 KA7OEI
 	dial_freq /= df.tunning_step;
 	dial_freq *= df.tunning_step;
-*/
+
 	// Calculate actual tune frequency
-	ts.tune_freq = (dial_freq - df.transv_freq)*4;
+	tune_freq = (dial_freq - df.transv_freq)*4;
 
-	//
-	// Offset dial frequency if the RX/TX frequency translation is active
-	//
-	if(!((ts.dmod_mode == DEMOD_CW) && (ts.txrx_mode == TRX_MODE_TX)))	{
-		if(ts.iq_freq_mode == 1)
-			ts.tune_freq += FREQ_SHIFT_MAG * 4;
-		else if(ts.iq_freq_mode == 2)
-			ts.tune_freq -= FREQ_SHIFT_MAG * 4;
-	}
-
-	// Extra tuning actions
+	// Extra tunning actions
 	if(ts.txrx_mode == TRX_MODE_RX)
 	{
 		// Add RIT on receive
-		ts.tune_freq += (ts.rit_value*80);
-		//
+		tune_freq += (ts.rit_value*80);
 	}
-	//
-	// detect - and eliminate - unnecessary synthesizer frequency changes
-	//
-	if(ts.tune_freq == ts.tune_freq_old)	// did the frequency NOT change?
-		return;		// yes - bail out - no need to do anything!
-
-	ts.tune_freq_old = ts.tune_freq;		// frequency change is required - save change detector
-
+	else
+	{
+		// Substract CW offset on TX
+		if(ts.dmod_mode == DEMOD_CW)
+			tune_freq -= CW_SIDETONE_OFFCET;
+	}
 
 	//printf("--------------------\n\r");
 	//printf("dial: %dHz, tune: %dHz\n\r",dial_freq,tune_freq);
 
 	// Set frequency
-	ui_si570_set_frequency(ts.tune_freq,ts.freq_cal,df.temp_factor);
+	ui_si570_set_frequency(tune_freq,CALIB_FREQ,df.temp_factor);
 
 	// Allow clear of spectrum display in its state machine
 	sd.dial_moved = 1;
@@ -3168,8 +2033,11 @@ void UiDriverUpdateFrequencyFast(void)
 	// Save the tunning step used during the last dial update
 	// - really important so we know what segments to clear
 	// during tune step change
-//	df.last_tune_step = df.tuning_step;
+	df.last_tune_step = df.tunning_step;
 
+	// Prevent eeprom save on fast knob rotation
+	// by resetting its flag
+	es.skip = 0;
 }
 
 //*----------------------------------------------------------------------------
@@ -3188,37 +2056,8 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 
 	char		digit[2];
 
-	if(ts.xverter_mode)	{	// transverter mode active?
-		dial_freq *= (ulong)ts.xverter_mode;	// yes - scale by LO multiplier
-		dial_freq += ts.xverter_offset;	// add transverter frequency offset
-		if(dial_freq > 100000000)		// over 100 MHz?
-			dial_freq -= 100000000;		// yes, offset to prevent overflow of display
-		if(ts.xverter_mode)	// if in transverter mode, frequency is yellow
-			color = Yellow;
-	}
-	//
-	// Handle frequency display offset in "CW RX" modes
-	//
-	if(ts.dmod_mode == DEMOD_CW)	{		// In CW mode?
-		if((ts.cw_offset_mode == CW_OFFSET_LSB_RX) || (ts.cw_offset_mode == CW_OFFSET_LSB_SHIFT))	// Yes - In an LSB mode with display offset?
-			dial_freq -= ts.sidetone_freq;															// yes, lower display freq. by sidetone amount
-		else if((ts.cw_offset_mode == CW_OFFSET_USB_RX) || (ts.cw_offset_mode == CW_OFFSET_USB_SHIFT))	// In a USB mode with display offset?
-			dial_freq += ts.sidetone_freq;															// yes, raise display freq. by sidetone amount
-		else if((ts.cw_offset_mode == CW_OFFSET_AUTO_RX) || (ts.cw_offset_mode == CW_OFFSET_AUTO_SHIFT))	{	// in "auto" mode with display offset?
-			if(ts.cw_lsb)
-				dial_freq -= ts.sidetone_freq;		// yes - LSB - lower display frequency by sidetone amount
-			else
-				dial_freq += ts.sidetone_freq;		// yes - USB - raise display frequency by sidetone amount
-		}
-	}
-	//
-	//
-	if(ts.frequency_lock) 	// Frequency is locked - change color of display
-		color = Grey;
-	//
 	// Terminate
 	digit[1] = 0;
-
 
 	//printf("--------------------\n\r");
 	//printf("dial: %dHz\n\r",dial_freq);
@@ -3233,7 +2072,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 10 Mhz needs update
 	d_10mhz = (dial_freq/10000000);
-	if((d_10mhz != df.dial_010_mhz) || ts.refresh_freq_disp)
+	if(d_10mhz != df.dial_010_mhz)
 	{
 		//printf("10 mhz diff: %d\n\r",d_10mhz);
 
@@ -3253,7 +2092,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 1 Mhz needs update
 	d_1mhz = (dial_freq%10000000)/1000000;
-	if((d_1mhz != df.dial_001_mhz) || ts.refresh_freq_disp)
+	if(d_1mhz != df.dial_001_mhz)
 	{
 		//printf("1 mhz diff: %d\n\r",d_1mhz);
 
@@ -3270,7 +2109,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 100 khz needs update
 	d_100khz = (dial_freq%1000000)/100000;
-	if((d_100khz != df.dial_100_khz) || ts.refresh_freq_disp)
+	if(d_100khz != df.dial_100_khz)
 	{
 		//printf("100 khz diff: %d\n\r",d_100khz);
 
@@ -3287,7 +2126,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 10 khz needs update
 	d_10khz = (dial_freq%100000)/10000;
-	if((d_10khz != df.dial_010_khz) || ts.refresh_freq_disp)
+	if(d_10khz != df.dial_010_khz)
 	{
 		//printf("10 khz diff: %d\n\r",d_10khz);
 
@@ -3304,7 +2143,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 1 khz needs update
 	d_1khz = (dial_freq%10000)/1000;
-	if((d_1khz != df.dial_001_khz) || ts.refresh_freq_disp)
+	if(d_1khz != df.dial_001_khz)
 	{
 		//printf("1 khz diff: %d\n\r",d_1khz);
 
@@ -3321,7 +2160,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 100 hz needs update
 	d_100hz = (dial_freq%1000)/100;
-	if((d_100hz != df.dial_100_hz) || ts.refresh_freq_disp)
+	if(d_100hz != df.dial_100_hz)
 	{
 		//printf("100 hz diff: %d\n\r",d_100hz);
 
@@ -3338,7 +2177,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 10 hz needs update
 	d_10hz = (dial_freq%100)/10;
-	if((d_10hz != df.dial_010_hz) || ts.refresh_freq_disp)
+	if(d_10hz != df.dial_010_hz)
 	{
 		//printf("10 hz diff: %d\n\r",d_10hz);
 
@@ -3355,7 +2194,7 @@ static void UiDriverUpdateLcdFreq(ulong dial_freq,ushort color)
 	// -----------------------
 	// See if 1 hz needs update
 	d_1hz = (dial_freq%10)/1;
-	if((d_1hz != df.dial_001_hz) || ts.refresh_freq_disp)
+	if(d_1hz != df.dial_001_hz)
 	{
 		//printf("1 hz diff: %d\n\r",d_1hz);
 
@@ -3386,30 +2225,6 @@ static void UiDriverUpdateSecondLcdFreq(ulong dial_freq)
 
 	char		digit[2];
 
-	if(ts.xverter_mode)	{	// transverter mode active?
-		dial_freq += ts.xverter_offset;	// yes - add transverter frequency offset
-		if(dial_freq > 100000000)		// over 100 MHz?
-			dial_freq -= 100000000;		// yes, offset to prevent overflow of display
-	}
-
-	//
-	// Handle frequency display offset in "CW RX" modes
-	//
-	if(ts.dmod_mode == DEMOD_CW)	{		// In CW mode?
-		if((ts.cw_offset_mode == CW_OFFSET_LSB_RX) || (ts.cw_offset_mode == CW_OFFSET_LSB_SHIFT))	// Yes - In an LSB mode with display offset?
-			dial_freq -= ts.sidetone_freq;															// yes, lower display freq. by sidetone amount
-		else if((ts.cw_offset_mode == CW_OFFSET_USB_RX) || (ts.cw_offset_mode == CW_OFFSET_USB_SHIFT))	// In a USB mode with display offset?
-			dial_freq += ts.sidetone_freq;															// yes, raise display freq. by sidetone amount
-		else if((ts.cw_offset_mode == CW_OFFSET_AUTO_RX) || (ts.cw_offset_mode == CW_OFFSET_AUTO_SHIFT))	{	// in "auto" mode with display offset?
-			if(ts.cw_lsb)
-				dial_freq -= ts.sidetone_freq;		// yes - LSB - lower display frequency by sidetone amount
-			else
-				dial_freq += ts.sidetone_freq;		// yes - USB - raise display frequency by sidetone amount
-		}
-	}
-
-
-	//
 	// Terminate
 	digit[1] = 0;
 
@@ -3445,8 +2260,6 @@ static void UiDriverUpdateSecondLcdFreq(ulong dial_freq)
 		// Save value
 		df.sdial_010_mhz = d_10mhz;
 	}
-	else if(!d_10mhz)	// no digit in the 10's place?
-		UiLcdHy28_PrintText((POS_TUNE_SFREQ_X + 0),POS_TUNE_SFREQ_Y,digit,Black,Black,0);	// mask the leading first digit
 
 	// -----------------------
 	// See if 1 Mhz needs update
@@ -3575,9 +2388,10 @@ static void UiDriverUpdateSecondLcdFreq(ulong dial_freq)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverChangeTuningStep(uchar is_up)
+static void UiDriverChangeTunningStep(uchar is_up)
 {
 	ulong 	idx = df.selected_idx;
+	ulong	dial_freq;
 
 	if(is_up)
 	{
@@ -3596,8 +2410,42 @@ static void UiDriverChangeTuningStep(uchar is_up)
 			idx = (MAX_STEPS - 1);
 	}
 
+	//printf("--------------------------\n\r");
+	//printf("step_o: %d\n\r",  df.tunning_step);
+	//printf("step_l: %d\n\r",  df.last_tune_step);
+
+	//printf("tune_o: %dHz\n\r",(df.tune_old/4));
+	//printf("tune_n: %dHz\n\r",(df.tune_new/4));
+
+	// Clear segments when we go from large to small
+	// tunning step
+	if(idx < df.selected_idx)
+	{
+		//printf("clear segments\n\r");
+
+		// Get current
+		dial_freq = df.tune_new;
+
+		// To display frequency
+		dial_freq = ((dial_freq/4) + df.transv_freq);
+
+		// Remove leftovers(use saved tunning step from encoder update)
+		dial_freq /= df.last_tune_step;
+		dial_freq *= df.last_tune_step;
+
+		// To tune frequency
+		dial_freq -= df.transv_freq;
+		dial_freq *= 4;
+
+		// Update
+		df.tune_old = dial_freq;
+		df.tune_new = dial_freq;
+
+		//printf("tune_n: %dHz\n\r",(df.tune_new/4));
+	}
+
 	// Update publics
-	df.tuning_step	= tune_steps[idx];
+	df.tunning_step	= tune_steps[idx];
 	df.selected_idx = idx;
 
 	//printf("step_n: %d\n\r",  df.tunning_step);
@@ -3608,357 +2456,93 @@ static void UiDriverChangeTuningStep(uchar is_up)
 	// Save to Eeprom
 	//TRX4M_VE_WriteStep(idx);
 }
-//
+
 //*----------------------------------------------------------------------------
-//* Function Name       : UiDriverButtonCheck
-//* Object              : Scans buttons 0-16:  0-15 are normal buttons, 16 is power button
-//* Input Parameters    : button_num - 0-16:  Anything >=16 returns power button status
-//* Output Parameters   : FALSE if button is pressed
-//* Functions called    :
-//*----------------------------------------------------------------------------
-//
-static uchar UiDriverButtonCheck(ulong button_num)
-{
-	if(button_num < 16)		// buttons 0-15 are the normal keypad buttons
-		return(GPIO_ReadInputDataBit(bm[button_num].port,bm[button_num].button));
-	else					// button 16 is the power button
-		return(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_13));
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverKeypadCheck, adjust volume and return to RX from TX
+//* Function Name       : UiDriverKeypadCheck
 //* Object              : implemented as state machine, to avoid interrupts
 //* Object              : and stall of app loop
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverTimeScheduler(void)
+static void UiDriverKeypadCheck(void)
 {
 	ulong i;
-	static bool	 unmute_flag = 1;
-	static bool	 trx_timer_set = 0;
-	static bool was_tx = 0;			// used to detect if we have returned from TX (for switching main screen items)
-	static bool startup_flag = 0;
-	static uchar enc_one_mode = ENC_ONE_MODE_AUDIO_GAIN;	// stores modes of encoder when we enter TX
-	static uchar enc_three_mode = ENC_THREE_MODE_CW_SPEED;	// stores modes of encoder when we enter TX
-	static bool	dsp_rx_reenable_flag = 0;
-	static ulong dsp_rx_reenable_timer = 0;
-	static uchar dsp_crash_count = 0;
 
-	//
-	// TR->RX audio un-muting timer and Audio/AGC De-Glitching handler
-	//
-	if(ts.audio_unmute)	{						// are we returning from TX with muted audio?
-		if(ts.dmod_mode == DEMOD_CW)	{		// yes - was it CW mode?
-			ts.unmute_delay_count = (ulong)ts.cw_rx_delay + 1;	// yes - get CW TX->RX delay timing
-			ts.unmute_delay_count++;
-			ts.unmute_delay_count *= 40;	// rescale value and limit minimum delay value
-			trx_timer_set = 1;				// indicate that tx->rx timer is set
-		}
-		else	{								// SSB mode
-			ts.unmute_delay_count = SSB_RX_DELAY;	// set time delay in SSB mode
-			ts.buffer_clear = 1;
-			trx_timer_set = 1;				// indicate that tx->rx timer is set
-		}
-		//
-		ts.audio_unmute = 0;					// clear flag that indicates return from CW mode
-	}
-	//
-	if(!ts.unmute_delay_count && trx_timer_set)	{		//	// did timer hit zero the first time?
-		unmute_flag = 1;
-		ts.buffer_clear = 0;
-		ads.agc_val = ads.agc_holder;		// restore AGC value that was present when we went to TX
-		trx_timer_set = 0;					// indicate that we've now finished the timeout
-	}
-	//
-	// Audio un-muting handler and volume control handler
-	//
-	if(ts.txrx_mode != TRX_MODE_TX)	{
-		if((ts.audio_gain != ts.audio_gain_change) || (unmute_flag) || ts.band_change)	{
-			ts.audio_gain_change = ts.audio_gain;
-			ts.audio_gain_active = 1;		// software gain not active - set to unity
-			if(ts.audio_gain <= 16)				// Note:  Gain > 16 adjusted in audio_driver.c via software
-				Codec_Volume((ts.audio_gain*5));
-			else	{	// are we in the "software amplification" range?
-				Codec_Volume((80));		// set to fixed "maximum" gain
-				ts.audio_gain_active = (float)ts.audio_gain;	// to float
-				ts.audio_gain_active /= 2.5;	// rescale to reasonable step size
-				ts.audio_gain_active -= 5.35;	// offset to get gain multiplier value
-			}
-			//
-			unmute_flag = 0;
-			if(ts.band_change)	{	// did we un-mute because of a band change
-				ts.band_change = 0;		// yes, reset the flag
-				ads.agc_val = ads.agc_holder;	// restore previously-stored AGC value before the band change (minimize "POP" desense)
-			}
-			//
-			dsp_rx_reenable_flag = 1;		// indicate that we need to re-enable the DSP soon
-			dsp_rx_reenable_timer = ts.sysclock + DSP_REENABLE_DELAY;	// establish time at which we re-enable the DSP
-		}
-	}
-	//
-	//
-	// Check to see if we need to re-enable DSP after return to RX
-	//
-	if(dsp_rx_reenable_flag)	{	// have we returned to RX after TX?
-		if(ts.sysclock > dsp_rx_reenable_timer)	{	// yes - is it time to re-enable DSP?
-			ts.dsp_inhibit = 0;		// yes - re-enable DSP
-			dsp_rx_reenable_flag = 0;	// clear flag so we don't do this again
-		}
-	}
-	//
-	// Check to see if we need to re-enabled DSP after disabling after a function that disables the DSP (e.g. band change)
-	//
-	if(ts.dsp_timed_mute)	{
-		if(ts.sysclock > ts.dsp_inhibit_timing)	{
-			ts.dsp_timed_mute = 0;
-			ts.dsp_inhibit = 0;
-		}
-	}
-	//
-	//
-	if(!(ts.misc_flags1 & 1))	{			// If auto-switch on TX/RX is enabled
-		if(ts.txrx_mode == TRX_MODE_TX)	{
-			if(!was_tx)	{
-				was_tx = 1;		// set flag so that we only change this once, as entering
-				// change display related to encoder one to TX mode (e.g. Sidetone gain or Compression level)
-				//
-				enc_one_mode = ts.enc_one_mode;
-				ts.enc_one_mode = ENC_ONE_MODE_ST_GAIN;
-				UiDriverChangeAfGain(0);	// Audio gain disabled
-				//
-				if(ts.dmod_mode != DEMOD_CW)
-					UiDriverChangeCmpLevel(1);	// enable compression adjust if voice mode
-/*				else
-					UiDriverChangeStGain(1);	// enable sidetone gain if CW mode
-*/
-				//
-				// change display related to encoder one to TX mode (e.g. CW speed or MIC/LINE gain)
-				//
-				enc_three_mode = ts.enc_thr_mode;
-				ts.enc_thr_mode = ENC_THREE_MODE_CW_SPEED;
-				UiDriverChangeRit(0);
-				if(ts.dmod_mode != DEMOD_CW)
-					UIDriverChangeAudioGain(1);		// enable audio gain
-/*				else
-					UiDriverChangeKeyerSpeed(1);	// enable keyer speed if it was CW mode
-*/
-			}
-		}
-		else	{	// In RX mode
-			if(was_tx)	{ 	// were we latched in TX mode?
-				//
-				// Yes, Switch to audio gain mode
-				//
-				ts.enc_one_mode = enc_one_mode;
-				if(ts.enc_one_mode == ENC_ONE_MODE_AUDIO_GAIN)	{	// are we to switch back to audio mode?
-					UiDriverChangeAfGain(1);	// Yes, audio gain enabled
-					if(ts.dmod_mode != DEMOD_CW)
-						UiDriverChangeCmpLevel(0);	// disable compression level (if in voice mode)
-/*					else
-						UiDriverChangeStGain(0);	// disable sidetone gain (if in CW mode)
-*/
-				}
-				//
-				ts.enc_thr_mode = enc_three_mode;
-				if(ts.enc_thr_mode == ENC_THREE_MODE_RIT)	{		// are we to switch back to RIT mode?
-					UiDriverChangeRit(1);			// enable RIT
-					if(ts.dmod_mode != DEMOD_CW)
-						UIDriverChangeAudioGain(0);		// disable audio gain if it was voice mode
-/*					else
-						UiDriverChangeKeyerSpeed(0);	// disable keyer speed if it was CW mode
-*/
-				}
-				was_tx = 0;		// clear flag indicating that we'd entered TX mode
-			}
-		}
-	}
-
-/*
-	if(ts.dsp_check)	{
-		ts.dsp_check = 0;
-		char txt[16];
-		sprintf(txt, " %d ", (ulong)(fabs(ads.dsp_nr_sample)));
-		UiLcdHy28_PrintText(POS_BOTTOM_BAR_F3_X,POS_BOTTOM_BAR_F3_Y,txt,0xFFFF,0,0);
-		sprintf(txt, " %d ", (ulong)(ads.dsp_zero_count));
-		UiLcdHy28_PrintText(POS_BOTTOM_BAR_F4_X,POS_BOTTOM_BAR_F4_Y,txt,0xFFFF,0,0);
-	}
-*/
-	///
-	// DSP crash detection
-	//
-	if((ts.dsp_active & 1) && (!(ts.dsp_active & 2)) && (!ads.af_dissabled) && (!ts.dsp_inhibit))	{	// Do this if enabled and "Pre-AGC" DSP NR enabled
-		if((ads.dsp_nr_sample > DSP_HIGH_LEVEL)	|| (ads.dsp_nr_sample == -1)){		// is the DSP output very high, or wrapped around to -1?
-			dsp_crash_count+=2;			// yes - increase detect count quickly
-		}
-		else	{						// not high level
-			if(dsp_crash_count)			// decrease detect count more slowly
-				dsp_crash_count--;
-		}
-		if((ads.dsp_zero_count > DSP_ZERO_COUNT_ERROR) || (dsp_crash_count > DSP_CRASH_COUNT_THRESHOLD))	{	// is "zero" output count OR high level count exceeding threshold?
-			ts.reset_dsp_nr = 1;				// yes - DSP has likely crashed:  Set flag to reset DSP NR coefficients
-			audio_driver_set_rx_audio_filter();	// update DSP settings
-			ts.reset_dsp_nr = 0;				// clear "reset NR coefficients" flag
-			dsp_crash_count = 0;				// clear crash count flag
-		}
-	}
-
-
-	//
-	// This delays the start-up of the DSP for several seconds to minimize the likelihood that the LMS function will get "jammed"
-	// and stop working.  It also does a delayed detection - and action - on the presence of a new version of firmware being installed.
-	//
-	if((ts.sysclock > DSP_STARTUP_DELAY) && (!startup_flag))	{	// has it been long enough after startup?
-		if(ts.version_number_build != TRX4M_VER_BUILD)	{	// Yes - check for new version number
-			ts.version_number_build = TRX4M_VER_BUILD;	// save new F/W version
-			UiDriverClearSpectrumDisplay();			// clear display under spectrum scope
-			UiLcdHy28_PrintText(110,156,"- New F/W detected -",Cyan,Black,0);
-			UiLcdHy28_PrintText(110,168," Preparing EEPROM ",Cyan,Black,0);
-			Write_VirtEEPROM(EEPROM_VERSION_NUMBER, ts.version_number_build);	// save version number to EEPROM
-			for(i = 0; i < 6; i++)			// delay so that it may be read
-				non_os_delay();
-			UiLcdHy28_PrintText(110,180,"      Done!       ",Cyan,Black,0);
-			for(i = 0; i < 6; i++)			// delay so that it may be read
-				non_os_delay();
-			//
-			UiDriverClearSpectrumDisplay();			// clear display under spectrum scope
-			UiDriverCreateSpectrumScope();
-		}
-		//
-		ts.dsp_inhibit = 0;					// allow DSP to function
-		unmute_flag = 1;					// set unmute flag to force audio to be un-muted - just in case it starts up muted!
-		startup_flag = 1;					// set flag so that we do this only once
-		Codec_Mute(0);						// make sure that audio is un-muted
-		//
-	}
-
-
-	//
 	// State machine - processing old click
 	if(ks.button_processed)
 		return;
 
 	// State machine - click or release(debounce filter)
-	if(!ks.button_pressed)	{
+	if(!ks.button_pressed)
+	{
 		// Scan inputs - 16 buttons in total, but on different ports
-		for(i = 0; i < 17; i++)	{		// button "16" is power button
+		for(i = 0; i < 16; i++)
+		{
 			// Read each pin of the port, based on the declared pin map
-			if(!UiDriverButtonCheck(i))	{
+			if(!GPIO_ReadInputDataBit(bm[i].port,bm[i].button))
+			{
 				// Change state to clicked
 				ks.button_id		= i;
 				ks.button_pressed	= 1;
 				ks.button_released	= 0;
-				ks.button_still_pressed	= 0;
-				ks.debounce_time 	= 0;
-				ks.debounce_check_complete	= 0;
-				ks.press_hold 		= 0;
+
+				// Debounce filter
+				non_os_delay();
+				non_os_delay();
+				non_os_delay();
+				non_os_delay();
+
 				//printf("button_pressed %02x\n\r",ks.button_id);
+
 				// Exit, we process just one click at a time
 				break;
 			}
 		}
 	}
-	else if((ks.debounce_time >= BUTTON_PRESS_DEBOUNCE) && (!ks.debounce_check_complete))	{
-		if(!UiDriverButtonCheck(ks.button_id))	{	// button still pressed?
-			ks.button_still_pressed = 1;	// yes!
-			ks.debounce_check_complete = 1;	// indicate that the debounce check was completed
+	else
+	{
+		// Debounce counter
+		ks.debounce_time++;
+
+		// Still pressed ?
+		if(GPIO_ReadInputDataBit(bm[ks.button_id].port,bm[ks.button_id].button))
+		{
+			// Change state from click to released,
+			// and processing flag on
+			ks.button_pressed 	= 0;
+			ks.button_released 	= 1;
+			ks.button_processed	= 1;
+
+			//printf("button_released %02x\n\r",ks.button_id);
 		}
-		else
-			ks.button_pressed = 0;			// debounce incomplete, button released - cancel detection
-	}
-	else if((ks.debounce_time >= BUTTON_HOLD_TIME) && (!ks.press_hold))	{	// press-and-hold processing
-		ks.button_processed = 1;						// indicate that a button was processed
-		ks.button_still_pressed = 0;					// clear this flag so that the release (below) won't be detected
-		ks.press_hold = 1;
-	}
-	else if(ks.press_hold && (UiDriverButtonCheck(ks.button_id)))	{	// was there a press-and-hold and the button is now released?
-		ks.button_pressed = 0;						// reset
-		ks.button_released = 0;
-		ks.press_hold = 0;
-		ks.button_still_pressed = 0;
-	}
-	else if(UiDriverButtonCheck(ks.button_id) && (!ks.press_hold))	{	// button released and had been debounced?
-		// Change state from click to released, and processing flag on - if the button had been held down adequately
-		ks.button_pressed 	= 0;
-		ks.button_released 	= 1;
-		ks.button_processed	= 1;
-		ks.button_still_pressed = 0;
-		//printf("button_released %02x\n\r",ks.button_id);
-	}
-	//
-	// Handle press-and-hold tuning step adjustment
-	//
-	if((ts.tune_step != 0) && (!ks.press_hold))	{	// are we in press-and-hold step size mode and did the button get released?
-		ts.tune_step = STEP_PRESS_OFF;						// yes, cancel offset
-		df.selected_idx = ts.tune_step_idx_holder;			// restore previous setting
-		df.tuning_step	= tune_steps[df.selected_idx];
-		UiDriverShowStep(df.selected_idx);
 	}
 }
 
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangeDemodMode
 //* Object              : change demodulator mode
-//* Input Parameters    : "noskip", if TRUE, disabled modes are to be included
+//* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverChangeDemodMode(uchar noskip)
+static void UiDriverChangeDemodMode(void)
 {
 	ulong loc_mode = ts.dmod_mode;	// copy to local, so IRQ is not affected
 
-
-	if((ts.lsb_usb_auto_select) && (noskip))	{	// noskip mode with auto-select enabled
-		if(loc_mode == DEMOD_LSB)					// if LSB, flip to USB
-			loc_mode = DEMOD_USB;
-		else if(loc_mode == DEMOD_USB)				// if USB, flip to LSB
-			loc_mode = DEMOD_LSB;
-		else										// None of the above?
-			loc_mode++;								// Increase mode
-	}
-	else				// Normal changing of the mode
-		loc_mode++;		// Increase mode
-
-	if(!noskip)	{		// Are we NOT to skip disabled modes?
-		if(loc_mode == DEMOD_AM)	{	// yes - is this AM mode
-			if(ts.am_mode_disable)		// is AM to be disabled?
-				loc_mode++;				// yes - go to next mode
-		}
-	}
+	// Increase mode
+	loc_mode++;
 
 	// Check for overflow
-	if(loc_mode >= DEMOD_MAX_MODE)
+	if(loc_mode == DEMOD_MAX_MODE)
 		loc_mode = DEMOD_USB;
-
-
-	if((ts.lsb_usb_auto_select) && (!noskip))	{	// is auto-select LSB/USB mode enabled AND mode-skip NOT enabled?
-		if((loc_mode == DEMOD_USB) || (loc_mode == DEMOD_LSB))	{	// is this a voice mode, subject to "auto" LSB/USB select?
-			if((ts.lsb_usb_auto_select == AUTO_LSB_USB_60M) && ((df.tune_new < USB_FREQ_THRESHOLD) && (ts.band != 1)))	{	// are we <10 MHz and NOT on 60 meters?
-				if(loc_mode == DEMOD_USB)	{		// are we in USB mode?
-					loc_mode++;					// yes - bump to the next mode
-				}
-			}
-			else if((ts.lsb_usb_auto_select == AUTO_LSB_USB_ON) && (df.tune_new < USB_FREQ_THRESHOLD))	{	// are we <10 MHz (not in 60 meter mode)
-				if(loc_mode == DEMOD_USB)	{		// are we in USB mode?
-					loc_mode++;					// yes - bump to the next mode
-				}
-			}
-			else	{	// we must be > 10 MHz OR on 60 meters
-				if(loc_mode == DEMOD_LSB)	{		// are we in LSB mode?
-					loc_mode++;				// yes - bump to the next mode
-				}
-			}
-		}
-	}
-
 
 	// Finally update public flag
 	ts.dmod_mode = loc_mode;
 
 	// Set SoftDDS in CW mode
 	if(ts.dmod_mode == DEMOD_CW)
-		softdds_setfreq((float)ts.sidetone_freq,ts.samp_rate,0);
+		softdds_setfreq(500.0,ts.samp_rate,0);
 	else
 		softdds_setfreq(0.0,ts.samp_rate,0);
 
@@ -3967,12 +2551,6 @@ static void UiDriverChangeDemodMode(uchar noskip)
 
 	// Update Decode Mode (USB/LSB/AM/FM/CW)
 	UiDriverShowMode();
-
-	UiCalcRxPhaseAdj();		// set gain and phase values according to mode
-	UiCalcRxIqGainAdj();
-	//
-	UiCalcTxPhaseAdj();
-	UiCalcTxIqGainAdj();
 
 	// Change function buttons caption
 	//UiDriverCreateFunctionButtons(false);
@@ -3992,33 +2570,24 @@ static void UiDriverChangeBand(uchar is_up)
 
 	ulong 	new_band_freq;		// new dial frequency
 
-
 	//printf("-----------> change band\n\r");
 
 	// Do not allow band change during TX
 	if(ts.txrx_mode == TRX_MODE_TX)
 		return;
 
-	Codec_Volume(0);		// Turn volume down to suppress click
-	ts.band_change = 1;		// indicate that we need to turn the volume back up after band change
-	ads.agc_holder = ads.agc_val;	// save the current AGC value to reload after the band change so that we can better recover
-									// from the loud "POP" that will occur when we change bands
+	curr_band_index = ts.band_mode;
 
-	curr_band_index = ts.band;
-
-	//printf("current index: %d and freq: %d\n\r",curr_band_index,tune_bands[ts.band]);
+	//printf("current index: %d and freq: %d\n\r",curr_band_index,tune_bands[ts.band_mode]);
 
 	// Save old band values
-	if(curr_band_index < (MAX_BANDS))
+	if(curr_band_index < (MAX_BANDS - 1))
 	{
 		// Save dial
 		band_dial_value[curr_band_index] = df.tune_old;
 
 		// Save decode mode
 		band_decod_mode[curr_band_index] = ts.dmod_mode;
-
-		// Save filter setting
-		band_filter_mode[curr_band_index] = ts.filter_id;
 
 		//printf("saved freq: %d and mode: %d\n\r",band_dial_value[curr_band_index],band_decod_mode[curr_band_index]);
 	}
@@ -4034,10 +2603,8 @@ static void UiDriverChangeBand(uchar is_up)
 			new_band_freq  = tune_bands[curr_band_index + 1];
 			new_band_index = curr_band_index + 1;
 		}
-		else	{	// wrap around to the lowest band
-			new_band_freq = tune_bands[MIN_BANDS];
-			new_band_index = MIN_BANDS;
-		}
+		else
+			return;
 	}
 	else
 	{
@@ -4049,13 +2616,15 @@ static void UiDriverChangeBand(uchar is_up)
 			new_band_freq  = tune_bands[curr_band_index - 1];
 			new_band_index = curr_band_index - 1;
 		}
-		else	{	// wrap around to the highest band
-			new_band_freq = tune_bands[MAX_BANDS - 1];
-			new_band_index = MAX_BANDS -1;
-		}
+		else
+			return;
 	}
 	//printf("new band index: %d and freq: %d\n\r",new_band_index,new_band_freq);
-	//
+
+	// Mute Audio
+	//Codec_Volume(0);
+	//Codec_Mute(1);
+
 	// Load frequency value - either from memory or default for
 	// the band if this is first band selection
 	if(band_dial_value[new_band_index] != 0xFFFFFFFF)
@@ -4091,15 +2660,6 @@ static void UiDriverChangeBand(uchar is_up)
 		UiDriverShowMode();
 	}
 
-	// Change filter mode if need to
-	if(ts.filter_id != band_filter_mode[new_band_index])
-	{
-		ts.filter_id = band_filter_mode[new_band_index];
-		UiDriverChangeFilter(0);	// update display and change filter
-		audio_driver_set_rx_audio_filter();
-		audio_driver_set_rx_audio_filter();	// we have to invoke the filter change several times for some unknown reason - 'dunno why!
-	}
-
 	// Create Band value
 	UiDriverShowBand(new_band_index);
 
@@ -4110,8 +2670,15 @@ static void UiDriverChangeBand(uchar is_up)
 	UiDriverChangeBandFilter(new_band_index,0);
 
 	// Finally update public flag
-	ts.band = new_band_index;
+	ts.band_mode = new_band_index;
 
+	// Unmute Audio
+	// Update codec volume
+	//  0 - 10: via codec command
+	// 10 - 20: soft gain after decoder
+	//if(ts.audio_gain < 10)
+	//Codec_Volume((ts.audio_gain*8));
+	//Codec_Mute(0);
 }
 
 //*----------------------------------------------------------------------------
@@ -4124,7 +2691,6 @@ static void UiDriverChangeBand(uchar is_up)
 static bool UiDriverCheckFrequencyEncoder(void)
 {
 	int 		pot_diff;
-
 
 	// Skip too regular read of the timer value, to avoid flickering
 //	df.update_skip++;
@@ -4159,15 +2725,6 @@ static bool UiDriverCheckFrequencyEncoder(void)
 	df.de_detent = 0;
 #endif
 
-	if(ts.txrx_mode != TRX_MODE_RX)		// do not allow tuning if in transmit mode
-		return false;
-
-	if(ks.button_still_pressed)		// press-and-hold - button is still being pressed for "temporary" step size change
-		return false;
-
-	if(ts.frequency_lock)
-		return false;						// frequency adjust is locked
-
 	//printf("freq pot: %d \n\r",df.value_new);
 
 	// Encoder value to difference
@@ -4180,9 +2737,9 @@ static bool UiDriverCheckFrequencyEncoder(void)
 
 	// Finaly convert to frequency incr/decr
 	if(pot_diff < 0)
-		df.tune_new -= (df.tuning_step * 4);
+		df.tune_new -= (df.tunning_step * 4);
 	else
-		df.tune_new += (df.tuning_step * 4);
+		df.tune_new += (df.tunning_step * 4);
 
 	// Updated
 	df.value_old = df.value_new;
@@ -4203,8 +2760,8 @@ static void UiDriverCheckEncoderOne(void)
 	int 	pot_diff;
 
 	// Only in RX mode when not calibrating
-//	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode) && (ts.menu_mode))
-//		return;
+	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode))
+		return;
 
 	eos.value_new = TIM_GetCounter(TIM3);
 
@@ -4241,6 +2798,34 @@ static void UiDriverCheckEncoderOne(void)
 
 	//printf("pot diff: %d\n\r",pot_diff);
 
+	// PA bias set
+	if(ts.calib_mode)
+	{
+		ulong bias_val;
+
+		if(pot_diff < 0)
+		{
+			if(ts.pa_bias)
+				ts.pa_bias -= 1;
+		}
+		else
+		{
+			if(ts.pa_bias < 50)
+				ts.pa_bias += 1;
+		}
+
+		bias_val = 200 + ts.pa_bias;
+		if(bias_val > 255)
+			bias_val = 255;
+
+		// Set DAC Channel1 DHR12L register
+		DAC_SetChannel2Data(DAC_Align_8b_R,bias_val);
+
+		// UI update
+		UiDriverChangePaBias(1,1);
+
+		goto skip_update;
+	}
 
 	// Take appropriate action
 	switch(ts.enc_one_mode)
@@ -4256,9 +2841,8 @@ static void UiDriverCheckEncoderOne(void)
 			}
 			else
 			{
-				ts.audio_gain += 1;
-				if(ts.audio_gain > ts.audio_max_volume)
-					ts.audio_gain = ts.audio_max_volume;
+				if(ts.audio_gain < 14)
+					ts.audio_gain += 1;
 			}
 
 			// Value to string
@@ -4267,50 +2851,35 @@ static void UiDriverCheckEncoderOne(void)
 			// Update screen indicator
 			UiLcdHy28_PrintText((POS_AG_IND_X + 38),(POS_AG_IND_Y + 1), temp,White,Black,0);
 
+			// Update codec volume
+			//  0 - 10: via codec command
+			// 10 - 20: soft gain after decoder
+			if(ts.audio_gain < 10)
+				Codec_Volume((ts.audio_gain*8));
+
 			break;
 		}
 
-		// Sidetone gain or compression level
+		// Sidetone gain
 		case ENC_ONE_MODE_ST_GAIN:
 		{
-			if(ts.dmod_mode == DEMOD_CW)	{	// In CW mode - adjust sidetone gain
-				// Convert to Audio Gain incr/decr
-				if(pot_diff < 0)
-				{
-					if(ts.st_gain)
-						ts.st_gain -= 1;
-				}
-				else
-				{
-						ts.st_gain += 1;
-						if(ts.st_gain > SIDETONE_MAX_GAIN)		// limit value to proper range
-							ts.st_gain = SIDETONE_MAX_GAIN;
-				}
-				UiDriverChangeStGain(1);
-				/*
-				// Value to string
-				sprintf(temp,"%02d",ts.st_gain);
+			// Convert to Audio Gain incr/decr
+			if(pot_diff < 0)
+			{
+				if(ts.st_gain)
+					ts.st_gain -= 1;
+			}
+			else
+			{
+				if(ts.st_gain < 7)
+					ts.st_gain += 1;
+			}
 
-				// Update screen indicator
-				UiLcdHy28_PrintText((POS_SG_IND_X + 30),(POS_SG_IND_Y + 1), temp,White,Black,0);
-				*/
-			}
-			else	{		// In voice mode - adjust audio compression level
-				// Convert to Audio Gain incr/decr
-				if(pot_diff < 0)
-				{
-					if(ts.tx_comp_level)	// Do not allow setting below 1 from main screen
-						ts.tx_comp_level--;
-				}
-				else
-				{
-					ts.tx_comp_level++;
-					if(ts.tx_comp_level > TX_AUDIO_COMPRESSION_MAX)		// limit value to proper range
-						ts.tx_comp_level = TX_AUDIO_COMPRESSION_MAX;
-				}
-				UiCalcTxCompLevel();		// calculate values for selection compression level
-				UiDriverChangeCmpLevel(1);	// update on-screen display
-			}
+			// Value to string
+			sprintf(temp,"%02d",ts.st_gain);
+
+			// Update screen indicator
+			UiLcdHy28_PrintText((POS_SG_IND_X + 30),(POS_SG_IND_Y + 1), temp,White,Black,0);
 
 			break;
 		}
@@ -4319,11 +2888,12 @@ static void UiDriverCheckEncoderOne(void)
 			break;
 	}
 
+skip_update:
+
 	// Updated
 	eos.value_old = eos.value_new;
-
 }
-//
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverCheckEncoderTwo
 //* Object              :
@@ -4335,11 +2905,10 @@ static void UiDriverCheckEncoderTwo(void)
 {
 	//char 	temp[10];
 	int 	pot_diff;
-	float tcalc;
 
 	// Only in RX mode
-//	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode) && (!ts.menu_mode))
-//		return;
+	if(ts.txrx_mode != TRX_MODE_RX)
+		return;
 
 	ews.value_new = TIM_GetCounter(TIM4);
 
@@ -4376,111 +2945,90 @@ static void UiDriverCheckEncoderTwo(void)
 
 	//printf("pot diff: %d\n\r",pot_diff);
 
-	if(ts.menu_mode)	{
-		if(pot_diff < 0)	{
-			if(ts.menu_item)	{
-				ts.menu_item--;
-			}
-			else	{
-				if(!ts.radio_config_menu_enable)
-					ts.menu_item = MAX_MENU_ITEM-1;	// move to the last menu item (e.g. "wrap around")
-				else
-					ts.menu_item = (MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS)-1;	// move to the last menu item (e.g. "wrap around")
-			}
+	// Update IQ gain
+	if(ts.calib_mode)
+	{
+		// Convert to incr/decr
+		if(pot_diff < 0)
+		{
+			if(ts.iq_gain_balance > -32)
+				ts.iq_gain_balance -= 1;
 		}
-		else	{
-			ts.menu_item++;
-			if(!ts.radio_config_menu_enable)	{
-				if(ts.menu_item >= MAX_MENU_ITEM)	{
-					ts.menu_item = 0;	// Note:  ts.menu_item is numbered starting at zero
-				}
-			}
-			else	{
-				if(ts.menu_item >= MAX_MENU_ITEM + MAX_RADIO_CONFIG_ITEMS)	{
-					ts.menu_item = 0;	// Note:  ts.menu_item is numbered starting at zero
-				}
-			}
+		else
+		{
+			if(ts.iq_gain_balance < 32)
+				ts.iq_gain_balance += 1;
 		}
-		ts.menu_var = 0;			// clear variable that is used to change a menu item
-		UiDriverUpdateMenu(1);		// Update that menu item
+
+		// Gain balance
+		UiDriverChangeIQGainBalance(1,1);
+
 		goto skip_update;
 	}
 
-	if(ts.txrx_mode == TRX_MODE_RX)	{
-		//
-		// Take appropriate action
-		switch(ts.enc_two_mode)
+	// Take appropriate action
+	switch(ts.enc_two_mode)
+	{
+		// Update rf volume
+		case ENC_TWO_MODE_RF_GAIN:
 		{
-			// Update rf gain
-			case ENC_TWO_MODE_RF_GAIN:
+			// Convert to Audio Gain incr/decr
+			if(pot_diff < 0)
 			{
-				// Convert to Audio Gain incr/decr
-				if(pot_diff < 0)
-				{
-					if(ts.rf_gain)
-						ts.rf_gain -= 1;
-				}
-				else
-				{
+				if(ts.rf_gain)
+					ts.rf_gain -= 1;
+			}
+			else
+			{
+				if(ts.rf_gain < 8)
 					ts.rf_gain += 1;
-					if(ts.rf_gain > MAX_RF_GAIN)
-						ts.rf_gain = MAX_RF_GAIN;
-				}
-				//
-				// get RF gain value and calculate new value
-				//
-				tcalc = (float)ts.rf_gain;	// use temp var as the resulting
-				tcalc -= 20;				// variable may be used during
-				tcalc /= 10;				// the actual calculation!
-				tcalc = powf(10, tcalc);
-				ads.agc_rf_gain = tcalc;
-				// RF gain
-				UiDriverChangeRfGain(1);
-
-				break;
 			}
 
-			// Update DSP/NB setting
-			case ENC_TWO_MODE_SIG_PROC:
-			{
-				if(ts.dsp_active & 8)	{	// is it in noise blanker mode?
-					// Convert to NB incr/decr
-					if(pot_diff < 0)
-					{
-						if(ts.nb_setting)
-							ts.nb_setting -= 1;
-					}
-					else
-					{
-						ts.nb_setting += 1;
-						if(ts.nb_setting > MAX_NB_SETTING)
-							ts.nb_setting = MAX_NB_SETTING;
-					}
-				}
-				else if(ts.dsp_active & 1)	{	// only allow adjustment if DSP NR is active
-					// Convert to NB incr/decr
-					if(pot_diff < 0)
-					{
-						if(ts.dsp_nr_strength)
-							ts.dsp_nr_strength -= 1;
-					}
-					else
-					{
-						ts.dsp_nr_strength += 1;
-						if(ts.dsp_nr_strength > DSP_NR_STRENGTH_MAX)
-							ts.dsp_nr_strength = DSP_NR_STRENGTH_MAX;
-					}
-					audio_driver_set_rx_audio_filter();
-				}
-				// Signal processor setting
-				UiDriverChangeSigProc(1);
-				//
-				break;
-			}
+			// RF gain
+			UiDriverChangeRfGain(1);
 
-			default:
-				break;
+			// Save to Eeprom
+			//TRX4M_VE_WriteRFG(ts.rf_gain);
+
+			break;
 		}
+
+		// Update rf gain
+		case ENC_TWO_MODE_RF_ATTEN:
+		{
+			ulong atten_val;
+
+			// Convert to Audio Gain incr/decr
+			if(pot_diff < 0)
+			{
+				if(ts.rf_atten)
+					ts.rf_atten -= 1;
+			}
+			else
+			{
+				if(ts.rf_atten < 8)
+					ts.rf_atten += 1;
+			}
+
+			// Use half range 0- 1.8V
+			atten_val = (ts.rf_atten * 16);
+			if(atten_val > 127)
+				atten_val = 127;
+
+			// Set DAC Channel1 DHR12L register - JFET attenuator
+			DAC_SetChannel1Data(DAC_Align_8b_R, atten_val);
+
+			// RF Attenuator
+			UiDriverChangeRfAttenuator(1);
+
+			// Save to Eeprom
+			//TRX4M_VE_WriteRFG(ts.rf_gain);
+
+			break;
+		}
+
+		default:
+			break;
 	}
 
 skip_update:
@@ -4489,7 +3037,7 @@ skip_update:
 	ews.value_old = ews.value_new;
 }
 
-//
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverCheckEncoderThree
 //* Object              :
@@ -4501,9 +3049,9 @@ static void UiDriverCheckEncoderThree(void)
 {
 	int 	pot_diff;
 
-	// Only in RX mode
-//	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode) && (!ts.menu_mode))
-//		return;
+	// Only in RX mode, if not calibrating
+	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode))
+		return;
 
 	ets.value_new = TIM_GetCounter(TIM5);
 
@@ -4540,18 +3088,26 @@ static void UiDriverCheckEncoderThree(void)
 
 	//printf("pot diff: %d\n\r",pot_diff);
 
-	if(ts.menu_mode)	{
-		if(pot_diff < 0)	{
-			ts.menu_var--;		// increment selected item
+	// Update IQ Phase
+	if(ts.calib_mode)
+	{
+		// Convert to incr/decr
+		if(pot_diff < 0)
+		{
+			if(ts.iq_phase_balance > -32)
+				ts.iq_phase_balance -= 1;
 		}
-		else	{
-			ts.menu_var++;		// decrement selected item
+		else
+		{
+			if(ts.iq_phase_balance < 32)
+				ts.iq_phase_balance += 1;
 		}
-		//
-		UiDriverUpdateMenu(1);		// perform update of selected item
+
+		// Phase balance
+		UiDriverChangeIQPhaseBalance(1,1);
+
 		goto skip_update;
 	}
-
 
 	// Take appropriate action
 	switch(ts.enc_thr_mode)
@@ -4559,94 +3115,44 @@ static void UiDriverCheckEncoderThree(void)
 		// Update RIT value
 		case ENC_THREE_MODE_RIT:
 		{
-			if(ts.txrx_mode == TRX_MODE_RX)	{
-				// Convert to RIT incr/decr
-				if(pot_diff < 0)
-				{
+			// Convert to RIT incr/decr
+			if(pot_diff < 0)
+			{
+				if(ts.rit_value > -50)
 					ts.rit_value -= 1;
-					if(ts.rit_value < -50)
-						ts.rit_value = MIN_RIT_VALUE;
-				}
-				else
-				{
-					ts.rit_value += 1;
-					if(ts.rit_value > 50)
-						ts.rit_value = MAX_RIT_VALUE;
-				}
-
-				// Update RIT
-				UiDriverChangeRit(1);
-
-				// Change frequency
-				UiDriverUpdateFrequency(1);
 			}
+			else
+			{
+				if(ts.rit_value < 50)
+					ts.rit_value += 1;
+			}
+
+			// Update RIT
+			UiDriverChangeRit(1);
+
+			// Change frequency
+			UiDriverUpdateFrequency(1);
+
 			break;
 		}
 
 		// Keyer speed
 		case ENC_THREE_MODE_CW_SPEED:
 		{
-			if(ts.dmod_mode == DEMOD_CW)	{		// in CW mode, adjust keyer speed
-				// Convert to Audio Gain incr/decr
-				if(pot_diff < 0)
-				{
-					ts.keyer_speed--;
-					if(ts.keyer_speed < MIN_KEYER_SPEED)
-						ts.keyer_speed = MIN_KEYER_SPEED;
-				}
-				else
-				{
-					ts.keyer_speed++;
-					if(ts.keyer_speed > 48)
-						ts.keyer_speed = MAX_KEYER_SPEED;
-				}
+			// Convert to Audio Gain incr/decr
+			if(pot_diff < 0)
+			{
+				if(ts.keyer_speed > 5)
+					ts.keyer_speed -= 1;
+			}
+			else
+			{
+				if(ts.keyer_speed < 48)
+					ts.keyer_speed += 1;
+			}
 
-				UiDriverChangeKeyerSpeed(1);
-			}
-			else	{	// in voice mode, adjust audio gain
-				if(ts.tx_audio_source != TX_AUDIO_MIC)	{		// in LINE-IN mode?
-					if(pot_diff < 0)	{						// yes, adjust line gain
-						ts.tx_line_gain--;
-						if(ts.tx_line_gain < LINE_GAIN_MIN)
-							ts.tx_line_gain = LINE_GAIN_MIN;
-					}
-					else	{
-						ts.tx_line_gain++;
-						if(ts.tx_line_gain > LINE_GAIN_MAX)
-							ts.tx_line_gain = LINE_GAIN_MAX;
-					}
-					//
-					if((ts.txrx_mode == TRX_MODE_TX) && (ts.dmod_mode != DEMOD_CW))		// in transmit and in voice mode?
-						Codec_Line_Gain_Adj(ts.tx_line_gain);		// change codec gain
-				}
-				else	{
-					if(pot_diff < 0)	{						// yes, adjust line gain
-						ts.tx_mic_gain--;
-						if(ts.tx_mic_gain < MIC_GAIN_MIN)
-							ts.tx_mic_gain = MIC_GAIN_MIN;
-					}
-					else	{
-						ts.tx_mic_gain++;
-						if(ts.tx_mic_gain > MIC_GAIN_MAX)
-							ts.tx_mic_gain = MIC_GAIN_MAX;
-					}
-					if(ts.tx_mic_gain > 50)	{		// actively adjust microphone gain and microphone boost
-						ts.mic_boost = 1;	// software boost active
-						ts.tx_mic_gain_mult = (ts.tx_mic_gain - 35)/3;			// above 50, rescale software amplification
-						if((ts.txrx_mode == TRX_MODE_TX) && (ts.dmod_mode != DEMOD_CW))	{		// in transmit and in voice mode?
-							Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0015);	// set mic boost on
-						}
-					}
-					else	{
-						ts.mic_boost = 0;	// software mic gain boost inactive
-						ts.tx_mic_gain_mult = ts.tx_mic_gain;
-						if((ts.txrx_mode == TRX_MODE_TX) && (ts.dmod_mode != DEMOD_CW))	{	// in transmit and in voice mode?
-							Codec_WriteRegister(W8731_ANLG_AU_PATH_CNTR,0x0014);	// set mic boost off
-						}
-					}
-				}
-				UIDriverChangeAudioGain(1);
-			}
+			UiDriverChangeKeyerSpeed(1);
+
 			break;
 		}
 
@@ -4671,20 +3177,17 @@ static void UiDriverChangeEncoderOneMode(uchar skip)
 {
 	uchar l_mode;
 
-	if(ts.menu_mode)	// bail out if in menu mode
-		return;
-
 	if(!skip)
 	{
 		ts.enc_one_mode++;
-		if(ts.enc_one_mode > ENC_ONE_MAX_MODE)
+		if(ts.enc_one_mode >= ENC_ONE_MAX_MODE)
 			ts.enc_one_mode = ENC_ONE_MODE_AUDIO_GAIN;
 
 		l_mode = ts.enc_one_mode;
 	}
 	else
 	{
-		ts.enc_one_mode = ENC_ONE_MAX_MODE + 1;
+		ts.enc_one_mode = ENC_ONE_MAX_MODE;
 		l_mode 			= 100;
 	}
 
@@ -4696,11 +3199,7 @@ static void UiDriverChangeEncoderOneMode(uchar skip)
 			UiDriverChangeAfGain(1);
 
 			// Sidetone disabled
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeStGain(0);
-			else
-				UiDriverChangeCmpLevel(0);
-			//
+			UiDriverChangeStGain(0);
 
 			break;
 		}
@@ -4710,11 +3209,8 @@ static void UiDriverChangeEncoderOneMode(uchar skip)
 			// Audio gain disabled
 			UiDriverChangeAfGain(0);
 
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeStGain(1);
-			else
-				UiDriverChangeCmpLevel(1);
-			//
+			// Sidetone enabled
+			UiDriverChangeStGain(1);
 
 			break;
 		}
@@ -4726,17 +3222,13 @@ static void UiDriverChangeEncoderOneMode(uchar skip)
 			UiDriverChangeAfGain(0);
 
 			// Sidetone enabled
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeStGain(0);
-			else
-				UiDriverChangeCmpLevel(0);
-			//
+			UiDriverChangeStGain(0);
 
 			break;
 		}
 	}
 }
-//
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangeEncoderTwoMode
 //* Object              :
@@ -4747,9 +3239,6 @@ static void UiDriverChangeEncoderOneMode(uchar skip)
 static void UiDriverChangeEncoderTwoMode(uchar skip)
 {
 	uchar 	l_mode;
-
-	if(ts.menu_mode)	// bail out if in menu mode
-		return;
 
 	if(!skip)
 	{
@@ -4772,18 +3261,20 @@ static void UiDriverChangeEncoderTwoMode(uchar skip)
 			// RF gain
 			UiDriverChangeRfGain(1);
 
-			// DSP/Noise Blanker
-			UiDriverChangeSigProc(0);
+			// RF Attenuator
+			UiDriverChangeRfAttenuator(0);
+
 			break;
 		}
 
-		case ENC_TWO_MODE_SIG_PROC:
+		case ENC_TWO_MODE_RF_ATTEN:
 		{
 			// RF gain
 			UiDriverChangeRfGain(0);
 
-			// DSP/Noise Blanker
-			UiDriverChangeSigProc(1);
+			// RF Attenuator
+			UiDriverChangeRfAttenuator(1);
+
 			break;
 		}
 
@@ -4793,8 +3284,8 @@ static void UiDriverChangeEncoderTwoMode(uchar skip)
 			// RF gain
 			UiDriverChangeRfGain(0);
 
-			// DSP/Noise Blanker
-			UiDriverChangeSigProc(0);
+			// RF Attenuator
+			UiDriverChangeRfAttenuator(0);
 
 			break;
 		}
@@ -4811,9 +3302,6 @@ static void UiDriverChangeEncoderTwoMode(uchar skip)
 static void UiDriverChangeEncoderThreeMode(uchar skip)
 {
 	uchar 	l_mode;
-
-	if(ts.menu_mode)	// bail out if in menu mode
-		return;
 
 	if(!skip)
 	{
@@ -4836,10 +3324,8 @@ static void UiDriverChangeEncoderThreeMode(uchar skip)
 			// RIT
 			UiDriverChangeRit(1);
 
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeKeyerSpeed(0);
-			else
-				UIDriverChangeAudioGain(0);
+			// CW speed
+			UiDriverChangeKeyerSpeed(0);
 
 			break;
 		}
@@ -4849,10 +3335,8 @@ static void UiDriverChangeEncoderThreeMode(uchar skip)
 			// RIT
 			UiDriverChangeRit(0);
 
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeKeyerSpeed(1);
-			else
-				UIDriverChangeAudioGain(1);
+			// CW speed
+			UiDriverChangeKeyerSpeed(1);
 
 			break;
 		}
@@ -4863,10 +3347,8 @@ static void UiDriverChangeEncoderThreeMode(uchar skip)
 			// RIT
 			UiDriverChangeRit(0);
 
-			if(ts.dmod_mode == DEMOD_CW)
-				UiDriverChangeKeyerSpeed(0);
-			else
-				UIDriverChangeAudioGain(0);
+			// CW speed
+			UiDriverChangeKeyerSpeed(0);
 
 			break;
 		}
@@ -4945,7 +3427,7 @@ static void UiDriverChangeAfGain(uchar enabled)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverChangeStGain(uchar enabled)
+static void UiDriverChangeStGain(uchar enabled)
 {
 	ushort 	color = Grey;
 	char	temp[100];
@@ -4963,85 +3445,41 @@ void UiDriverChangeStGain(uchar enabled)
 	sprintf(temp,"%02d",ts.st_gain);
 	UiLcdHy28_PrintText    ((POS_SG_IND_X + 30),(POS_SG_IND_Y + 1), temp,color,Black,0);
 }
+
+
 //*----------------------------------------------------------------------------
-//* Function Name       : UiDriverChangeCmpLevel
-//* Object              : Display TX audio compression level
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiDriverChangeCmpLevel(uchar enabled)
-{
-	ushort 	color = White;
-	char	temp[100];
-
-
-	UiLcdHy28_DrawEmptyRect( POS_SG_IND_X,POS_SG_IND_Y,13,49,Grey);
-
-	if(enabled)
-		UiLcdHy28_PrintText    ((POS_SG_IND_X + 1), (POS_SG_IND_Y + 1),"CMP",Black,Grey,0);
-	else
-		UiLcdHy28_PrintText    ((POS_SG_IND_X + 1), (POS_SG_IND_Y + 1),"CMP",Grey1,Grey,0);
-
-	if(ts.tx_comp_level < TX_AUDIO_COMPRESSION_MAX)	{	// 	display numbers for all but the highest value
-		sprintf(temp,"%02d",ts.tx_comp_level);
-	}
-	else	{				// show "SV" (Stored Value) for highest value
-		strcpy(temp, "SV");
-		color = Yellow;	// Stored value - use yellow
-	}
-
-	if(enabled == 0)		// always display grey if disabled
-		color = Grey;
-
-	UiLcdHy28_PrintText    ((POS_SG_IND_X + 30),(POS_SG_IND_Y + 1), temp,color,Black,0);
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverChangeDSPMode
+//* Function Name       : UiDriverChangeKeyerMode
 //* Object              :
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverChangeDSPMode(void)
+static void UiDriverChangeKeyerMode(void)
 {
 	ushort color = White;
-	char txt[32];
-	ulong	x_off = 0;
 
-	// Draw line for upper box
-	UiLcdHy28_DrawStraightLine(POS_DSPU_IND_X,(POS_DSPU_IND_Y - 1),56,LCD_DIR_HORIZONTAL,Grey);
-	// Draw line for lower box
-	UiLcdHy28_DrawStraightLine(POS_DSPL_IND_X,(POS_DSPL_IND_Y - 1),56,LCD_DIR_HORIZONTAL,Grey);
-	//
-	if(((ts.dsp_active & 1) || (ts.dsp_active & 4)))	// DSP active
-		color = White;
-	else	// DSP not active
-		color = Grey2;
-	//
-	UiLcdHy28_PrintText((POS_DSPU_IND_X),(POS_DSPU_IND_Y),"  DSP  ",White,Orange,0);
-	//
-	if((ts.dsp_active & 1) && (ts.dsp_active & 4) && (ts.dmod_mode != DEMOD_CW))	{
-		sprintf(txt, "NR+NOT");
-		x_off = 4;
-	}
-	else if(ts.dsp_active & 1)	{
-		sprintf(txt, "  NR  ");
-		x_off = 4;
-	}
-	else if(ts.dsp_active & 4)	{
-		sprintf(txt, " NOTCH");
-		if(ts.dmod_mode == DEMOD_CW)
-			color = Grey2;
-	}
-	else
-		sprintf(txt, "  OFF");
-	//
-	UiLcdHy28_PrintText((POS_DSPU_IND_X),(POS_DSPL_IND_Y),"       ",White,Blue,0);
-	UiLcdHy28_PrintText((POS_DSPL_IND_X+x_off),(POS_DSPL_IND_Y),txt,color,Blue,0);
+	// Draw top line
+	UiLcdHy28_DrawStraightLine(POS_KM_IND_X,(POS_KM_IND_Y - 1),56,LCD_DIR_HORIZONTAL,Grey);
 
+	switch(ts.keyer_mode)
+	{
+		case CW_MODE_IAM_B:
+			UiLcdHy28_PrintText((POS_KM_IND_X),(POS_KM_IND_Y)," IAM B ",color,Blue,0);
+			break;
+		case CW_MODE_IAM_A:
+			UiLcdHy28_PrintText((POS_KM_IND_X),(POS_KM_IND_Y)," IAM A ",color,Blue,0);
+			break;
+		case CW_MODE_STRAIGHT:
+			UiLcdHy28_PrintText((POS_KM_IND_X),(POS_KM_IND_Y)," STR K ",color,Blue,0);
+			break;
+		default:
+			break;
+	}
+
+	// Update CW gen module
+	cw_gen_init();
 }
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangePowerLevel
 //* Object              :
@@ -5076,7 +3514,7 @@ static void UiDriverChangePowerLevel(void)
 	}
 
 	// Set TX power factor - to reflect changed power
-	UiDriverSetBandPowerFactor(ts.band);
+	UiDriverSetBandPowerFactor(ts.band_mode);
 }
 
 //*----------------------------------------------------------------------------
@@ -5086,7 +3524,7 @@ static void UiDriverChangePowerLevel(void)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverChangeKeyerSpeed(uchar enabled)
+static void UiDriverChangeKeyerSpeed(uchar enabled)
 {
 	ushort 	color = Grey;
 	char	temp[100];
@@ -5111,45 +3549,6 @@ void UiDriverChangeKeyerSpeed(uchar enabled)
 		cw_gen_init();
 }
 
-
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverChangeAudioGain
-//* Object              :
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UIDriverChangeAudioGain(uchar enabled)
-{
-	ushort 	color = Grey;
-	char	temp[100];
-
-	if(enabled)
-		color = White;
-
-	UiLcdHy28_DrawEmptyRect( POS_KS_IND_X,POS_KS_IND_Y,13,49,Grey);
-
-	if(ts.tx_audio_source == TX_AUDIO_MIC)		// Microphone gain
-		strcpy(temp, "MIC");
-	else										// Line gain
-		strcpy(temp, "LIN");
-
-	if(enabled)
-		UiLcdHy28_PrintText((POS_KS_IND_X + 1), (POS_KS_IND_Y + 1),temp,Black,Grey,0);
-	else
-		UiLcdHy28_PrintText((POS_KS_IND_X + 1), (POS_KS_IND_Y + 1),temp,Grey1,Grey,0);
-
-	memset(temp,0,100);
-
-	if(ts.tx_audio_source == TX_AUDIO_MIC)		// Mic gain mode
-		sprintf(temp,"%2d",ts.tx_mic_gain);
-	else
-		sprintf(temp,"%2d",ts.tx_line_gain);	// Line gain mode
-
-	UiLcdHy28_PrintText    ((POS_KS_IND_X + 30),(POS_KS_IND_Y + 1), temp,color,Black,0);
-
-}
-
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangeRfGain
 //* Object              :
@@ -5157,7 +3556,7 @@ void UIDriverChangeAudioGain(uchar enabled)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverChangeRfGain(uchar enabled)
+static void UiDriverChangeRfGain(uchar enabled)
 {
 	ushort 	color = Grey;
 	char	temp[100];
@@ -5167,93 +3566,152 @@ void UiDriverChangeRfGain(uchar enabled)
 
 	UiLcdHy28_DrawEmptyRect( POS_RF_IND_X,POS_RF_IND_Y,13,57,Grey);
 
-	if(enabled)	{
+	if(enabled)
 		UiLcdHy28_PrintText((POS_RF_IND_X + 1), (POS_RF_IND_Y + 1),"RFG",Black,Grey,0);
-		//
-		// set color as warning that RX sensitivity is reduced
-		//
-		if(ts.rf_gain < 20)
-			color = Red;
-		else if(ts.rf_gain < 30)
-			color = Orange;
-		else if(ts.rf_gain < 40)
-			color = Yellow;
-	}
 	else
 		UiLcdHy28_PrintText((POS_RF_IND_X + 1), (POS_RF_IND_Y + 1),"RFG",Grey1,Grey,0);
 
-
-
-	sprintf(temp," %02d",ts.rf_gain);
-	UiLcdHy28_PrintText    ((POS_RF_IND_X + 32),(POS_RF_IND_Y + 1), temp,color,Black,0);
-
+	sprintf(temp,"%02d",ts.rf_gain);
+	UiLcdHy28_PrintText    ((POS_RF_IND_X + 38),(POS_RF_IND_Y + 1), temp,color,Black,0);
 }
 
 //*----------------------------------------------------------------------------
-//* Function Name       : UiDriverChangeSigProc
-//* Object              : Display settings related to signal processing - DSP NR or Noise Blanker strength
+//* Function Name       : UiDriverChangeRfAttenuator
+//* Object              :
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-static void UiDriverChangeSigProc(uchar enabled)
+static void UiDriverChangeRfAttenuator(uchar enabled)
 {
 	ushort 	color = Grey;
 	char	temp[100];
 
-	UiLcdHy28_DrawEmptyRect( POS_RA_IND_X,POS_RA_IND_Y,13,49,Grey);		// draw box
+	if(enabled)
+		color = White;
 
-	//
-	// Noise blanker settings display
-	//
-	if(ts.dsp_active & 8)	{	// is noise blanker to be displayed
-		if(enabled)	{
-			if(ts.nb_setting >= NB_WARNING3_SETTING)
-				color = Red;		// above this value, make it red
-			else if(ts.nb_setting >= NB_WARNING2_SETTING)
-				color = Orange;		// above this value, make it orange
-			else if(ts.nb_setting >= NB_WARNING1_SETTING)
-				color = Yellow;		// above this value, make it yellow
-			else
-				color = White;		// Otherwise, make it white
-		}
-		//
-		if((!enabled) || (ts.dmod_mode == DEMOD_AM) || (ts.filter_id == AUDIO_10KHZ))	// is NB disabled, at 10 kHZ and/or are we in AM mode?
-			UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"NB ",Grey1,Grey,0);	// yes - it is gray
-		else
-			UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"NB ",Black,Grey,0);
-		//
-		sprintf(temp,"%02d",ts.nb_setting);
-	}
-	//
-	// DSP settings display
-	//
-	else	{			// DSP settings are to be displayed
-		if(enabled && (ts.dsp_active & 1))	{	// if this menu is enabled AND the DSP NR is also enabled...
-			color = White;		// Make it white by default
-			//
-			if(ts.dsp_nr_strength >= DSP_STRENGTH_RED)
-				color = Red;
-			else if(ts.dsp_nr_strength >= DSP_STRENGTH_ORANGE)
-				color = Orange;
-			else if(ts.dsp_nr_strength >= DSP_STRENGTH_YELLOW)
-				color = Yellow;
-		}
-		//
-		if(enabled)
-			UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"DSP",Black,Grey,0);
-		else
-			UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"DSP",Grey1,Grey,0);
+	UiLcdHy28_DrawEmptyRect( POS_RA_IND_X,POS_RA_IND_Y,13,49,Grey);
 
-		sprintf(temp,"%02d",ts.dsp_nr_strength);
-	}
-	//
-	// display numerical value
-	//
+	if(enabled)
+		UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"ATT",Black,Grey,0);
+	else
+		UiLcdHy28_PrintText    ((POS_RA_IND_X + 1), (POS_RA_IND_Y + 1),"ATT",Grey1,Grey,0);
+
+	sprintf(temp,"%02d",ts.rf_atten);
 	UiLcdHy28_PrintText    ((POS_RA_IND_X + 30),(POS_RA_IND_Y + 1), temp,color,Black,0);
 }
 
-//
+//*----------------------------------------------------------------------------
+//* Function Name       : UiDriverChangeIQGainBalance
+//* Object              :
+//* Input Parameters    :
+//* Output Parameters   :
+//* Functions called    :
+//*----------------------------------------------------------------------------
+static void UiDriverChangeIQGainBalance(uchar enabled,uchar visible)
+{
+	ushort 	color = Grey;
+	char	temp[100];
+
+	// Delete control
+	if(!visible)
+	{
+		UiLcdHy28_DrawFullRect( POS_BG_IND_X,POS_BG_IND_Y,14,110,Black);
+		return;
+	}
+
+	if(enabled)
+		color = White;
+
+	UiLcdHy28_DrawEmptyRect( POS_BG_IND_X,POS_BG_IND_Y,13,109,Grey);
+
+	if(enabled)
+		UiLcdHy28_PrintText    ((POS_BG_IND_X + 1), (POS_BG_IND_Y + 1),"IQ GAIN",Black,Grey,0);
+	else
+		UiLcdHy28_PrintText    ((POS_BG_IND_X + 1), (POS_BG_IND_Y + 1),"IQ GAIN",Grey1,Grey,0);
+
+	if(ts.iq_gain_balance >= 0)
+		sprintf(temp,"+%i",ts.iq_gain_balance);
+	else
+		sprintf(temp,"%i", ts.iq_gain_balance);
+
+	UiLcdHy28_PrintText((POS_BG_IND_X + 82),(POS_BG_IND_Y + 1),"000",Black,Black,0); // clear screen
+	UiLcdHy28_PrintText((POS_BG_IND_X + 82),(POS_BG_IND_Y + 1), temp,color,Black,0);
+}
+
+//*----------------------------------------------------------------------------
+//* Function Name       : UiDriverChangeIQPhaseBalance
+//* Object              :
+//* Input Parameters    :
+//* Output Parameters   :
+//* Functions called    :
+//*----------------------------------------------------------------------------
+static void UiDriverChangeIQPhaseBalance(uchar enabled,uchar visible)
+{
+	ushort 	color = Grey;
+	char	temp[100];
+
+	// Delete control
+	if(!visible)
+	{
+		UiLcdHy28_DrawFullRect( POS_BP_IND_X,POS_BP_IND_Y,14,110,Black);
+		return;
+	}
+
+	if(enabled)
+		color = White;
+
+	UiLcdHy28_DrawEmptyRect(POS_BP_IND_X,POS_BP_IND_Y,13,109,Grey);
+
+	if(enabled)
+		UiLcdHy28_PrintText    ((POS_BP_IND_X + 1), (POS_BP_IND_Y + 1),"IQ PHAS",Black,Grey,0);
+	else
+		UiLcdHy28_PrintText    ((POS_BP_IND_X + 1), (POS_BP_IND_Y + 1),"IQ PHAS",Grey1,Grey,0);
+
+	if(ts.iq_phase_balance >= 0)
+		sprintf(temp,"+%i",ts.iq_phase_balance);
+	else
+		sprintf(temp,"%i", ts.iq_phase_balance);
+
+	UiLcdHy28_PrintText((POS_BP_IND_X + 82),(POS_BP_IND_Y + 1),"000",Black,Black,0); // clear screen
+	UiLcdHy28_PrintText((POS_BP_IND_X + 82),(POS_BP_IND_Y + 1), temp,color,Black,0);
+}
+
+//*----------------------------------------------------------------------------
+//* Function Name       : UiDriverChangePaBias
+//* Object              :
+//* Input Parameters    :
+//* Output Parameters   :
+//* Functions called    :
+//*----------------------------------------------------------------------------
+static void UiDriverChangePaBias(uchar enabled,uchar visible)
+{
+	ushort 	color = Grey;
+	char	temp[100];
+
+	// Delete control
+	if(!visible)
+	{
+		UiLcdHy28_DrawFullRect( POS_PB_IND_X,POS_PB_IND_Y,14,110,Black);
+		return;
+	}
+
+	if(enabled)
+		color = White;
+
+	UiLcdHy28_DrawEmptyRect( POS_PB_IND_X,POS_PB_IND_Y,13,109,Grey);
+
+	if(enabled)
+		UiLcdHy28_PrintText    ((POS_PB_IND_X + 1), (POS_PB_IND_Y + 1),"PA BIAS",Black,Grey,0);
+	else
+		UiLcdHy28_PrintText    ((POS_PB_IND_X + 1), (POS_PB_IND_Y + 1),"PA BIAS",Grey1,Grey,0);
+
+	sprintf(temp,"+%d",ts.pa_bias);
+
+	UiLcdHy28_PrintText((POS_PB_IND_X + 82),(POS_PB_IND_Y + 1),"000",Black,Black,0); // clear screen
+	UiLcdHy28_PrintText((POS_PB_IND_X + 82),(POS_PB_IND_Y + 1), temp,color,Black,0);
+}
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangeRit
 //* Object              :
@@ -5285,7 +3743,6 @@ static void UiDriverChangeRit(uchar enabled)
 	UiLcdHy28_PrintText((POS_RIT_IND_X + 30),(POS_RIT_IND_Y + 1), temp,color,Black,0);
 }
 
-
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverChangeFilter
 //* Object              : change audio filter, based on public flag
@@ -5293,7 +3750,7 @@ static void UiDriverChangeRit(uchar enabled)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverChangeFilter(uchar ui_only_update)
+static void UiDriverChangeFilter(uchar ui_only_update)
 {
 	ushort fcolor = Grey;
 
@@ -5313,33 +3770,28 @@ void UiDriverChangeFilter(uchar ui_only_update)
 	// Update screen indicator
 	switch(ts.filter_id)
 	{
-		case AUDIO_300HZ:
-			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15)," 300Hz", fcolor,Black,0);
-			break;
-
-		case AUDIO_500HZ:
-			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15)," 500Hz", fcolor,Black,0);
-			break;
-
-		case AUDIO_1P8KHZ:
+		case AUDIO_FIR_1P8KHZ:
 			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15),"  1.8k", fcolor,Black,0);
 			break;
 
-		case AUDIO_2P3KHZ:
-			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15),"  2.3k", fcolor,Black,0);
+		case AUDIO_FIR_2P3KHZ:
+			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15),"  2.6k", fcolor,Black,0);
 			break;
 
-		case AUDIO_3P6KHZ:
+		case AUDIO_FIR_3P6KHZ:
 			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15),"  3.6k", fcolor,Black,0);
 			break;
 
-		case AUDIO_10KHZ:
+		case AUDIO_FIR_10KHZ:
 			UiLcdHy28_PrintText(POS_FIR_IND_X,(POS_FIR_IND_Y + 15),"   10k", fcolor,Black,0);
 			break;
 
 		default:
 			break;
 	}
+
+	// Save to Eeprom
+	//TRX4M_VE_WriteFir(ts.filter_id);
 }
 
 //*----------------------------------------------------------------------------
@@ -5359,16 +3811,6 @@ static void UiDriverInitSpectrumDisplay(void)
 	sd.skip_process = 0;
 	sd.enabled		= 0;
 	sd.dial_moved	= 0;
-	//
-	sd.rescale_rate = (float)ts.scope_rescale_rate;	// load rescale rate
-	sd.rescale_rate = 1/sd.rescale_rate;				// actual rate is inverse of this setting
-	//
-	sd.agc_rate = (float)ts.scope_agc_rate;	// calculate agc rate
-	sd.agc_rate = 1/(sd.agc_rate/5);
-	//
-
-	sd.spectrum_display_gain = 40;	// initial FFT gain
-	sd.mag_calc = 1;				// initial setting of spectrum display scaling factor
 
 	// Init FFT structures
 	a = arm_rfft_init_q15((arm_rfft_instance_q15 *)&sd.S,(arm_cfft_radix4_instance_q15 *)&sd.S_CFFT,FFT_IQ_BUFF_LEN,FFT_QUADRATURE_PROC,1);
@@ -5381,7 +3823,7 @@ static void UiDriverInitSpectrumDisplay(void)
 	// Ready
 	sd.enabled		= 1;
 }
-//
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverReDrawSpectrumDisplay
 //* Object              : state machine implementation
@@ -5389,27 +3831,13 @@ static void UiDriverInitSpectrumDisplay(void)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-//
-// Spectrum Display code rewritten by C. Turner, KA7OEI, September 2014
-//
 static void UiDriverReDrawSpectrumDisplay(void)
 {
-	q15_t spec_maxval;		// holder for maximum value found
 	ulong i;
-	uint32_t	max_ptr;	// throw-away pointer for ARM maxval functions
-	static uchar	scan_rate = 1;
 
-	// Only in RX mode and NOT while powering down or in menu mode
-	if((ts.txrx_mode != TRX_MODE_RX) || (ts.powering_down) || (ts.menu_mode))
+	// Only in RX mode
+	if(ts.txrx_mode != TRX_MODE_RX)
 		return;
-
-	// adjust the scan rate of the scope - need to make this a bit more elegant!
-	//
-	scan_rate--;
-	if((scan_rate) || (!ts.scope_speed))	// is it time to update the scan, or is this scope to be disabled?
-		return;
-	else
-		scan_rate = ts.scope_speed;
 
 	// No spectrum display in DIGI modes
 	//if(ts.dmod_mode == DEMOD_DIGI)
@@ -5430,234 +3858,104 @@ static void UiDriverReDrawSpectrumDisplay(void)
 	// Process implemented as state machine
 	switch(sd.state)
 	{
-		//
-		// Apply gain to collected IQ samples and then do FFT
-		//
+		// Stage 1 - apply gain to collected IQ samples
 		case 1:
 		{
-			float gcalc, samp_temp;
-			//
-			for(i = 0; i < FFT_IQ_BUFF_LEN; i++)	{
-				gcalc = 1/ads.codec_gain_calc;				// Get gain setting of codec and convert to multiplier
-				if(gcalc < 1)								// Limit multiplier value to unity or higher
-					gcalc = 1;
-				samp_temp = sd.FFT_Samples[i];				// temporarily convert sample to float for gain adjustment
-				samp_temp *= (gcalc * sd.spectrum_display_gain);					// Multiply input FFT value by codec gain
-				sd.FFT_Samples[i] = (q15_t)samp_temp;
-			}
-			//
-			arm_rfft_q15((arm_rfft_instance_q15 *)&sd.S,(q15_t *)(sd.FFT_Samples),(q15_t *)(sd.FFT_Samples));	// Do FFT
-			//
-			// Apply left shift on input data to multiply by 64 to help compensate for effective 8-bit shift by RFFT which otherwise
-			// ruins the dynamic range of the magnitude calculations and makes for a miserably bad spectrum display if we don't!
-			//
-			arm_shift_q15((q15_t *)sd.FFT_Samples, 6, (q15_t *)sd.FFT_Samples, FFT_IQ_BUFF_LEN);	// shift array left by 6 bits for multiply-by-64
-			//
-			arm_max_q15((q15_t *)sd.FFT_Samples, FFT_IQ_BUFF_LEN, (q15_t *)&spec_maxval, &max_ptr);	// Find maximum value in array
-			//
-		sd.state++;
-		break;
+			for(i = 0; i < FFT_IQ_BUFF_LEN; i++)
+				sd.FFT_Samples[i] *= 60;	// was 20
+
+			//arm_mult_q15(sd.FFT_Samples, hamm_wnd_vector, sd.FFT_Samples, FFT_IQ_BUFF_LEN);
+
+			sd.state++;
+			break;
 		}
-		//
-		// Do magnitude processing and gain control (AGC) on input of FFT
-		//
+
+		// Stage 2 - do FFT calc on the samples
 		case 2:
+		{
+			arm_rfft_q15((arm_rfft_instance_q15 *)&sd.S,(q15_t *)(sd.FFT_Samples),(q15_t *)(sd.FFT_Samples));
+
+			sd.state++;
+			break;
+		}
+
+		// Stage 3 - do magnitude processing
+		case 3:
 		{
 			// Save old data - we will use later to mask pixel on the control
 			for(i = 0; i < FFT_IQ_BUFF_LEN/2; i++)
-				sd.FFT_BkpData[i]  = sd.FFT_DspData[i];
-			//
+				sd.FFT_BkpData[i]  = sd.FFT_MagData[i];
+
 			// Calculate magnitude
 			arm_cmplx_mag_q15((q15_t *)(sd.FFT_Samples),(q15_t *)(sd.FFT_MagData),(FFT_IQ_BUFF_LEN/2));
-			//
-		sd.state++;
-		break;
+
+			sd.state++;
+			break;
 		}
-		//
-		//  Low-pass filter amplitude magnitude data
-		//
-		case 3:
-		{
-			uint32_t 	i;
-			static float avg_ttemp;
-			float		filt_factor;
-			//
-			filt_factor = (float)ts.scope_filter;		// use stored filter setting
-			//
-			if(sd.dial_moved)	{	// Clear filter data if dial was moved in steps greater than 1 kHz
-				sd.dial_moved = 0;	// Dial moved - reset indicator
-				if(df.tuning_step > 1000)	{	// was tuning step greater than 1kHz
-					for(i=0; i < ( FFT_IQ_BUFF_LEN/2); i++)	{	// Yes - load the array with the current scaled magnitude data
-						avg_ttemp = (float)sd.FFT_MagData[i];	// to blow away filtered data
-						avg_ttemp /= sd.spectrum_display_gain;	// correct for input FFT gain
-						sd.FFT_AVGData[i] = avg_ttemp;
-					}
-				}
-				//
-				UiDrawSpectrumScopeFrequencyBarText();	// redraw frequency bar on the bottom of the display
-				//
-			}
-			else	{	// dial was not moved - do normal IIR lowpass filtering to "smooth" display
-				for(i=0; i < (FFT_IQ_BUFF_LEN/2); i++)	{	// scan the array
-					sd.FFT_AVGData[i] -= (sd.FFT_AVGData[i]/filt_factor);		// Reduce existing data by amount of LPF factor
-					avg_ttemp = (float)sd.FFT_MagData[i];						// Get new data
-					avg_ttemp /= sd.spectrum_display_gain;	// correct for input FFT gain adjusted by AGC
-					avg_ttemp /= filt_factor;						// Scale by LPF factor
-					sd.FFT_AVGData[i] += avg_ttemp;									// Add in by amount
-					if(sd.FFT_AVGData[i] < 0)
-						sd.FFT_AVGData[i] = 0;
-				}
-			}
-		sd.state++;
-		break;
-		}
-		//
-		// De-linearize and normalize display data and do AGC processing
-		//
+
+		// Stage 4 - equalise magnitude data
 		case 4:
 		{
-			float		mag_calc_adj, mag_max, mag_max1;
-			float32_t		disp_scale[FFT_IQ_BUFF_LEN/2];
-			q15_t	max, max1;
-			//
-			// De-linearize data and find peak
-			//
-			for(i = 0; i < (FFT_IQ_BUFF_LEN/2); i+= 4)	{
-				arm_sqrt_f32((float32_t)sd.FFT_AVGData[i], &disp_scale[i]);	// take square root to de-linearize data
-				arm_sqrt_f32((float32_t)sd.FFT_AVGData[i+1], &disp_scale[i+1]);	// "unroll" this loop to optimize for the MCU's prefetch
-				arm_sqrt_f32((float32_t)sd.FFT_AVGData[i+2], &disp_scale[i+2]);
-				arm_sqrt_f32((float32_t)sd.FFT_AVGData[i+3], &disp_scale[i+3]);
+			uint32_t	index;
+			q15_t		max,divisor;
+			uint32_t 	i;
+			//float 		cur;
+
+			// Get the max value of the samples array
+			arm_max_q15((q15_t *)(sd.FFT_MagData),(FFT_IQ_BUFF_LEN/2),&max, &index);
+
+			// Calc div to fit into the screen
+			divisor	= max/(SPECTRUM_HEIGHT - 5);
+
+			// Equalize, by averaging or window function
+			for(i = 0; i < (FFT_IQ_BUFF_LEN/2); i++)
+			{
+				sd.FFT_MagData[i] = (sd.FFT_MagData[i]/divisor);
+
+				// Window func do not work
+				//cur = 2.0 * log2(sd.FFT_MagData[i] * sd.FFT_MagData[i]);
+				//sd.FFT_MagData[i] = (q15_t)cur;
 			}
-			//
-			// scan_top is used to limit AGC action to "magnified" portion
-			//
-			if(!sd.magnify)	// not in magnify mode
-				arm_max_f32(disp_scale, (FFT_IQ_BUFF_LEN/2), &mag_max, &max_ptr);	// find peak in all data if not in magnify mode
-			else	{	// in magnify mode - limit peak search to portions of array
-				arm_max_f32(disp_scale, (FFT_IQ_BUFF_LEN/8), &mag_max, &max_ptr);	// find peak in  bottom quarter data
-				arm_max_f32(&disp_scale[(FFT_IQ_BUFF_LEN*3)/8], (FFT_IQ_BUFF_LEN/8), &mag_max1, &max_ptr);	// find peak in 1/4 above 1/2 data
-				if(mag_max1 > mag_max)	// find largest peak
-					mag_max = mag_max1;
-			}
-//			arm_mean_f32(disp_scale, (FFT_IQ_BUFF_LEN/2), &mag_avg);			// calculate average of spectrum data
-			//
-//			mag_avg = mag_max/mag_avg;	// calculate peak/average ratio of data
-			//
-			mag_calc_adj = mag_max/(SPECTRUM_HEIGHT - SPECTRUM_SCOPE_TOP_LIMIT);	// calculate scaling factor
-			//
-			// This portion uses the peak-average ratio calculated above to determine of the displayed spectrum would be mostly noise.  If the
-			// peak to average ratio is very low it will rescale the display downwards to keep it from (mostly) filling the screen
-			//
-//			if(mag_avg < PK_AVG_RESCALE_THRESH)	{	// was the peak to average ratio lower than the desired threshold?
-//				mag_avg /= PK_AVG_RESCALE_THRESH;	// calculate rescaling factor based on peak to average ratio
-//				mag_calc_adj /= mag_avg;			// adjust the scaline factor according to the peak to average ratio "low-ness"
-//			}
-//			//
-			if(sd.mag_calc > mag_calc_adj)				// adjust rescaling factor more slowly based on time - another AGC-type effect
-//				sd.mag_calc -= mag_calc_adj * SPECTRUM_SCOPE_RESCALE_DECAY_RATE;	// Slow decay rate of scaling factor
-				sd.mag_calc -= mag_calc_adj * (sd.rescale_rate/3);	// Slow decay rate of scaling factor
-			else
-//				sd.mag_calc += mag_calc_adj * SPECTRUM_SCOPE_RESCALE_ATTACK_RATE;	// Fast attack of scaling factor
-				sd.mag_calc += mag_calc_adj * sd.rescale_rate;	// Fast attack of scaling factor
-			//
-			//
-			if(!sd.magnify)	{		// spectrum scope magnify mode NOT on
-				for(i = 0; i < (FFT_IQ_BUFF_LEN/2); i+= 4)	{	// rescale de-linearized data
-					sd.FFT_DspData[i] = (q15_t)(disp_scale[i]/sd.mag_calc);		// "unroll" this loop to optimize for speed
-					sd.FFT_DspData[i+1] = (q15_t)(disp_scale[i+1]/sd.mag_calc);
-					sd.FFT_DspData[i+2] = (q15_t)(disp_scale[i+2]/sd.mag_calc);
-					sd.FFT_DspData[i+3] = (q15_t)(disp_scale[i+3]/sd.mag_calc);
-				}
-			}
-			else	{	// spectrum scope magnify mode is on (x2)
-				// Lower half
-				for(i = (FFT_IQ_BUFF_LEN/4); i < (FFT_IQ_BUFF_LEN/2); i++)	{	// rescale de-linearized data
-					sd.FFT_DspData[i] = (q15_t)(disp_scale[(FFT_IQ_BUFF_LEN/4)+ i/2] /sd.mag_calc);
-				}
-				// Upper half
-				for(i = 0; i < (FFT_IQ_BUFF_LEN/4); i++)	{	// rescale de-linearized data
-					sd.FFT_DspData[i] = (q15_t)(disp_scale[i/2] /sd.mag_calc);
-				}
-			}
-			//
-			// Find peak amplitude of buffer to be used on the next go-around for adjustment of the input gain
-			//
-			// scan_top is used to limit AGC action to "magnified" portion
-			//
-			if(!sd.magnify)	// NOT in magnify mode
-				arm_max_q15((q15_t *)(sd.FFT_MagData),(FFT_IQ_BUFF_LEN/2),&max, &max_ptr);	// scan the entire array
-			else	{
-				arm_max_q15((q15_t *)(sd.FFT_MagData),(FFT_IQ_BUFF_LEN/8),&max, &max_ptr);	// scan the bottom 1/4 of the array
-				arm_max_q15((q15_t *)(&sd.FFT_MagData[(FFT_IQ_BUFF_LEN*3)/8]),(FFT_IQ_BUFF_LEN/8),&max1, &max_ptr);	// scan the 1/4 above the middle half of the array
-				if(max1 > max)
-					max = max1;	// pick the larger of the two results
-			}
-			//
-			// Use maximum value to adjust gain of Spectrum Scope FFT - An AGC
-			if((max > SPECTRUM_SCOPE_AGC_THRESHOLD) || (spec_maxval > SPECTRUM_SCOPE_MAX_FFT_VAL))	{	// Are signals too "hot" on the input or output of the FFT?
-//				sd.spectrum_display_gain -= sd.spectrum_display_gain*SPECTRUM_SCOPE_AGC_ATTACK;		// Yes - decrese the gain
-				sd.spectrum_display_gain -= sd.spectrum_display_gain*sd.agc_rate;		// Yes - decrese the gain
-				if(sd.spectrum_display_gain < SPECTRUM_SCOPE_MIN_GAIN)	// Set a limit
-					sd.spectrum_display_gain = SPECTRUM_SCOPE_MIN_GAIN;
-			}
-			else	{							// Signals are not too strong - increase the FFT gain
-//				sd.spectrum_display_gain += sd.spectrum_display_gain*SPECTRUM_SCOPE_AGC_DECAY;		// Increase the FFT gain
-				sd.spectrum_display_gain += sd.spectrum_display_gain*(sd.agc_rate/3);		// Increase the FFT gain
-				if(sd.spectrum_display_gain > SPECTRUM_SCOPE_MAX_GAIN)
-					sd.spectrum_display_gain = SPECTRUM_SCOPE_MAX_GAIN;
-			}
-		sd.state++;
-		break;
+
+			sd.state++;
+			break;
 		}
-		//
-		//  update LCD control
-		//
+
+		// Stage 5 - update LCD control
 		case 5:
 		{
-		ulong	clr;
-			clr = UiDriverGetScopeTraceColour();
-			// Left part of screen(mask and update in one operation to minimize flicker)
-			UiLcdHy28_DrawSpectrum_Interleaved((q15_t *)(sd.FFT_BkpData + FFT_IQ_BUFF_LEN/4), (q15_t *)(sd.FFT_DspData + FFT_IQ_BUFF_LEN/4), Black, clr,0);
-			// Right part of the screen (mask and update)
-			UiLcdHy28_DrawSpectrum_Interleaved((q15_t *)(sd.FFT_BkpData), (q15_t *)(sd.FFT_DspData), Black, clr,1);
-			sd.state = 0;	// Stage 0 - collection of data by the Audio driver
-		break;
+			// Left part of screen(mask and update)
+			UiLcdHy28_DrawSpectrum((q15_t *)(sd.FFT_BkpData + FFT_IQ_BUFF_LEN/4),Black,0);
+			UiLcdHy28_DrawSpectrum((q15_t *)(sd.FFT_MagData + FFT_IQ_BUFF_LEN/4),White,0);
+
+			// Right part of screen(mask and update)
+			UiLcdHy28_DrawSpectrum((q15_t *)(sd.FFT_BkpData),                    Black,1);
+			UiLcdHy28_DrawSpectrum((q15_t *)(sd.FFT_MagData),				     White,1);
+
+			sd.state++;
+			break;
 		}
-		default:
+
+		// Stage 6 - clear LCD control when dial was moved
+		case 6:
+		{
+			if(sd.dial_moved)
+			{
+				// Clear spectrum control, if VFO dial was moved
+				//UiLcdHy28_DrawFullRect((POS_SPECTRUM_IND_X + 1),(POS_SPECTRUM_IND_Y + 1),(POS_SPECTRUM_IND_H - 2),(POS_SPECTRUM_IND_W - 4),Black);
+
+				// Reset flag
+				sd.dial_moved = 0;
+			}
+
 			sd.state = 0;
 			break;
+		}
+
+		// Stage 0 - collection of data by the Audio driver
+		default:
+			break;
 	}
-}
-//
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverGetScopeTraceColour
-//* Object              : Gets setting from trace color variable
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-//
-static ulong UiDriverGetScopeTraceColour(void)
-{
-	if(ts.scope_trace_colour == SPEC_GREY)
-		return Grey;
-	else if(ts.scope_trace_colour == SPEC_BLUE)
-		return Blue;
-	else if(ts.scope_trace_colour == SPEC_RED)
-		return Red;
-	else if(ts.scope_trace_colour == SPEC_MAGENTA)
-			return Magenta;
-	else if(ts.scope_trace_colour == SPEC_GREEN)
-		return Green;
-	else if(ts.scope_trace_colour == SPEC_CYAN)
-		return Cyan;
-	else if(ts.scope_trace_colour == SPEC_YELLOW)
-		return Yellow;
-	else if(ts.scope_trace_colour == SPEC_ORANGE)
-		return Orange;
-	else
-		return White;
 }
 
 //*----------------------------------------------------------------------------
@@ -5699,6 +3997,53 @@ static ulong UiDriverGetScopeTraceColour(void)
 }*/
 
 //*----------------------------------------------------------------------------
+//* Function Name       : UiDriverPowerOffCheck
+//* Object              :
+//* Input Parameters    :
+//* Output Parameters   :
+//* Functions called    :
+//*----------------------------------------------------------------------------
+static void UiDriverPowerOffCheck(void)
+{
+	ulong wait = 0;
+
+	if(!ts.power_off_req)
+		return;
+
+	// Wait power button release (software de-bounce)
+	while(!GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_13))
+	{
+		wait++;
+		if(wait > POWER_BUTTON_HOLD_TIME)
+		{
+			// Clear flag
+			ts.power_off_req = 0;
+
+			break;
+		}
+	}
+
+	// Debounce finished ?
+	if(ts.power_off_req)
+	{
+		ts.power_off_req = 0;
+		return;
+	}
+
+	// Clear flag
+	ts.power_off_req = 0;
+
+	// Do not poweroff in TX mode
+	if(ts.txrx_mode != TRX_MODE_RX)
+		return;
+
+	//printf("going to sleep\n\r");
+
+	// Enter power off mode
+	mchf_board_power_off();
+}
+
+//*----------------------------------------------------------------------------
 //* Function Name       : UiDriverHandleSmeter
 //* Object              :
 //* Input Parameters    :
@@ -5708,13 +4053,8 @@ static ulong UiDriverGetScopeTraceColour(void)
 static void UiDriverHandleSmeter(void)
 {
 	uchar 	val;
-	u_int 	rfg_calc;
-	float gcalc;
-	static bool 		clip_indicate = 0;
-	static	u_int		auto_rfg = 8;
-	static	uint16_t 	rfg_timer= 0;	// counter used for timing RFG control decay
-//	char temp[10];
-	//
+	float	db_val;
+	int		i_val;
 
 	// Only in RX mode
 	if(ts.txrx_mode != TRX_MODE_RX)
@@ -5726,97 +4066,30 @@ static void UiDriverHandleSmeter(void)
 
 	sm.skip = 0;
 
-	// ************************
-	// Update S-Meter
-	// ************************
-	//
-	// Calculate attenuation of "RF Codec Gain" setting so that S-meter reading can be compensated.
-	// for input RF attenuation setting
-	//
-	if(ts.rf_codec_gain == 9)		// Is RF gain in "AUTO" mode?
-		rfg_calc = auto_rfg;
-	else	{				// not in "AUTO" mode
-		rfg_calc = (u_int)ts.rf_codec_gain;		// get copy of RF gain setting
-		auto_rfg = rfg_calc;		// keep "auto" variable updated with manual setting when in manual mode
-		rfg_timer = 0;
-	}
-	//
-	rfg_calc += 1;	// offset to prevent zero
-	rfg_calc *= 2;	// double the range
-	rfg_calc += 13;	// offset, as bottom of range of A/D gain control is not useful (e.g. ADC saturates before RX hardware)
-	if(rfg_calc >31)	// limit calc to hardware range
-		rfg_calc = 31;
-	Codec_Line_Gain_Adj(rfg_calc);	// set the RX gain
-	//
-	// Now calculate the RF gain setting
-	//
-	gcalc = (float)rfg_calc;
-	gcalc *= 1.5;	// codec has 1.5 dB/step
-	gcalc -= 34.5;	// offset codec setting by 34.5db (full gain = 12dB)
-	gcalc = pow10(gcalc/10);	// convert to power ratio
-	ads.codec_gain_calc = sqrt(gcalc);		// convert to voltage ratio
-	//
-	sm.gain_calc = (ads.pre_filter_gain * ads.agc_val);		// get product of the two AGC loop gain settings
-	sm.gain_calc = 1/sm.gain_calc;	// invert gain to calculate amount of attenuation
-	//
-	sm.gain_calc *= AGC_GAIN_CAL;	// multiply by AGC gain calibration factor
-	sm.gain_calc /= ads.codec_gain_calc;	// divide by known A/D gain setting
-	//
-	sm.s_count = 0;		// Init search counter
-	while ((sm.gain_calc >= S_Meter_Cal[sm.s_count]) && (sm.s_count <= S_Meter_Cal_Size))	{	// find
-		sm.s_count++;;
-	}
-	val = (uchar)sm.s_count;
-	UiDriverUpdateTopMeterA(val,sm.old);
-	sm.old = val;
+	if(sm.s_count == S_MET_SAMP_CNT)
+	{
+		db_val 	= 10.0 * log10(sm.curr_max);
+		i_val	= (int)db_val;
+		i_val  -= 40;
 
-	rfg_timer++;	// bump RFG timer
-	if(rfg_timer > 10000)	// limit count of RFG timer
-		rfg_timer = 10000;
-	//
-	if(ads.adc_half_clip)	{	// did clipping almost occur?
-		if(rfg_timer >	AUTO_RFG_DECREASE_LOCKOUT)	{	// has enough time passed since the last gain decrease?
-			if(auto_rfg)	{	// yes - is this NOT zero?
-				auto_rfg--;	// yes - decrease gain a bit
-				//sprintf(temp, " %d ", auto_rfg);		// Display auto RFG for debug
-				//UiLcdHy28_PrintText((POS_BG_IND_X + 82),(POS_BG_IND_Y + 1), temp,White,Black,0);
-				rfg_timer = 0;	// reset the adjustment timer
-			}
-		}
-	}
-	else if(!ads.adc_quarter_clip)	{	// no clipping occurred
-		if(rfg_timer > AUTO_RFG_INCREASE_TIMER)	{	// has it been long enough since the last increase?
-			auto_rfg++;		// yes - increase the gain
-			rfg_timer = 0;	// reset the timer to prevent this from executing too often
-			if(auto_rfg > 8)	// limit it to 8
-				auto_rfg = 8;
-				//sprintf(temp, " %d ", auto_rfg);		// Display auto RFG for debug
-				//UiLcdHy28_PrintText((POS_BG_IND_X + 82),(POS_BG_IND_Y + 1), temp,White,Black,0);
-		}
-	}
-	ads.adc_half_clip = 0;		// clear "half clip" indicator that tells us that we should decrease gain
-	ads.adc_quarter_clip = 0;	// clear indicator that, if not triggered, indicates that we can increase gain
-	//
-	// This makes a portion of the S-meter go red if A/D clipping occurs
-	//
-	if(ads.adc_clip)	{		// did clipping occur?
-		if(!clip_indicate)	{	// have we seen it clip before?
-			UiDriverDrawRedSMeter();		// No, make the first portion of the S-meter red
-			clip_indicate = 1;		// set flag indicating that we saw clipping and changed the screen (prevent continuous redraw)
-		}
-		ads.adc_clip = 0;		// reset clip detect flag
-	}
-	else	{		// clipping NOT occur?
-		if(clip_indicate)	{	// had clipping occurred since we last visited this code?
-			UiDriverDrawWhiteSMeter();					// yes - restore the S meter to a white condition
-			clip_indicate = 0;							// clear the flag that indicated that clipping had occurred
-		}
+		if(i_val < 0)
+			i_val = 0;
+
+		//printf("%d ",i_val);
+
+		val = (uchar)i_val;
+
+		UiDriverUpdateTopMeterA(val,sm.old);
+
+		sm.s_count  = 0;
+		sm.curr_max = 0;
+		sm.old		= val;
 	}
 }
 
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverHandleSWRMeter
-//* Object              : Power, SWR, ALC and Audio indicator
+//* Object              : Power and SWR indicator
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
@@ -5824,7 +4097,6 @@ static void UiDriverHandleSmeter(void)
 static void UiDriverHandleSWRMeter(void)
 {
 	ushort	val_p,val_s = 0;
-	float	fwd_calc, scale_calc;
 	//float 	rho,swr;
 
 	// Only in TX mode
@@ -5853,19 +4125,6 @@ static void UiDriverHandleSWRMeter(void)
 		//printf("sample no %d\n\r",swrm.p_curr);
 		return;
 	}
-
-	//
-	// adjust power meter reading according to calibration variable
-	// (This is temporary - until this function is rewritten)
-	//
-	if((swrm.fwd_cal >= SWR_CAL_MIN) && (swrm.fwd_cal <= SWR_CAL_MAX))	{	// do this only if a valid value is stored
-		fwd_calc = (float)swrm.pwr_aver;	//
-		scale_calc = (float)swrm.fwd_cal;	// get calibration factor
-		scale_calc /= 100;					// divide by 100
-		fwd_calc *= scale_calc;				// apply calibration
-		swrm.pwr_aver = (ushort)fwd_calc;
-	}
-	//
 
 	// Get average
 	val_p  = swrm.pwr_aver/SWR_SAMPLES_CNT;
@@ -5929,68 +4188,30 @@ static void UiDriverHandleSWRMeter(void)
 	if(val_p > POWER_10W_MAX)
 		UiDriverUpdateTopMeterA(34,0);
 
-	if(ts.tx_meter_mode == METER_SWR)	{
-		// Just test
-		//UiDriverUpdateBtmMeter((uchar)(val_s / 250), 0);
+	// Just test
+	//UiDriverUpdateBtmMeter((uchar)(val_s / 250));
 
-		// From http://ac6v.com/swrmeter.html
-		// not working, to fix !!!
-		//
-		//rho 	= (float)sqrt((val_s/val_p));
-		//swr 	= (1 + rho)/(1 - rho);
-		//swr 	= (swr * 30);
-		//val_s	 = ((ushort)swr);
-		//printf("swr %i\n\r", val_s);
+	// From http://ac6v.com/swrmeter.html
+	// not working, to fix !!!
+	//
+	//rho 	= (float)sqrt((val_s/val_p));
+	//swr 	= (1 + rho)/(1 - rho);
+	//swr 	= (swr * 30);
+	//val_s	 = ((ushort)swr);
+	//printf("swr %i\n\r", val_s);
 
-		// Display SWR
-		//UiDriverUpdateBtmMeter((uchar)(val_s / 10), 0);
-	}
-	else if(ts.tx_meter_mode == METER_ALC)	{
-		scale_calc = ads.alc_val;		// get TX ALC value
-		scale_calc *= scale_calc;		// square the value
-		scale_calc = log10f(scale_calc);	// get the log10
-		scale_calc *= -10;		// convert it to DeciBels and switch sign and then scale it for the meter
-		if(scale_calc > 34)
-			scale_calc = 34;
-		else if(scale_calc < 0)
-			scale_calc = 0;
-		//
-		UiDriverUpdateBtmMeter((uchar)(scale_calc), 13);	// update the meter, setting the "red" threshold
+	// Display SWR
+	//UiDriverUpdateBtmMeter((uchar)(val_s / 10));
 
-// used for debugging
-//		char txt[32];
-//		sprintf(txt, "  %d   ", (ulong)(scale_calc * 1000));
-//		UiLcdHy28_PrintText    ((POS_RIT_IND_X + 1), (POS_RIT_IND_Y + 20),txt,White,Grid,0);
-
-	}
-	else if(ts.tx_meter_mode == METER_AUDIO)	{
-		scale_calc = ads.peak_audio/10000;		// get a copy of the peak TX audio (maximum reference = 30000)
-		ads.peak_audio = 0;					// reset the peak detect
-		scale_calc *= scale_calc;			// square the value
-		scale_calc = log10f(scale_calc);	// get the log10
-		scale_calc *= 10;					// convert to DeciBels and scale for the meter
-		scale_calc += 11;					// offset for meter
-		//
-		if(scale_calc > 34)					// enforce a "ceiling" for the meter
-			scale_calc = 34;
-		else if(scale_calc < 0)
-			scale_calc = 0;
-		//
-		UiDriverUpdateBtmMeter((uchar)(scale_calc), 22);	// update the meter, setting the "red" threshold
-	}
-
-
-	// Reset accumulator for SWR measurements
+	// Reset accumulator
 	swrm.pwr_aver = 0;
 	swrm.swr_aver = 0;
 	swrm.p_curr   = 0;
 }
 
-
-
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverHandlePowerSupply
-//* Object              : display external voltage and to handle final power-off and delay
+//* Object              : display external voltage
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
@@ -6001,17 +4222,6 @@ static void UiDriverHandlePowerSupply(void)
 	uchar	v10,v100,v1000,v10000;
 	//char 	cap1[50];
 	char	digit[2];
-	int		col;
-
-	static ulong	powerdown_delay = 0;
-
-	if(ts.powering_down)	{	// are we powering down?
-		powerdown_delay++;		// yes - do the powerdown delay
-		if(powerdown_delay > POWERDOWN_DELAY_COUNT)	{	// is it time to power down
-			POWER_DOWN_PIO->BSRRL = POWER_DOWN;			// yes - kill the power
-			powerdown_delay = POWERDOWN_DELAY_COUNT;	// limit count if power button is being held down/stuck for a while
-		}
-	}
 
 	pwmt.skip++;
 	if(pwmt.skip < POWER_SAMPLES_SKP)
@@ -6041,29 +4251,11 @@ static void UiDriverHandlePowerSupply(void)
 	// Terminate
 	digit[1] = 0;
 
+	// -----------------------
+	// See if 10V needs update
 	v10000 = (val_p%100000)/10000;
-	v1000 = (val_p%10000)/1000;
-	v100 = (val_p%1000)/100;
-	v10 = (val_p%100)/10;
-	//
-	//
-	col = COL_PWR_IND;	// Assume normal voltage, so Set normal color
-	//
-	// is voltage <= 9.49 volts
-	if((v10000 & 0x0F) <= 0)	{			// below 10 volts?
-		if(((((v1000 & 0x0F) <= 9) && ((v100 & 0x0F) <= 4)) || ((v1000 & 0x0F) < 9)))	{	// and <= 9.49 volts?
-			col = Red;			// yes - battery indicator is red
-		}
-	}
-	//
-	// did we detect a voltage change?
-	//
-	if((v10000 != pwmt.v10000) || (v1000 != pwmt.v1000) || (v100 != pwmt.v100) || (v10 != pwmt.v10))	{	// Time to update - or was this the first time it was called?
-
-
-		// -----------------------
-		// 10V update
-
+	if(v10000 != pwmt.v10000)
+	{
 		//printf("10V diff: %d\n\r",v10000);
 
 		// To string
@@ -6071,57 +4263,64 @@ static void UiDriverHandlePowerSupply(void)
 
 		// Update segment
 		if(v10000)
-			UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*0),POS_PWR_IND_Y,digit,col,Black,0);
+			UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*0),POS_PWR_IND_Y,digit,COL_PWR_IND,Black,0);
 		else
 			UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*0),POS_PWR_IND_Y,digit,Black,Black,0);
 
 		// Save value
 		pwmt.v10000 = v10000;
+	}
 
-
-		// -----------------------
-		// 1V update
-
+	// -----------------------
+	// See if 1V needs update
+	v1000 = (val_p%10000)/1000;
+	if(v1000 != pwmt.v1000)
+	{
 		//printf("1V diff: %d\n\r",v1000);
 
 		// To string
 		digit[0] = 0x30 + (v1000 & 0x0F);
 
 		// Update segment
-		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*1),POS_PWR_IND_Y,digit,col,Black,0);
+		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*1),POS_PWR_IND_Y,digit,COL_PWR_IND,Black,0);
 
 		// Save value
 		pwmt.v1000 = v1000;
+	}
 
-		// -----------------------
-		// 0.1V update
-
+	// -----------------------
+	// See if 0.1V needs update
+	v100 = (val_p%1000)/100;
+	if(v100 != pwmt.v100)
+	{
 		//printf("0.1V diff: %d\n\r",v100);
 
 		// To string
 		digit[0] = 0x30 + (v100 & 0x0F);
 
 		// Update segment(skip the dot)
-		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*3),POS_PWR_IND_Y,digit,col,Black,0);
+		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*3),POS_PWR_IND_Y,digit,COL_PWR_IND,Black,0);
 
 		// Save value
 		pwmt.v100 = v100;
+	}
 
-		// -----------------------
-		// 0.01Vupdate
-
+	// -----------------------
+	// See if 0.01V needs update
+	v10 = (val_p%100)/10;
+	if(v10 != pwmt.v10)
+	{
 		//printf("0.01V diff: %d\n\r",v10);
 
 		// To string
 		digit[0] = 0x30 + (v10 & 0x0F);
 
 		// Update segment(skip the dot)
-		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*4),POS_PWR_IND_Y,digit,col,Black,0);
+		UiLcdHy28_PrintText((POS_PWR_IND_X + SMALL_FONT_WIDTH*4),POS_PWR_IND_Y,digit,COL_PWR_IND,Black,0);
 
 		// Save value
 		pwmt.v10 = v10;
 	}
-
 
 	// Reset accumulator
 	pwmt.p_curr 	= 0;
@@ -6172,7 +4371,7 @@ static void UiDriverUpdateLoMeter(uchar val,uchar active)
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverCreateTemperatureDisplay(uchar enabled,uchar create)
+static void UiDriverCreateTemperatureDisplay(uchar enabled,uchar create)
 {
 	if(create)
 	{
@@ -6181,11 +4380,9 @@ void UiDriverCreateTemperatureDisplay(uchar enabled,uchar create)
 
 		// LO tracking indicator
 		UiLcdHy28_DrawEmptyRect( POS_TEMP_IND_X,POS_TEMP_IND_Y + 14,10,109,Grey);
+
 		// Temperature - initial draw
-		if(df.temp_enabled & 0xf0)
-			UiLcdHy28_PrintText((POS_TEMP_IND_X + 50),(POS_TEMP_IND_Y + 1), "  77.0F",Grey,Black,0);
-		else
-			UiLcdHy28_PrintText((POS_TEMP_IND_X + 50),(POS_TEMP_IND_Y + 1), "  25.0C",Grey,Black,0);
+		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50),(POS_TEMP_IND_Y + 1), "  25.0C",Grey,Black,0);
 	}
 
 	if(enabled)
@@ -6204,12 +4401,7 @@ void UiDriverCreateTemperatureDisplay(uchar enabled,uchar create)
 		// Lock indicator
 		UiLcdHy28_PrintText((POS_TEMP_IND_X + 45),(POS_TEMP_IND_Y + 1),"*",Grey,Black,0);
 	}
-	//
-	if((df.temp_enabled & 0x0f) == TCXO_STOP)	{	// if temperature update is disabled, don't update display!
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 45),(POS_TEMP_IND_Y + 1), " ",Grey,Black,0);	// delete asterisc
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50),(POS_TEMP_IND_Y + 1), "STOPPED",Grey,Black,0);
-	}
-	//
+
 	// Meter
 	UiDriverUpdateLoMeter(13,enabled);
 }
@@ -6225,58 +4417,37 @@ static void UiDriverRefreshTemperatureDisplay(uchar enabled,int temp)
 {
 	uchar	v1000,v10000,v100000,v1000000;
 	char	digit[2];
-	ulong	ttemp;
 
-	if((df.temp_enabled & 0x0f) == TCXO_STOP)	{	// if temperature update is disabled, don't update display!
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 45),(POS_TEMP_IND_Y + 1), " ",Grey,Black,0);	// delete asterisk
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50),(POS_TEMP_IND_Y + 1), "STOPPED",Grey,Black,0);
-		return;
-	}
+	//printf("temp: %i\n\r",temp);
 
-	if((temp < 0) || (temp > 1000000))	{// is the temperature out of range?
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*1),(POS_TEMP_IND_Y + 1),"---",Grey,Black,0);
-		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*5),(POS_TEMP_IND_Y + 1),"-",Grey,Black,0);
-	}
-	else	{
+	// Terminate
+	digit[1] = 0;
 
-		//printf("temp: %i\n\r",temp);
-
-		// Terminate
-		digit[1] = 0;
-
-		ttemp = (ulong)temp;	// convert to long to make sure that our workspace is large enough
-
-		if(df.temp_enabled & 0xf0)	{	// Is it Fahrenheit mode?
-			ttemp *= 9;			// multiply by 1.8
-			ttemp /= 5;
-			ttemp += 320000;	// Add 32 degrees
-		}
-
-		// -----------------------
-		// See if 100 needs update
-		v1000000 = (ttemp%10000000)/1000000;
-		//	if(v1000000 != lo.v1000000)
-		//	{
-		//printf("100 diff: %d\n\r",v1000000);
+	// -----------------------
+	// See if 100C needs update
+	v1000000 = (temp%10000000)/1000000;
+	if(v1000000 != lo.v1000000)
+	{
+		//printf("100C diff: %d\n\r",v1000000);
 
 		// To string
 		digit[0] = 0x30 + (v1000000 & 0x0F);
 
 		// Update segment (optional)
 		if(v1000000)
-				UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*1),(POS_TEMP_IND_Y + 1),digit,Grey,Black,0);
-			else
-				UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*1),(POS_TEMP_IND_Y + 1),digit,Black,Black,0);
+			UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*1),(POS_TEMP_IND_Y + 1),digit,Grey,Black,0);
+		else
+			UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*1),(POS_TEMP_IND_Y + 1),digit,Black,Black,0);
 
 		// Save value
 		lo.v1000000 = v1000000;
-		//	}
+	}
 
-		// -----------------------
-		// See if 10 needs update
-		v100000 = (ttemp%1000000)/100000;
-		//	if(v100000 != lo.v100000)
-		//	{
+	// -----------------------
+	// See if 10C needs update
+	v100000 = (temp%1000000)/100000;
+	if(v100000 != lo.v100000)
+	{
 		//printf("10C diff: %d\n\r",v100000);
 
 		// To string
@@ -6287,13 +4458,13 @@ static void UiDriverRefreshTemperatureDisplay(uchar enabled,int temp)
 
 		// Save value
 		lo.v100000 = v100000;
-		//	}
+	}
 
-		// -----------------------
-		// See if 1 needs update
-		v10000 = (ttemp%100000)/10000;
-		//	if(v10000 != lo.v10000)
-		//	{
+	// -----------------------
+	// See if 1C needs update
+	v10000 = (temp%100000)/10000;
+	if(v10000 != lo.v10000)
+	{
 		//printf("1C diff: %d\n\r",v10000);
 
 		// To string
@@ -6304,26 +4475,24 @@ static void UiDriverRefreshTemperatureDisplay(uchar enabled,int temp)
 
 		// Save value
 		lo.v10000 = v10000;
-		//	}
+	}
 
-		// -----------------------
-		// See if 0.1 needs update
-		v1000 = (ttemp%10000)/1000;
-		//	if(v1000 != lo.v1000)
-		//	{
-		//printf("0.1 diff: %d\n\r",v1000);
+	// -----------------------
+	// See if 0.1C needs update
+	v1000 = (temp%10000)/1000;
+	if(v1000 != lo.v1000)
+	{
+		//printf("0.1C diff: %d\n\r",v1000);
 
 		// To string
 		digit[0] = 0x30 + (v1000 & 0x0F);
 
-		// Save value
-		lo.v1000 = v1000;
-		//
 		// Update segment
 		UiLcdHy28_PrintText((POS_TEMP_IND_X + 50 + SMALL_FONT_WIDTH*5),(POS_TEMP_IND_Y + 1),digit,Grey,Black,0);
-	}
 
-//	}
+		// Save value
+		lo.v1000 = v1000;
+	}
 }
 
 //*----------------------------------------------------------------------------
@@ -6336,12 +4505,11 @@ static void UiDriverRefreshTemperatureDisplay(uchar enabled,int temp)
 static void UiDriverHandleLoTemperature(void)
 {
 	int		temp = 0;
-	int		comp, comp_p;
-	float	dtemp, remain, t_index;
+	int		comp;
 	uchar	tblp;
 
-	// No need to process if no chip avail or updates are disabled
-	if((lo.sensor_present) || ((df.temp_enabled & 0x0f) == TCXO_STOP))
+	// No need to process if no chip avail
+	if(lo.sensor_present)
 		return;
 
 	lo.skip++;
@@ -6354,67 +4522,38 @@ static void UiDriverHandleLoTemperature(void)
 	if(ui_si570_read_temp(&temp) != 0)
 		return;
 
-	// Get temperature from sensor with its maximum precision
-	//
-	dtemp = (float)temp;	// get temperature
-	dtemp /= 10000;			// convert to decimal degrees
-	remain = truncf(dtemp);	// get integer portion of temperature
-	remain = dtemp - remain;	// get fractional portion
-
 	// Refresh UI
 	UiDriverRefreshTemperatureDisplay(1,temp);
 
 	// Compensate only if enabled
-	if(!(df.temp_enabled & 0x0f))
+	if(!df.temp_enabled)
 		return;
 
 	//printf("temp: %i\n\r",temp);
 
 	// Temperature to unsigned table pointer
-	t_index  = (uchar)((temp%1000000)/100000);
-	t_index *= 10;
-	t_index += (uchar)((temp%100000)/10000);
-
-	// Check for overflow - keep within the lookup table
-	if((t_index < 0) || (t_index > 150))	{	// the temperature sensor function "wraps around" below zero
-		t_index = 0;						// point at the bottom of the temperature table
-		dtemp = 0;							// zero out fractional calculations
-		remain = 0;
-	}
-	else if(t_index > 98)	{				// High temperature - limit to maximum
-		t_index = 98;						// Point to (near) top of table
-		dtemp = 0;							// zero out fractional calculations
-		remain = 0;
-	}
-
-	tblp = (uchar)t_index;						// convert to index
+	tblp  = (uchar)((temp%1000000)/100000);
+	tblp *= 10;
+	tblp += (uchar)((temp%100000)/10000);
 	//printf("ptr: %d\n\r",tblp);
 
 	// Update drift indicator, no overload
 	UiDriverUpdateLoMeter(tblp - 30,1);
 
 	// Check for overflow
-	if(tblp > 99)
+	if(tblp > 100)
 	{
 		//printf("out of range\n\r");
 		return;
 	}
 
 	// Value from freq table
-	comp = tcxo_table_20m[tblp];				// get the first entry in the table
-	comp_p = tcxo_table_20m[tblp + 1];			// get the next entry in the table to determine fraction of frequency step
+	comp = tcxo_table_20m[tblp];
 	//printf("comp:  %d - %i\n\r",tblp,comp);
 
-	comp_p = comp_p - comp;	//					// get frequency difference between the two steps
-
-	dtemp = (float)comp_p;	// change it to float for the calculation
-	dtemp *= remain;		// get proportion of temperature difference between the two steps using the fraction
-
-	comp += (int)dtemp;		// add the compensation value to the lower of the two frequency steps
-
 	// Change needed ?
-	if(lo.comp == comp)		// is it the same value?
-		return;				// yes - bail out, no change needed
+	if(lo.comp == comp)
+		return;
 
 	// Update frequency, without reflecting it on the LCD
 	if(comp != (-1))
@@ -6570,10 +4709,8 @@ static void UiDriverSwitchOffPtt(void)
 	{
 		if(ts.txrx_mode == TRX_MODE_RX)
 		{
-			if(!ts.tx_disable)	{
-				ts.txrx_mode = TRX_MODE_TX;
-				ui_driver_toggle_tx();
-			}
+			ts.txrx_mode = TRX_MODE_TX;
+			ui_driver_toggle_tx();
 		}
 
 		ts.ptt_req = 0;
@@ -6587,7 +4724,7 @@ static void UiDriverSwitchOffPtt(void)
 		goto unmute_only;
 
 	// PTT off
-	if((ts.dmod_mode == DEMOD_USB)||(ts.dmod_mode == DEMOD_LSB) || (ts.dmod_mode == DEMOD_AM))
+	if((ts.dmod_mode == DEMOD_USB)||(ts.dmod_mode == DEMOD_LSB))
 	{
 		// PTT flag on ?
 		if(ts.txrx_mode == TRX_MODE_TX)
@@ -6615,7 +4752,39 @@ static void UiDriverSwitchOffPtt(void)
 	}
 
 unmute_only:
-return;
+
+	// Handle Codec return to RX
+	UiDriverDelayedUnmute();
+}
+
+//*----------------------------------------------------------------------------
+//* Function Name       : UiDriverDelayedUnmute
+//* Object              :
+//* Input Parameters    :
+//* Output Parameters   :
+//* Functions called    :
+//*----------------------------------------------------------------------------
+static void UiDriverDelayedUnmute(void)
+{
+	// Is delayed auto mute requested ?
+	if(ts.audio_unmute)
+	{
+		// Delay counter
+		unmute_delay++;
+		//if(unmute_delay == 3000)
+		if(unmute_delay == 3)
+		{
+			// Unmute
+			if(ts.audio_gain < 10)
+				Codec_Volume((ts.audio_gain*8));
+			else
+				Codec_Volume((80));
+
+			// Reset all publics
+			unmute_delay 	= 0;
+			ts.audio_unmute = 0;
+		}
+	}
 }
 
 //*----------------------------------------------------------------------------
@@ -6625,514 +4794,260 @@ return;
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-void UiDriverSetBandPowerFactor(uchar band)
+static void UiDriverSetBandPowerFactor(uchar band)
 {
-	float	pf_temp;	// used as a holder for percentage of power output scaling
-
 	// Display clear
-//	UiLcdHy28_PrintText(((POS_SM_IND_X + 18) + 140),(POS_SM_IND_Y + 59),"PROT",Black,Black,4);
+	UiLcdHy28_PrintText(((POS_SM_IND_X + 18) + 140),(POS_SM_IND_Y + 59),"PROT",Black,Black,4);
 
-	// If full power selected, no need to check band - for now, until this gets its own menu item!
-	//
-	if(ts.power_level == PA_LEVEL_FULL)	{
-		switch(band)	{		// get pre-loaded power output scaling factor for band
-			case BAND_MODE_80:
-				pf_temp = (float)ts.pwr_80m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_60:
-				pf_temp = (float)ts.pwr_60m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_40:
-				pf_temp = (float)ts.pwr_40m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_30:
-				pf_temp = (float)ts.pwr_30m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_20:
-				pf_temp = (float)ts.pwr_20m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_17:
-				pf_temp = (float)ts.pwr_17m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_15:
-				pf_temp = (float)ts.pwr_15m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_12:
-				pf_temp = (float)ts.pwr_12m_full_adj;		// load full power level
-				break;
-			case BAND_MODE_10:
-				pf_temp = (float)ts.pwr_10m_full_adj;		// load full power level
-				break;
-			default:
-				pf_temp = 50;
-				break;
-		}
-	}
-	else	{					// OTHER than FULL power!
-		switch(band)	{		// get pre-loaded power output scaling factor for band
-			case BAND_MODE_80:
-				pf_temp = (float)ts.pwr_80m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_60:
-				pf_temp = (float)ts.pwr_60m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_40:
-				pf_temp = (float)ts.pwr_40m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_30:
-				pf_temp = (float)ts.pwr_30m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_20:
-				pf_temp = (float)ts.pwr_20m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_17:
-				pf_temp = (float)ts.pwr_17m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_15:
-				pf_temp = (float)ts.pwr_15m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_12:
-				pf_temp = (float)ts.pwr_12m_5w_adj;		// load 5 watt power level
-				break;
-			case BAND_MODE_10:
-				pf_temp = (float)ts.pwr_10m_5w_adj;		// load 5 watt power level
-				break;
-			default:
-				pf_temp = 50;
-				break;
-		}
-	}
-	//
-	ts.tx_power_factor = pf_temp/100;	// preliminarily scale to percent, which is the default for 5 watts
-
-	// now rescale to power levels <5 watts
-
-	switch(ts.power_level)	{
-		case	PA_LEVEL_0_5W:
-			pf_temp = 0.316;		// rescale for 10% of 5 watts
-			break;
-		case	PA_LEVEL_1W:
-			pf_temp = 0.447;		// rescale for 20% of 5 watts
-			break;
-		case	PA_LEVEL_2W:
-			pf_temp = 0.6324;		// rescale for 40% of 5 watts
-			break;
-		default:					// 100% is 5 watts or full power!!
-			pf_temp = 1;
-			break;
-	}
-	//
-	ts.tx_power_factor *= pf_temp;	// rescale this for the actual power level
-}
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCWSidebandMode
-//* Object              : Determine CW sideband and offset mode settings
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-//
-void UiCWSidebandMode(void)
-{
-	switch(ts.cw_offset_mode)	{
-		case CW_OFFSET_USB_TX:
-		case CW_OFFSET_USB_RX:
-		case CW_OFFSET_USB_SHIFT:
-			ts.cw_lsb = 0;				// Not LSB!
-			break;
-		case CW_OFFSET_LSB_TX:
-		case CW_OFFSET_LSB_RX:
-		case CW_OFFSET_LSB_SHIFT:
-			ts.cw_lsb = 1;				// It is LSB
-			break;
-		case CW_OFFSET_AUTO_TX:						// For "auto" modes determine if we are above or below threshold frequency
-		case CW_OFFSET_AUTO_RX:
-		case CW_OFFSET_AUTO_SHIFT:
-			if(df.tune_new >= USB_FREQ_THRESHOLD)	// is the current frequency above the USB threshold?
-				ts.cw_lsb = 0;						// yes - indicate that it is USB
-			else
-				ts.cw_lsb = 1;						// no - LSB
-			break;
-		default:
-			ts.cw_lsb = 0;
-			break;
-	}
-}
-//
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcNB_AGC
-//* Object              : Calculate Noise Blanker AGC settings
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcNB_AGC(void)
-{
-	float temp_float;
-
-	temp_float = (float)ts.nb_agc_time_const;	// get user setting
-	temp_float = NB_MAX_AGC_SETTING-temp_float;		// invert (0 = minimum))
-	temp_float /= 1.1;								// scale calculation
-	temp_float *= temp_float;						// square value
-	temp_float += 1;								// offset by one
-	temp_float /= 44000;							// rescale
-	temp_float += 1;								// prevent negative log result
-	ads.nb_sig_filt = log10f(temp_float);			// de-linearize and save in "new signal" contribution parameter
-	ads.nb_agc_filt = 1 - ads.nb_sig_filt;			// calculate parameter for recyling "old" AGC value
-}
-//
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcRxIqGainAdj
-//* Object              : Calculate RX IQ Gain adjustments
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcRxIqGainAdj(void)
-{
-	if(ts.dmod_mode == DEMOD_AM)
-		ts.rx_adj_gain_var_i = (float)ts.rx_iq_am_gain_balance;			// get current gain adjustment for AM
-	else if(ts.dmod_mode == DEMOD_LSB)
-		ts.rx_adj_gain_var_i = (float)ts.rx_iq_lsb_gain_balance;		// get current gain adjustment setting for LSB
-	else
-		ts.rx_adj_gain_var_i = (float)ts.rx_iq_usb_gain_balance;		// get current gain adjustment setting	USB and other modes
-	//
-	ts.rx_adj_gain_var_i /= 1024;		// fractionalize it
-	ts.rx_adj_gain_var_q = -ts.rx_adj_gain_var_i;				// get "invert" of it
-	ts.rx_adj_gain_var_i += 1;		// offset it by one (e.g. 0 = unity)
-	ts.rx_adj_gain_var_q += 1;
-}
-
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcTxIqGainAdj
-//* Object              : Calculate TX IQ Gain adjustments
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcTxIqGainAdj(void)
-{
-	// Note:  There is a fixed amount of offset due to the fact that the phase-added Hilbert (e.g. 0, 90) transforms are
-	// slightly asymmetric that is added so that "zero" is closer to being the proper phase balance.
-	//
-	if(ts.dmod_mode == DEMOD_LSB)
-		ts.tx_adj_gain_var_i = (float)ts.tx_iq_lsb_gain_balance;		// get current gain adjustment setting for LSB
-	else
-		ts.tx_adj_gain_var_i = (float)ts.tx_iq_usb_gain_balance;		// get current gain adjustment setting for USB and other modes
-	//
-	ts.tx_adj_gain_var_i /= 1024;		// fractionalize it
-	ts.tx_adj_gain_var_q = -ts.tx_adj_gain_var_i;				// get "invert" of it
-	ts.tx_adj_gain_var_i += 1;		// offset it by one (e.g. 0 = unity)
-	ts.tx_adj_gain_var_q += 1;
-}
-
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcRxPhaseAdj
-//* Object              : Calculate RX FFT coeffients based on adjustment settings
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcRxPhaseAdj(void)
-{
-	float f_coeff, f_offset, var_norm, var_inv;
-	ulong i;
-	int phase;
-	//
-	// always make a fresh copy of the original Q and I coefficients
-	// NOTE:  We are assuming that the I and Q filters are of the same length!
-	//
-	fc.rx_q_num_taps = Q_NUM_TAPS;
-	fc.rx_i_num_taps = I_NUM_TAPS;
-	//
-	fc.rx_q_block_size = Q_BLOCK_SIZE;
-	fc.rx_i_block_size = I_BLOCK_SIZE;
-	//
-	if(ts.dmod_mode == DEMOD_AM)	{		// AM - load low-pass, non Hilbert filters (e.g. no I/Q phase shift
-		if(ts.filter_id == AUDIO_10KHZ)	{	// Wide AM - "10 kHz" filter (total of 20 kHz bandwidth)
-			for(i = 0; i < Q_NUM_TAPS; i++)	{
-				fc.rx_filt_q[i] = iq_rx_am_10k_coeffs[i];
-				fc.rx_filt_i[i] = iq_rx_am_10k_coeffs[i];
-			}
-		}
-		else if(ts.filter_id == AUDIO_3P6KHZ)	{	// "Medium" AM - "3.6" kHz filter (total of 7.2 kHz bandwidth)
-			for(i = 0; i < Q_NUM_TAPS; i++)	{
-				fc.rx_filt_q[i] = iq_rx_am_3k6_coeffs[i];
-				fc.rx_filt_i[i] = iq_rx_am_3k6_coeffs[i];
-			}
-		}
-		else	{
-			for(i = 0; i < Q_NUM_TAPS; i++)	{		// "Narrow" AM - "1.8" kHz filter (total of 3.6 kHz bandwidth)
-				fc.rx_filt_q[i] = iq_rx_am_2k3_coeffs[i];
-				fc.rx_filt_i[i] = iq_rx_am_2k3_coeffs[i];
-			}
-		}
-	}
-	else	{		// Not AM - load Hilbert transformation filters
-		if(ts.filter_id == AUDIO_10KHZ)	{
-			for(i = 0; i < Q_NUM_TAPS; i++)	{
-				fc.rx_filt_q[i] = q_rx_10k_coeffs[i];
-				fc.rx_filt_i[i] = i_rx_10k_coeffs[i];
-			}
-		}
-		else	{
-			for(i = 0; i < Q_NUM_TAPS; i++)	{
-				fc.rx_filt_q[i] = q_rx_3k6_coeffs[i];
-				fc.rx_filt_i[i] = i_rx_3k6_coeffs[i];	// phase shift in other modes
-			}
-		}
-		//
-		if(ts.dmod_mode == DEMOD_LSB)	// get phase setting appropriate to mode
-			phase = ts.rx_iq_lsb_phase_balance;		// yes, get current gain adjustment setting for LSB
-		else
-			phase = ts.rx_iq_usb_phase_balance;		// yes, get current gain adjustment setting for USB and other mdoes
-		//
-		if(phase != 0)	{	// is phase adjustment non-zero?
-			var_norm = (float)phase;
-			var_norm = fabs(var_norm);		// get absolute value of this gain adjustment
-			var_inv = 32 - var_norm;		// calculate "inverse" of number of steps
-			var_norm /= 32;		// fractionalize by the number of steps
-			var_inv /= 32;						// fractionalize this one, too
-			if(phase < 0)	{	// was the phase adjustment negative?
-				if(ts.filter_id == AUDIO_10KHZ)	{
-					for(i = 0; i < Q_NUM_TAPS; i++)	{
-						f_coeff = var_inv * q_rx_10k_coeffs[i];	// get fraction of 90 degree setting
-						f_offset = var_norm * q_rx_10k_coeffs_minus[i];	// get fraction of 89.5 degree setting
-						fc.rx_filt_q[i] = f_coeff + f_offset;	// synthesize new coefficient
-					}
-				}
-				else	{
-					for(i = 0; i < Q_NUM_TAPS; i++)	{
-						f_coeff = var_inv * q_rx_3k6_coeffs[i];	// get fraction of 90 degree setting
-						f_offset = var_norm * q_rx_3k6_coeffs_minus[i];	// get fraction of 89.5 degree setting
-						fc.rx_filt_q[i] = f_coeff + f_offset;	// synthesize new coefficient
-					}
-				}
-			}
-			else	{							// adjustment was positive
-				if(ts.filter_id == AUDIO_10KHZ)	{
-					for(i = 0; i < Q_NUM_TAPS; i++)	{
-						f_coeff = var_inv * q_rx_10k_coeffs[i];	// get fraction of 90 degree setting
-						f_offset = var_norm * q_rx_10k_coeffs_plus[i];	// get fraction of 90.5 degree setting
-						fc.rx_filt_q[i] = f_coeff + f_offset;	// synthesize new coefficient
-					}
-				}
-				else	{
-					for(i = 0; i < Q_NUM_TAPS; i++)	{
-						f_coeff = var_inv * q_rx_3k6_coeffs[i];	// get fraction of 90 degree setting
-						f_offset = var_norm * q_rx_3k6_coeffs_plus[i];	// get fraction of 90.5 degree setting
-						fc.rx_filt_q[i] = f_coeff + f_offset;	// synthesize new coefficient
-					}
-				}
-			}
-		}
-	}
-	//
-
-	if(ts.dmod_mode == DEMOD_AM)		// use "Q" filter settings in AM mode
-		arm_fir_init_f32(&FIR_I,fc.rx_q_num_taps,(float32_t *)&fc.rx_filt_i[0], &FirState_I[0],fc.rx_q_block_size);
-	else								// not in AM mode - use normal settings
-		arm_fir_init_f32(&FIR_I,fc.rx_i_num_taps,(float32_t *)&fc.rx_filt_i[0], &FirState_I[0],fc.rx_i_block_size);
-	//
-	arm_fir_init_f32(&FIR_Q,fc.rx_q_num_taps,(float32_t *)&fc.rx_filt_q[0], &FirState_Q[0],fc.rx_q_block_size);
-	//
-}
-//
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcTxCompLevel
-//* Object              : Set TX audio compression settings (gain and ALC decay rate) based on user setting
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcTxCompLevel(void)
-{
-	float tcalc;
-	ushort	value;
-
-	switch(ts.tx_comp_level)	{				// get the speech compressor setting
-		case 0:		// minimum compression
-			ts.alc_tx_postfilt_gain = 1;		// set the gain for that processor value
-			ts.alc_decay = 15;					// set the decay rate for that processor value
-			break;
-		case 1:
-			ts.alc_tx_postfilt_gain = 2;
-			ts.alc_decay = 12;
-			break;
-		case 2:
-			ts.alc_tx_postfilt_gain = 4;
-			ts.alc_decay = 10;
-			break;
-		case 3:
-			ts.alc_tx_postfilt_gain = 6;
-			ts.alc_decay = 9;
-			break;
-		case 4:
-			ts.alc_tx_postfilt_gain = 8;
-			ts.alc_decay = 8;
-			break;
-		case 5:
-			ts.alc_tx_postfilt_gain = 7;
-			ts.alc_decay = 7;
-			break;
-		case 6:
-			ts.alc_tx_postfilt_gain = 10;
-			ts.alc_decay = 6;
-			break;
-		case 7:
-			ts.alc_tx_postfilt_gain = 12;
-			ts.alc_decay = 5;
-			break;
-		case 8:
-			ts.alc_tx_postfilt_gain = 15;
-			ts.alc_decay = 4;
-			break;
-		case 9:
-			ts.alc_tx_postfilt_gain = 17;
-			ts.alc_decay = 3;
-			break;
-		case 10:
-			ts.alc_tx_postfilt_gain = 20;
-			ts.alc_decay = 2;
-			break;
-		case 11:
-			ts.alc_tx_postfilt_gain = 25;
-			ts.alc_decay = 1;
-			break;
-		case 12:		// Maximum compression
-			ts.alc_tx_postfilt_gain = 25;
-			ts.alc_decay = 0;
-			break;
-		case 13:	// read saved values from EEPROM
-			// ------------------------------------------------------------------------------------
-			// Try to read ALC release (decay) time
-			if(Read_VirtEEPROM(EEPROM_ALC_DECAY_TIME, &value) == 0)
-			{
-				if(value > ALC_DECAY_MAX)	// if out of range, it was bogus
-					value = ALC_DECAY_DEFAULT;	// reset to default
-				//
-				ts.alc_decay = value;
-				//printf("-->ALC release (decay) time loaded\n\r");
-			}
-			//
-			// ------------------------------------------------------------------------------------
-			// Try to read TX audio post-filter gain setting
-			if(Read_VirtEEPROM(EEPROM_ALC_POSTFILT_TX_GAIN, &value) == 0)
-			{
-				if((value > ALC_POSTFILT_GAIN_MAX) || (value < ALC_POSTFILT_GAIN_MIN))	// if out of range, it was bogus
-					value = ALC_POSTFILT_GAIN_DEFAULT;	// reset to default
-				//
-				ts.alc_tx_postfilt_gain = value;
-				//printf("-->TX audio post-filter gain setting loaded\n\r");
-			}
-		default:
-			ts.alc_tx_postfilt_gain = 4;
-			ts.alc_decay = 10;
-			break;
-	}
-	//
-	tcalc = (float)ts.alc_decay;	// use temp var "tcalc" as audio function
-	tcalc += 35;			// can be called mid-calculation!
-	tcalc /= 10;
-	tcalc *= -1;
-	tcalc = powf(10, tcalc);
-	ads.alc_decay = tcalc;
-}
-
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiCalcTxPhaseAdj
-//* Object              : Calculate TX FFT coeffients based on adjustment settings
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-void UiCalcTxPhaseAdj(void)
-{
-	float f_coeff, f_offset, var_norm, var_inv;
-	ulong i;
-	int phase;
-	//
-	ads.tx_filter_adjusting = 1;		// disable TX I/Q filter during adjustment
-	//
-
-	// always make a fresh copy of the original Q and I coefficients
-	// NOTE:  We are assuming that the I and Q filters are of the same length!
-	//
-	fc.tx_q_num_taps = Q_TX_NUM_TAPS;
-	fc.tx_i_num_taps = I_TX_NUM_TAPS;
-	//
-	fc.tx_q_block_size = Q_TX_BLOCK_SIZE;
-	fc.tx_i_block_size = I_TX_BLOCK_SIZE;
-	//
-	for(i = 0; i < Q_TX_NUM_TAPS; i++)	{
-		fc.tx_filt_q[i] = q_tx_coeffs[i];
-		fc.tx_filt_i[i] = i_tx_coeffs[i];
-	}
-	//
-	if(ts.dmod_mode == DEMOD_LSB)
-		phase = ts.tx_iq_lsb_phase_balance;		// yes, get current gain adjustment setting for LSB
-	else
-		phase = ts.tx_iq_usb_phase_balance;		// yes, get current gain adjustment setting
-	//
-	if(phase != 0)	{	// is phase adjustment non-zero?
-		var_norm = (float)phase;		// yes, get current gain adjustment setting
-		var_norm = fabs(var_norm);		// get absolute value of this gain adjustment
-		var_inv = 32 - var_norm;		// calculate "inverse" of number of steps
-		var_norm /= 32;		// fractionalize by the number of steps
-		var_inv /= 32;						// fractionalize this one, too
-		if(phase < 0)	{	// was the phase adjustment negative?
-			for(i = 0; i < Q_TX_NUM_TAPS; i++)	{
-				f_coeff = var_inv * q_tx_coeffs[i];	// get fraction of 90 degree setting
-				f_offset = var_norm * q_tx_coeffs_minus[i];
-				fc.tx_filt_q[i] = f_coeff + f_offset;
-			}
-		}
-		else	{							// adjustment was positive
-			for(i = 0; i < Q_TX_NUM_TAPS; i++)	{
-				f_coeff = var_inv * q_tx_coeffs[i];	// get fraction of 90 degree setting
-				f_offset = var_norm * q_tx_coeffs_plus[i];
-				fc.tx_filt_q[i] = f_coeff + f_offset;
-			}
-		}
-	}
-	//
-
-	arm_fir_init_f32(&FIR_I_TX,fc.tx_i_num_taps,(float32_t *)&fc.tx_filt_i[0], &FirState_I_TX[0],fc.tx_i_block_size);
-	arm_fir_init_f32(&FIR_Q_TX,fc.tx_q_num_taps,(float32_t *)&fc.tx_filt_q[0], &FirState_Q_TX[0],fc.tx_q_block_size);
-
-	ads.tx_filter_adjusting = 0;		// re enable TX I/Q filter now that we are done
-}
-
-//
-//*----------------------------------------------------------------------------
-//* Function Name       : UiDriverLoadFilterValue
-//* Object              : Load stored filter value from EEPROM
-//* Input Parameters    :
-//* Output Parameters   :
-//* Functions called    :
-//*----------------------------------------------------------------------------
-//
-void UiDriverLoadFilterValue(void)	// Get filter value so we can init audio with it
-{
-	ushort value;
-
-	if(Read_VirtEEPROM(EEPROM_BAND_MODE, &value) == 0)
+	// If full power selected, no need to check band
+	if(ts.power_level == PA_LEVEL_FULL)
 	{
-		ts.filter_id = (value >> 12) & 0x0F;	// get filter setting
-		if((ts.filter_id >= AUDIO_MAX_FILTER) || (ts.filter_id < AUDIO_MIN_FILTER))		// audio filter invalid?
-			ts.filter_id = AUDIO_DEFAULT_FILTER;	// set default audio filter
-		//
-		//printf("-->filter mode loaded\n\r");
+		ts.tx_power_factor	= 1.00;
+		return;
+	}
+
+	switch(band)
+	{
+		// -------------------------------------------------------------
+		// 80m
+		case BAND_MODE_80:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.03;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.04;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.052;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.08;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 60m
+		case BAND_MODE_60:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.025;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.035;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.045;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.10;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 40m
+		case BAND_MODE_40:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.035;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.05;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.065;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.10;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 30m
+		case BAND_MODE_30:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.04;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.06;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.08;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.13;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 20m
+		case BAND_MODE_20:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.08;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.115;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.145;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.30;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 17m
+		case BAND_MODE_17:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.08;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.12;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.16;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.40;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 15m
+		case BAND_MODE_15:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.11;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.16;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.20;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 0.90;
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 12m
+		case BAND_MODE_12:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.13;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.20;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 0.30;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 1.00;	// actually 3.5W without attenuation
+					break;
+			}
+
+			break;
+		}
+
+		// -------------------------------------------------------------
+		// 10m
+		case BAND_MODE_10:
+		{
+			switch(ts.power_level)
+			{
+				case PA_LEVEL_0_5W:
+					ts.tx_power_factor	= 0.20;
+					break;
+
+				case PA_LEVEL_1W:
+					ts.tx_power_factor	= 0.40;
+					break;
+
+				case PA_LEVEL_2W:
+					ts.tx_power_factor	= 1.00;
+					break;
+
+				default:	// 5W
+					ts.tx_power_factor	= 1.00;	// actually 1.5W without attenuation
+					break;
+			}
+
+			break;
+		}
+
+		default:
+			ts.tx_power_factor	= 0.50;
+			break;
 	}
 }
 
-//
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverLoadEepromValues
 //* Object              : load saved values on driver start
@@ -7140,47 +5055,30 @@ void UiDriverLoadFilterValue(void)	// Get filter value so we can init audio with
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-//
-void UiDriverLoadEepromValues(void)
+static void UiDriverLoadEepromValues(void)
 {
 	ushort value,value1;
-	uint16_t uint_val;
-	int16_t	*int_val;
 
-	// Do a sample reads to "prime the pump" before we start...
-	// This is to make the function work reliabily after boot-up
-	//
-	Read_VirtEEPROM(EEPROM_ZERO_LOC_UNRELIABLE, &value);	// Let's use location zero - which may not work reliably, anyway!
-	//
 	// ------------------------------------------------------------------------------------
 	// Try to read Band and Mode saved values
-	if(Read_VirtEEPROM(EEPROM_BAND_MODE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_BAND_MODE], &value) == 0)
 	{
-		ts.band = value & 0x00FF;
-		if(ts.band > MAX_BANDS-1)			// did we get an insane value from EEPROM?
-			ts.band = BAND_MODE_80;		//	yes - set to 80 meters
-		//
-		ts.dmod_mode = (value >> 8) & 0x0F;		// demodulator mode might not be right for saved band!
-		if(ts.dmod_mode > DEMOD_MAX_MODE)		// valid mode value from EEPROM?
-			ts.dmod_mode = DEMOD_LSB;			// no - set to LSB
-		//
-		ts.filter_id = (value >> 12) & 0x0F;	// get filter setting
-		if((ts.filter_id >= AUDIO_MAX_FILTER) || (ts.filter_id < AUDIO_MIN_FILTER))		// audio filter invalid?
-			ts.filter_id = AUDIO_DEFAULT_FILTER;	// set default audio filter
-		//
+		ts.band_mode = value & 0xFF;
+		ts.dmod_mode = (value >> 8) & 0xFF;		// demodulator mode might not be right for saved band!
 		//printf("-->band and mode loaded\n\r");
 	}
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Freq saved values
-	if(	(Read_VirtEEPROM(EEPROM_FREQ_HIGH, &value) == 0) &&
-		(Read_VirtEEPROM(EEPROM_FREQ_LOW, &value1) == 0))
+	if(	(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_HIGH], &value) == 0) &&
+		(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_LOW], &value1) == 0))
 	{
 		ulong saved = (value << 16) | (value1);
 
 		// We have loaded from eeprom the last used band, but can't just
 		// load saved frequency, as it could be out of band, so do a
 		// boundary check first
-		if((saved >= tune_bands[ts.band]) && (saved <= (tune_bands[ts.band] + size_bands[ts.band])))
+		if((saved >= tune_bands[ts.band_mode]) && (saved <= (tune_bands[ts.band_mode] + size_bands[ts.band_mode])))
 		{
 			df.tune_new = saved;
 			//printf("-->frequency loaded\n\r");
@@ -7188,69 +5086,23 @@ void UiDriverLoadEepromValues(void)
 		else
 		{
 			// Load default for this band
-			df.tune_new = tune_bands[ts.band];
+			df.tune_new = tune_bands[ts.band_mode];
 			//printf("-->base frequency loaded\n\r");
 		}
 	}
-	//
-	// Try to read saved per-band values for frequency, mode and filter
-	//
-	ulong i, saved;
-	//
-	for(i = 0; i < MAX_BANDS; i++)	{		// read from stored bands
-		// ------------------------------------------------------------------------------------
-		// Try to read Band and Mode saved values
-		//
-		if(Read_VirtEEPROM(EEPROM_BAND0_MODE + i, &value) == 0)			{
-			// Note that ts.band will, by definition, be equal to index "i"
-			//
-			band_decod_mode[i] = (value >> 8) & 0x0F;		// demodulator mode might not be right for saved band!
-			if(band_decod_mode[i] > DEMOD_MAX_MODE)		// valid mode value from EEPROM?
-				band_decod_mode[i] = DEMOD_LSB;			// no - set to LSB
-			//
-			band_filter_mode[i] = (value >> 12) & 0x0F;	// get filter setting
-			if((band_filter_mode[i] >= AUDIO_MAX_FILTER) || (ts.filter_id < AUDIO_MIN_FILTER))		// audio filter invalid?
-				band_filter_mode[i] = AUDIO_DEFAULT_FILTER;	// set default audio filter
-			//
-			//printf("-->band, mode and filter setting loaded\n\r");
-		}
 
-		// ------------------------------------------------------------------------------------
-		// Try to read Freq saved values
-		if(	(Read_VirtEEPROM(EEPROM_BAND0_FREQ_HIGH + i, &value) == 0) && (Read_VirtEEPROM(EEPROM_BAND0_FREQ_LOW + i, &value1) == 0))	{
-			saved = (value << 16) | (value1);
-			//
-			// We have loaded from eeprom the last used band, but can't just
-			// load saved frequency, as it could be out of band, so do a
-			// boundary check first
-			//
-			if((saved >= tune_bands[i]) && (saved <= (tune_bands[i] + size_bands[i])))	{
-				band_dial_value[i] = saved;
-				//printf("-->frequency loaded\n\r");
-			}
-			else	{
-				// Load default for this band
-				band_dial_value[i] = tune_bands[i] + 100;
-				//printf("-->base frequency loaded\n\r");
-			}
-		}
-	}
-	//
 	// ------------------------------------------------------------------------------------
 	// Try to read Step saved values
-	if(Read_VirtEEPROM(EEPROM_FREQ_STEP, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_STEP], &value) == 0)
 	{
-		if(value >= MAX_STEPS -1)		// did we get step size value outside the range?
-			value = 3;					// yes - set to default size of 1 kHz steps
-		//
 		df.selected_idx = value;
-		df.tuning_step	= tune_steps[df.selected_idx];
+		df.tunning_step	= tune_steps[df.selected_idx];
 		//printf("-->freq step loaded\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read TX Audio Source saved values
-	if(Read_VirtEEPROM(EEPROM_TX_AUDIO_SRC, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_TX_AUDIO_SRC], &value) == 0)
 	{
 		ts.tx_audio_source = value;
 		//printf("-->TX audio source loaded\n\r");
@@ -7258,2267 +5110,384 @@ void UiDriverLoadEepromValues(void)
 
 	// ------------------------------------------------------------------------------------
 	// Try to read TCXO saved values
-	if(Read_VirtEEPROM(EEPROM_TCXO_STATE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_TCXO_STATE], &value) == 0)
 	{
 		df.temp_enabled = value;
 		//printf("-->TCXO state loaded\n\r");
 	}
+
 	// ------------------------------------------------------------------------------------
 	// Try to read PA BIAS saved values
-	if(Read_VirtEEPROM(EEPROM_PA_BIAS, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_PA_BIAS], &value) == 0)
 	{
-		if(value > MAX_PA_BIAS)	// prevent garbage value for bias
-			value = DEFAULT_PA_BIAS;
-		//
 		ts.pa_bias = value;
-		//
-		ulong bias_val;
-
-		bias_val = BIAS_OFFSET + (ts.pa_bias * 2);
-		if(bias_val > 255)
-			bias_val = 255;
-
-		// Set DAC Channel1 DHR12L register with bias value
-		DAC_SetChannel2Data(DAC_Align_8b_R,bias_val);
 		//printf("-->PA BIAS loaded: %d\n\r",ts.pa_bias);
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read PA BIAS saved values
-	if(Read_VirtEEPROM(EEPROM_PA_CW_BIAS, &value) == 0)
-	{
-		if(value > MAX_PA_BIAS)	// prevent garbage value for bias
-			value = DEFAULT_PA_BIAS;
-		//
-		ts.pa_cw_bias = value;
-		//
-	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Audio Gain saved values
-	if(Read_VirtEEPROM(EEPROM_AUDIO_GAIN, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_AUDIO_GAIN], &value) == 0)
 	{
-		if(value > MAX_AUDIO_GAIN)	// set default gain if garbage value from EEPROM
-			value = DEFAULT_AUDIO_GAIN;
 		ts.audio_gain = value;
 		//printf("-->Audio Gain loaded\n\r");
 	}
+
 	// ------------------------------------------------------------------------------------
-	// Try to read RF Codec Gain saved values
-	if(Read_VirtEEPROM(EEPROM_RX_CODEC_GAIN, &value) == 0)
+	// Try to read RF Gain saved values
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_RF_GAIN], &value) == 0)
 	{
-		if(value > MAX_RF_CODEC_GAIN_VAL)			// set default if invalid value
-			value = DEFAULT_RF_CODEC_GAIN_VAL;
-		//
-		ts.rf_codec_gain = value;
-		//printf("-->RF Codec Gain loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RF Codec Gain saved values
-	if(Read_VirtEEPROM(EEPROM_RX_GAIN, &value) == 0)
-	{
-		if(value > MAX_RF_GAIN)			// set default if invalid value
-			value = DEFAULT_RF_GAIN;
-		//
 		ts.rf_gain = value;
 		//printf("-->RF Gain loaded\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
-	// Try to read Noise Blanker saved values
-	if(Read_VirtEEPROM(EEPROM_NB_SETTING, &value) == 0)
+	// Try to read RIT saved values
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_RIT], &value) == 0)
 	{
-		if(value > MAX_RF_ATTEN)	// invalid value?
-			value = 0;				// yes - set to zero
-		//
-		ts.nb_setting = value;
-		//printf("-->Noise Blanker value loaded\n\r");
+		ts.rit_value = (short)value;
+		//printf("-->RIT loaded\n\r");
 	}
-	//
+
+	// ------------------------------------------------------------------------------------
+	// Try to read Attenuator saved values
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_ATTEN], &value) == 0)
+	{
+		ts.rf_atten = value;
+		//printf("-->Attenuator loaded\n\r");
+	}
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Power level saved values
-	if(Read_VirtEEPROM(EEPROM_TX_POWER_LEVEL, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_POWER], &value) == 0)
 	{
-		if(value >= PA_LEVEL_MAX_ENTRY)
-			value = PA_LEVEL_DEFAULT;
-		//
 		ts.power_level = value;
 		//printf("-->Power level loaded\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Keyer speed saved values
-	if(Read_VirtEEPROM(EEPROM_KEYER_SPEED, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_KEYER_SPEED], &value) == 0)
 	{
-		if((value < MIN_KEYER_SPEED) || value > MAX_KEYER_SPEED)	// value out of range?
-			value = DEFAULT_KEYER_SPEED;
-		//
 		ts.keyer_speed = value;
 		//printf("-->Keyer speed loaded\n\r");
 
 		// Extra init needed
 		UiDriverChangeKeyerSpeed(1);
-
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Keyer mode saved values
-	if(Read_VirtEEPROM(EEPROM_KEYER_MODE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_KEYER_MODE], &value) == 0)
 	{
-		if(ts.keyer_mode >= CW_MAX_MODE)	// invalid CW mode value?
-			value = CW_MODE_IAM_B;	// set default mode
-		//
 		ts.keyer_mode = value;
 		//printf("-->Keyer mode loaded\n\r");
 
 		// Extra init needed
-		cw_gen_init();
-
+		UiDriverChangeKeyerMode();
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Sidetone Gain saved values
-	if(Read_VirtEEPROM(EEPROM_SIDETONE_GAIN, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_SIDETONE_GAIN], &value) == 0)
 	{
-		if(value > SIDETONE_MAX_GAIN)			// out of range of gain settings?
-			value = DEFAULT_SIDETONE_GAIN;		// yes, use default
-		//
 		ts.st_gain = value;
 		//printf("-->Sidetone Gain loaded\n\r");
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Audio Gain saved values
-	if(Read_VirtEEPROM(EEPROM_AUDIO_GAIN, &value) == 0)
-	{
-		if(value > MAX_AUDIO_GAIN)			// out of range of gain settings?
-			value = DEFAULT_AUDIO_GAIN;		// yes, use default
-		//
-		ts.audio_gain = value;
-		//printf("-->Audio Gain loaded\n\r");
-	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read MIC BOOST saved values
-	if(Read_VirtEEPROM(EEPROM_MIC_BOOST, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_MIC_BOOST], &value) == 0)
 	{
-		if(value < 2)
-			ts.mic_boost = value;
+		ts.mic_boost = value;
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX LSB Phase saved values
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_LSB_PHASE_BALANCE, &uint_val) == 0)
+	else	// create
 	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_TX_IQ_PHASE_BALANCE) || (*int_val > MAX_TX_IQ_PHASE_BALANCE))	// out of range
-			*int_val = 0;		// yes, use zero
-		//
-		ts.tx_iq_lsb_phase_balance = *int_val;
+		EE_WriteVariable(VirtAddVarTab[EEPROM_MIC_BOOST],ts.mic_boost);
+		//printf("-->MIC BOOST state created\n\r");
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX USB Phase saved values
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_USB_PHASE_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;
-		if((*int_val < MIN_TX_IQ_PHASE_BALANCE) || (*int_val > MAX_TX_IQ_PHASE_BALANCE))	// out of range
-			*int_val = 0;		// yes, use zero
-		//
-		ts.tx_iq_usb_phase_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX LSB Gain saved values
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_LSB_GAIN_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;
-		if((*int_val < MIN_TX_IQ_GAIN_BALANCE) || (*int_val > MAX_TX_IQ_GAIN_BALANCE))	// out of range?
-			*int_val = 0;		// yes, use zero
-		//
-		ts.tx_iq_lsb_gain_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX USB Gain saved values
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_USB_GAIN_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_TX_IQ_GAIN_BALANCE) || (*int_val > MAX_TX_IQ_GAIN_BALANCE))	// out of range?
-			*int_val = 0;		// yes, use zero
-		//
-		ts.tx_iq_usb_gain_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX LSB Phase saved values
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_LSB_PHASE_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_RX_IQ_PHASE_BALANCE) || (*int_val > MAX_RX_IQ_PHASE_BALANCE))	// out of range
-			*int_val = 0;		// yes - set default
-		//
-		ts.rx_iq_lsb_phase_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX USB Phase saved values
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_USB_PHASE_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_RX_IQ_PHASE_BALANCE) || (*int_val > MAX_RX_IQ_PHASE_BALANCE))	// out of range
-			*int_val = 0;		// yes - set default
-		//
-		ts.rx_iq_usb_phase_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX LSB Gain saved values
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_LSB_GAIN_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_RX_IQ_GAIN_BALANCE) || (*int_val > MAX_RX_IQ_GAIN_BALANCE))	// out of range?
-			*int_val = 0;	// yes - set default
-		//
-		ts.rx_iq_lsb_gain_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX USB Gain saved values
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_USB_GAIN_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_RX_IQ_GAIN_BALANCE) || (*int_val > MAX_RX_IQ_GAIN_BALANCE))	// out of range?
-			*int_val = 0;	// yes - set default
-		//
-		ts.rx_iq_usb_gain_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX AM Gain saved values
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_AM_GAIN_BALANCE, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_RX_IQ_GAIN_BALANCE) || (*int_val > MAX_RX_IQ_GAIN_BALANCE))	// out of range?
-			*int_val = 0;	// yes - set default
-		//
-		ts.rx_iq_am_gain_balance = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX Frequency Calibration
-	if(Read_VirtEEPROM(EEPROM_FREQ_CAL, &uint_val) == 0)
-	{
-		int_val = &uint_val;	// kludge here to preserve sign of restored value
-		if((*int_val < MIN_FREQ_CAL) || (*int_val > MAX_FREQ_CAL))	// out of range
-			*int_val = 0;		// yes - set default
-		//
-		ts.freq_cal = *int_val;
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read AGC mode saved values
-	if(Read_VirtEEPROM(EEPROM_AGC_MODE, &value) == 0)
-	{
-		if(value > AGC_MAX_MODE)				// out of range of AGC settings?
-			value = AGC_DEFAULT;				// yes, use default
-		//
-		ts.agc_mode = value;
-		//printf("-->AGC mode loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read MIC gain saved values
-	if(Read_VirtEEPROM(EEPROM_MIC_GAIN, &value) == 0)
-	{
-		if((value > MIC_GAIN_MAX) || (value < MIC_GAIN_MIN))				// out of range of MIC gain settings?
-			value = MIC_GAIN_DEFAULT;				// yes, use default
-		//
-		ts.tx_mic_gain = value;
-		//printf("-->MIC gain loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read LIEN gain saved values
-	if(Read_VirtEEPROM(EEPROM_LINE_GAIN, &value) == 0)
-	{
-		if((value > LINE_GAIN_MAX) || (value < LINE_GAIN_MIN))				// out of range of LINE gain settings?
-			value = LINE_GAIN_DEFAULT;				// yes, use default
-		//
-		ts.tx_line_gain = value;
-		//printf("-->LINE gain loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Sidetone Frequency saved values
-	if(Read_VirtEEPROM(EEPROM_SIDETONE_FREQ, &value) == 0)
-	{
-		if((value > CW_SIDETONE_FREQ_MAX) || (value < CW_SIDETONE_FREQ_MIN))				// out of range of sidetone freq settings?
-			value = CW_SIDETONE_FREQ_DEFAULT;				// yes, use default
-		//
-		ts.sidetone_freq = value;
-		//printf("-->Sidetone freq. loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope Speed saved values
-	if(Read_VirtEEPROM(EEPROM_SPEC_SCOPE_SPEED, &value) == 0)
-	{
-		if(value > SPECTRUM_SCOPE_SPEED_MAX)	// out of range of spectrum scope speed settings?
-			value = SPECTRUM_SCOPE_SPEED_DEFAULT;				// yes, use default
-		//
-		ts.scope_speed = value;
-		//printf("-->Spectrum scope speed loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope Filter Strength saved values
-	if(Read_VirtEEPROM(EEPROM_SPEC_SCOPE_FILTER, &value) == 0)
-	{
-		if((value > SPECTRUM_SCOPE_FILTER_MAX) || (value < SPECTRUM_SCOPE_FILTER_MIN))	// out of range of spectrum scope filter strength settings?
-			value = SPECTRUM_SCOPE_FILTER_DEFAULT;				// yes, use default
-		//
-		ts.scope_filter = value;
-		//printf("-->Spectrum scope filter strength loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Custom AGC Decay saved values
-	if(Read_VirtEEPROM(EEPROM_AGC_CUSTOM_DECAY, &value) == 0)
-	{
-		if(value > AGC_CUSTOM_MAX)	// out of range Custom AGC Decay settings?
-			value = AGC_CUSTOM_DEFAULT;				// yes, use default
-		//
-		ts.agc_custom_decay = value;
-		//printf("-->Custom AGC Decay setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read color for spectrum scope trace saved values
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_TRACE_COLOUR, &value) == 0)
-	{
-		if(value > SPEC_MAX_COLOUR)	// out of range Spectrum Scope color settings?
-			value = SPEC_COLOUR_TRACE_DEFAULT;				// yes, use default
-		//
-		ts.scope_trace_colour = value;
-		//printf("-->Spectrum Scope trace color loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read color for spectrum scope grid saved values
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_GRID_COLOUR, &value) == 0)
-	{
-		if(value > SPEC_MAX_COLOUR)	// out of range Spectrum Scope color settings?
-			value = SPEC_COLOUR_GRID_DEFAULT;				// yes, use default
-		//
-		ts.scope_grid_colour = value;
-		//printf("-->Spectrum Scope grid color loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read color for spectrum scope scale saved values
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_SCALE_COLOUR, &value) == 0)
-	{
-		if(value > SPEC_MAX_COLOUR)	// out of range Spectrum Scope color settings?
-			value = SPEC_COLOUR_SCALE_DEFAULT;				// yes, use default
-		//
-		ts.scope_scale_colour = value;
-		//printf("-->Spectrum Scope scale color loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read paddle reverse saved values
-	if(Read_VirtEEPROM(EEPROM_PADDLE_REVERSE, &value) == 0)
-	{
-		if(value > 1)	// out of range paddle reverse boolean settings?
-			value = 0;				// yes, use default (off)
-		//
-		ts.paddle_reverse = value;
-		//printf("-->Paddle Reverse setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read CW TX>RX Delay saved values
-	if(Read_VirtEEPROM(EEPROM_CW_RX_DELAY, &value) == 0)
-	{
-		if(value > CW_RX_DELAY_MAX)	// out of range CW TX>RX Delay settings?
-			value = CW_RX_DELAY_DEFAULT;	// yes, use default
-		//
-		ts.cw_rx_delay = value;
-		//printf("-->CW TX>RX Delay setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read maximum volume  saved values
-	if(Read_VirtEEPROM(EEPROM_MAX_VOLUME, &value) == 0)
-	{
-		if((value < MAX_VOLUME_MIN) || (value > MAX_VOLUME_MAX))	// out range of maximum volume settings?
-			value = MAX_VOLUME_DEFAULT;	// yes, use default
-		//
-		ts.audio_max_volume = value;
-		//printf("-->maximum volume setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 300 Hz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_300HZ_SEL, &value) == 0)
-	{
-		if(value > MAX_300HZ_FILTER)	// out range of filter settings?
-			value = FILTER_300HZ_DEFAULT;	// yes, use default
-		//
-		ts.filter_300Hz_select = value;
-		//printf("-->300 Hz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 500 Hz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_500HZ_SEL, &value) == 0)
-	{
-		if(value > MAX_500HZ_FILTER)	// out range of filter settings?
-			value = FILTER_500HZ_DEFAULT;	// yes, use default
-		//
-		ts.filter_500Hz_select = value;
-		//printf("-->500 Hz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 1.8 kHz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_1K8_SEL, &value) == 0)
-	{
-		if(value > MAX_1K8_FILTER)	// out range of filter settings?
-			value = FILTER_1K8_DEFAULT;	// yes, use default
-		//
-		ts.filter_1k8_select = value;
-		//printf("-->1.8 kHz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 2.3 kHz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_2K3_SEL, &value) == 0)
-	{
-		if(value > MAX_2K3_FILTER)	// out range of filter settings?
-			value = FILTER_2K3_DEFAULT;	// yes, use default
-		//
-		ts.filter_2k3_select = value;
-		//printf("-->2.3 kHz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 3.6 kHz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_3K6_SEL, &value) == 0)
-	{
-		if(value > MAX_3K6_FILTER)	// out range of filter settings?
-			value = FILTER_3K6_DEFAULT;	// yes, use default
-		//
-		ts.filter_3k6_select = value;
-		//printf("-->3.6 kHz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10 kHz filter saved values
-	if(Read_VirtEEPROM(EEPROM_FILTER_10K_SEL, &value) == 0)
-	{
-		if(value > MAX_10K_FILTER)	// out range of filter settings?
-			value = FILTER_10K_DEFAULT;	// yes, use default
-		//
-		ts.filter_10k_select = value;
-		//printf("-->10 kHz filter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read calibration factor for forward power meter
-	if(Read_VirtEEPROM(EEPROM_FWD_PWR_CAL, &value) == 0)
-	{
-		if((value > SWR_CAL_MAX) || (value < SWR_CAL_MIN))	// out range of calibration factor for forward power meter settings?
-			value = SWR_CAL_DEFAULT;	// yes, use default
-		//
-		swrm.fwd_cal = value;
-		//printf("-->calibration factor for forward power meter setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Transverter Offset Freq saved values
-	if(	(Read_VirtEEPROM(EEPROM_XVERTER_OFFSET_HIGH, &value) == 0) &&
-		(Read_VirtEEPROM(EEPROM_XVERTER_OFFSET_LOW, &value1) == 0))
-	{
-		ulong saved = (value << 16) | (value1);
 
-		// We have loaded from eeprom the last used band, but can't just
-		// load saved frequency, as it could be out of band, so do a
-		// boundary check first
-		if(saved <= XVERTER_OFFSET_MAX)		// is offset within allowed limits?
-		{
-			ts.xverter_offset = saved;			// yes, use this value
-			//printf("-->frequency loaded\n\r");
-		}
-		else		// it's outside allowed limites - force to zero
-		{
-			// Load default for this band
-			ts.xverter_offset = 0;
-			//printf("-->base frequency loaded\n\r");
-		}
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read transverter mode enable/disable
-	if(Read_VirtEEPROM(EEPROM_XVERTER_DISP, &value) == 0)
-	{
-		if(value > XVERTER_MULT_MAX)	// if above maximum multipler value, it was bogus
-			value = 0;	// reset to "off"
-		//
-		ts.xverter_mode = value;
-		//printf("-->transverter mode enable/disable setting loaded\n\r");
-	}
-	//
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 80 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND0_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_80_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_80m_5w_adj = value;
-		//printf("-->80 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 60 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND1_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_60_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_60m_5w_adj = value;
-		//printf("-->60 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 40 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND2_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_40_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_40m_5w_adj = value;
-		//printf("-->40 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 30 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND3_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_30_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_30m_5w_adj = value;
-		//printf("-->30 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 20 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND4_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_20_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_20m_5w_adj = value;
-		//printf("-->20 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 17 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND5_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_17_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_17m_5w_adj = value;
-		//printf("-->17 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 15 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND6_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_15_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_15m_5w_adj = value;
-		//printf("-->15 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 12 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND7_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_12_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_12m_5w_adj = value;
-		//printf("-->12 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10 meter 5 watt power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND8_5W, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_10_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_10m_5w_adj = value;
-		//printf("-->10 meter 5 watt power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 80 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND0_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_80_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_80m_full_adj = value;
-		//printf("-->80 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 60 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND1_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_60_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_60m_full_adj = value;
-		//printf("-->60 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 40 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND2_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_40_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_40m_full_adj = value;
-		//printf("-->40 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 30 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND3_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_30_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_30m_full_adj = value;
-		//printf("-->30 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 20 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND4_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_20_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_20m_full_adj = value;
-		//printf("-->20 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 17 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND5_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_17_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_17m_full_adj = value;
-		//printf("-->17 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 15 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND6_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_15_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_15m_full_adj = value;
-		//printf("-->15 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 12 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND7_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_12_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_12m_full_adj = value;
-		//printf("-->12 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10 meter FULL power calibration setting
-	if(Read_VirtEEPROM(EEPROM_BAND8_FULL, &value) == 0)
-	{
-		if((value > TX_POWER_FACTOR_MAX) || (value < TX_POWER_FACTOR_MIN))	// if out of range of power setting, it was bogus
-			value = TX_POWER_FACTOR_10_DEFAULT;	// reset to default for this band
-		//
-		ts.pwr_10m_full_adj = value;
-		//printf("-->10 meter FULL power calibration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read spectrum scope magnify setting
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_MAGNIFY, &value) == 0)
-	{
-		if(value > 1)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		sd.magnify = value;
-		//printf("-->spectrum scope magnify setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read CW wide filter disable setting
-	if(Read_VirtEEPROM(EEPROM_WIDE_FILT_CW_DISABLE, &value) == 0)
-	{
-		if(value > 1)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.filter_cw_wide_disable = value;
-		//printf("-->CW wide filter disable setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read SSB Narrow filter disable setting
-	if(Read_VirtEEPROM(EEPROM_NARROW_FILT_SSB_DISABLE, &value) == 0)
-	{
-		if(value > 1)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.filter_ssb_narrow_disable = value;
-		//printf("-->SSB Narrow disable setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read AM Mode disable setting
-	if(Read_VirtEEPROM(EEPROM_AM_MODE_DISABLE, &value) == 0)
-	{
-		if(value > 1)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.am_mode_disable = value;
-		//printf("-->SSB Narrow disable setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope rescale rate
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_RESCALE_RATE, &value) == 0)
-	{
-		if((value > SPECTRUM_SCOPE_RESCALE_MAX) || (value < SPECTRUM_SCOPE_RESCALE_MIN))	// if out of range, it was bogus
-			value = SPECTRUM_SCOPE_RESCALE_DEFAULT;	// reset to default
-		//
-		ts.scope_rescale_rate = value;
-		//printf("-->Spectrum Scope rescale rate loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope AGC rate
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_AGC_RATE, &value) == 0)
-	{
-		if((value > SPECTRUM_SCOPE_AGC_MAX) || (value < SPECTRUM_SCOPE_AGC_MIN))	// if out of range, it was bogus
-			value = SPECTRUM_SCOPE_AGC_DEFAULT;	// reset to default
-		//
-		ts.scope_agc_rate = value;
-		//printf("-->Spectrum Scope AGC rate loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read meter mode
-	if(Read_VirtEEPROM(EEPROM_METER_MODE, &value) == 0)
-	{
-		if(value > METER_MAX)	// if out of range, it was bogus
-			value = METER_SWR;	// reset to default
-		//
-		ts.tx_meter_mode = value;
-		//printf("-->Meter mode loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read ALC release (decay) time
-	if(Read_VirtEEPROM(EEPROM_ALC_DECAY_TIME, &value) == 0)
-	{
-		if(value > ALC_DECAY_MAX)	// if out of range, it was bogus
-			value = ALC_DECAY_DEFAULT;	// reset to default
-		//
-		ts.alc_decay = value;
-		//printf("-->ALC release (decay) time loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX audio post-filter gain setting
-	if(Read_VirtEEPROM(EEPROM_ALC_POSTFILT_TX_GAIN, &value) == 0)
-	{
-		if((value > ALC_POSTFILT_GAIN_MAX) || (value < ALC_POSTFILT_GAIN_MIN))	// if out of range, it was bogus
-			value = ALC_POSTFILT_GAIN_DEFAULT;	// reset to default
-		//
-		ts.alc_tx_postfilt_gain = value;
-		//printf("-->TX audio post-filter gain setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Frequency step line/button configuration setting
-	if(Read_VirtEEPROM(EEPROM_STEP_SIZE_CONFIG, &value) == 0)
-	{
-		if(value > 255)	// if out of range, it was bogus
-			value = 0;	// reset to default for
-		//
-		ts.freq_step_config = value;
-		//printf("-->Frequency step marker line setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP configuration setting
-	if(Read_VirtEEPROM(EEPROM_DSP_MODE, &value) == 0)
-	{
-		if(value > 255)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.dsp_active = value;
-		//printf("-->DSP configuration setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Noise reduction setting
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_STRENGTH, &value) == 0)
-	{
-		if(value > DSP_NR_STRENGTH_MAX)	// if out of range, it was bogus
-			value = DSP_NR_STRENGTH_DEFAULT;	// reset to default
-		//
-		ts.dsp_nr_strength = value;
-		//printf("-->DSP Noise reduction setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Noise reduction de-correlator buffer length setting
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_DECOR_BUFLEN, &value) == 0)
-	{
-		if((value > DSP_NR_BUFLEN_MAX) || (value < DSP_NR_BUFLEN_MIN))	// if out of range, it was bogus
-			value = DSP_NR_BUFLEN_DEFAULT;	// reset to default
-		//
-		ts.dsp_nr_delaybuf_len = value;
-		//printf("-->DSP Noise reduction de-correlator buffer length setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Noise reduction FFT number of taps setting
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_FFT_NUMTAPS, &value) == 0)
-	{
-		if((value > DSP_NR_NUMTAPS_MAX) || (value < DSP_NR_NUMTAPS_MIN))	// if out of range, it was bogus
-			value = DSP_NR_NUMTAPS_DEFAULT;	// reset to default
-		//
-		ts.dsp_nr_numtaps = value;
-		//printf("-->DSP Noise reduction FFT number of taps setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Notch de-correlator buffer length setting
-	if(Read_VirtEEPROM(EEPROM_DSP_NOTCH_DECOR_BUFLEN, &value) == 0)
-	{
-		if((value > DSP_NR_NUMTAPS_MAX) || (value < DSP_NR_NUMTAPS_MIN))	// if out of range, it was bogus
-			value = DSP_NR_NUMTAPS_DEFAULT;	// reset to default
-		//
-		ts.dsp_notch_delaybuf_len = value;
-		//printf("-->DSP Notch de-correlator buffer setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Notch convergence rate length setting
-	if(Read_VirtEEPROM(EEPROM_DSP_NOTCH_CONV_RATE, &value) == 0)
-	{
-		if(value > DSP_NOTCH_MU_MAX)	// if out of range, it was bogus
-			value = DSP_NOTCH_MU_DEFAULT;	// reset to default
-		//
-		ts.dsp_notch_mu = value;
-		//printf("-->DSP Notch convergence rate setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read maximum RF gain setting
-	if(Read_VirtEEPROM(EEPROM_MAX_RX_GAIN, &value) == 0)
-	{
-		if(value > MAX_RF_GAIN_MAX)	// if out of range, it was bogus
-			value = MAX_RF_GAIN_DEFAULT;	// reset to default
-		//
-		ts.max_rf_gain = value;
-		//printf("-->maximum RF gain setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX audio compressor setting
-	if(Read_VirtEEPROM(EEPROM_TX_AUDIO_COMPRESS, &value) == 0)
-	{
-		if(value > TX_AUDIO_COMPRESSION_MAX)	// if out of range, it was bogus
-			value = TX_AUDIO_COMPRESSION_DEFAULT;	// reset to default
-		//
-		ts.tx_comp_level = value;
-		//printf("-->TX audio compressor setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX disable setting
-	if(Read_VirtEEPROM(EEPROM_TX_DISABLE, &value) == 0)
-	{
-		if(value > 1)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.tx_disable = value;
-		//printf("-->TX disable setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Misc. flags 1 setting
-	if(Read_VirtEEPROM(EEPROM_MISC_FLAGS1, &value) == 0)
-	{
-		if(value > 255)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.misc_flags1 = value;
-		//printf("-->Misc. flags 1 setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read version number
-	if(Read_VirtEEPROM(EEPROM_VERSION_NUMBER, &value) == 0)
-	{
-		if(value > 255)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.version_number_build = value;
-		//printf("-->Version number loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Noise blanker AGC setting
-	if(Read_VirtEEPROM(EEPROM_NB_AGC_TIME_CONST, &value) == 0)
-	{
-		if(value > NB_MAX_AGC_SETTING)	// if out of range, it was bogus
-			value = 0;	// reset to default
-		//
-		ts.nb_agc_time_const = value;
-		//printf("-->Noise blanker AGC setting loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read CW offset setting
-	if(Read_VirtEEPROM(EEPROM_CW_OFFSET_MODE, &value) == 0)
-	{
-		if(value > CW_OFFSET_MAX)				// if out of range, it was bogus
-			value = CW_OFFSET_MODE_DEFAULT;		// reset to default
-		//
-		ts.cw_offset_mode = value;
-		//printf("-->CW offset loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read I/Q Freq. conversion setting
-	if(Read_VirtEEPROM(EEPROM_FREQ_CONV_MODE, &value) == 0)
-	{
-		if(value > FREQ_IQ_CONV_MODE_MAX)				// if out of range, it was bogus
-			value = FREQ_IQ_CONV_MODE_DEFAULT;		// reset to default
-		//
-		ts.iq_freq_mode = value;
-		//printf("-->I/Q Freq. conversion loaded\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read auto LSB/USB select mode
-	if(Read_VirtEEPROM(EEPROM_LSB_USB_AUTO_SELECT, &value) == 0)
-	{
-		if(value > AUTO_LSB_USB_MAX)				// if out of range, it was bogus
-			value = AUTO_LSB_USB_DEFAULT;		// reset to default
-		//
-		ts.lsb_usb_auto_select = value;
-		//printf("-->LSB/USB select mode loaded\n\r");
-	}
-	//
 	// Next setting...
 }
-//
-// Below is a marker to make it easier to find the "Read" and "Save" EEPROM functions when scanning the source code
-//
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-// ********************************************************************************************************************
-//
+
 //*----------------------------------------------------------------------------
 //* Function Name       : UiDriverSaveEepromValues
-//* Object              : save all values to EEPROM - called on power-down.  Does not check to see if they have changed
+//* Object              : save changed values on regular intervals
 //* Input Parameters    :
 //* Output Parameters   :
 //* Functions called    :
 //*----------------------------------------------------------------------------
-//
-void UiDriverSaveEepromValuesPowerDown(void)
+static void UiDriverSaveEepromValues(void)
 {
-	ushort value,value1, i;
+	ushort value,value1;
 
 	// Only in RX mode, if not calibrating
 	if((ts.txrx_mode != TRX_MODE_RX) && (!ts.calib_mode))
 		return;
 
+	es.skip++;
+	if(es.skip < EEPROM_SAVE_SKP)
+		return;
+
+	es.skip = 0;
+
 	//printf("eeprom save activate\n\r");
 
 	// ------------------------------------------------------------------------------------
 	// Read Band and Mode saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND_MODE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_BAND_MODE], &value) == 0)
 	{
-		ushort new;
+		ushort new,change;
 
+		change 	= 0;
 		new 	= 0;
-		new 	= ts.band;
-		new	   |= (ts.dmod_mode << 8);
-		new	   |= (ts.filter_id << 12);
-		Write_VirtEEPROM(EEPROM_BAND_MODE, new);
-		//printf("-->band and mode saved\n\r");
+
+		// Check first half
+		if(ts.band_mode != (value & 0xFF))
+		{
+			new 	= ts.band_mode;
+			change 	= 1;
+		}
+
+		// Check second
+		if(ts.dmod_mode != ((value >> 8) & 0xFF))
+		{
+			new	   |= (ts.dmod_mode << 8);
+			change 	= 1;
+		}
+
+		// Update var if changed
+		if(change)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_BAND_MODE], new);
+			//printf("-->band and mode saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_BAND_MODE,(ts.band |(ts.dmod_mode & 0x0f << 8) | (ts.filter_id << 12) ));
+		EE_WriteVariable(VirtAddVarTab[EEPROM_BAND_MODE],(ts.band_mode|(ts.dmod_mode << 8)));
 		//printf("-->band and mode var created\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Freq saved values - update if changed
-	if(	(Read_VirtEEPROM(EEPROM_FREQ_HIGH, &value) == 0) && (Read_VirtEEPROM(EEPROM_FREQ_LOW, &value1) == 0)) {
-		Write_VirtEEPROM(EEPROM_FREQ_HIGH,(df.tune_new >> 16));
-		//printf("-->freq high saved\n\r");
-		Write_VirtEEPROM(EEPROM_FREQ_LOW,(df.tune_new & 0xFFFF));
-		//printf("-->freq low saved\n\r");
-	}
-	else	// create
+	if(	(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_HIGH], &value) == 0) &&
+		(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_LOW], &value1) == 0))
 	{
-		Write_VirtEEPROM(EEPROM_FREQ_HIGH,(df.tune_new >> 16));
-		Write_VirtEEPROM(EEPROM_FREQ_LOW,(df.tune_new & 0xFFFF));
-		//printf("-->freq vars created\n\r");
-	}
-	//
-	//
-	// Save stored band/mode/frequency memory from RAM
-	//
-	for(i = 0; i < MAX_BANDS; i++)	{	// scan through each band's frequency/mode data
-		// ------------------------------------------------------------------------------------
-		// Read Band and Mode saved values - update if changed
-		if(Read_VirtEEPROM(EEPROM_BAND0_MODE + i, &value) == 0)
+		// Check first half
+		if((df.tune_new >> 16) != value)
 		{
-			ushort new;
-			new 	= 0;
-
-			// We do NOT check the band stored in the bottom byte as we have, by definition, saved that band at this index.
-			//
-			new	   |= (band_decod_mode[i] << 8);
-			new	   |= (band_filter_mode[i] << 12);
-			Write_VirtEEPROM(EEPROM_BAND0_MODE + i, new);
-		}
-		else	// create
-		{
-			Write_VirtEEPROM(EEPROM_BAND0_MODE + i,(((band_decod_mode[i] & 0x0f) << 8) | (band_filter_mode[i] << 12) ));
-			//printf("-->band and mode var created\n\r");
-		}
-		//
-		// Try to read Freq saved values - update if changed
-		//
-		if((Read_VirtEEPROM(EEPROM_BAND0_FREQ_HIGH + i, &value) == 0) && (Read_VirtEEPROM(EEPROM_BAND0_FREQ_LOW + i, &value1) == 0))	{
-			Write_VirtEEPROM(EEPROM_BAND0_FREQ_HIGH + i,(band_dial_value[i] >> 16));
+			EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_HIGH],(df.tune_new >> 16));
 			//printf("-->freq high saved\n\r");
-			Write_VirtEEPROM(EEPROM_BAND0_FREQ_LOW + i,(band_dial_value[i] & 0xFFFF));
+		}
+
+		// Check second half
+		if((df.tune_new & 0xFFFF) != value1)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_LOW],(df.tune_new & 0xFFFF));
 			//printf("-->freq low saved\n\r");
 		}
-		else	// create
-		{
-			Write_VirtEEPROM(EEPROM_BAND0_FREQ_HIGH + i,(band_dial_value[i] >> 16));
-			Write_VirtEEPROM(EEPROM_BAND0_FREQ_LOW + i,(band_dial_value[i] & 0xFFFF));
-			//printf("-->freq vars created\n\r");
-		}
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Step saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FREQ_STEP, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FREQ_STEP,df.selected_idx);
-		//printf("-->freq step saved\n\r");
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_FREQ_STEP,3);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_HIGH],(df.tune_new >> 16));
+		EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_LOW],(df.tune_new & 0xFFFF));
+		//printf("-->freq vars created\n\r");
+	}
+
+	// ------------------------------------------------------------------------------------
+	// Try to read Step saved values - update if changed
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_FREQ_STEP], &value) == 0)
+	{
+		if(df.selected_idx != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_STEP],df.selected_idx);
+			//printf("-->freq step saved\n\r");
+		}
+	}
+	else	// create
+	{
+		EE_WriteVariable(VirtAddVarTab[EEPROM_FREQ_STEP],df.selected_idx);
 		//printf("-->freq step created\n\r");
 	}
 
 	// ------------------------------------------------------------------------------------
 	// Try to read TX Audio Source saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_AUDIO_SRC, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_TX_AUDIO_SRC], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_TX_AUDIO_SRC,ts.tx_audio_source);
-		//printf("-->TX audio source saved\n\r");
+		if(ts.tx_audio_source != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_TX_AUDIO_SRC],ts.tx_audio_source);
+			//printf("-->TX audio source saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_TX_AUDIO_SRC,0);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_TX_AUDIO_SRC],ts.tx_audio_source);
 		//printf("-->TX audio source created\n\r");
 	}
 
 	// ------------------------------------------------------------------------------------
 	// Try to read TCXO saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TCXO_STATE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_TCXO_STATE], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_TCXO_STATE,df.temp_enabled);
-		//printf("-->TCXO state saved\n\r");
+		if(df.temp_enabled != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_TCXO_STATE],df.temp_enabled);
+			//printf("-->TCXO state saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_TCXO_STATE,0);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_TCXO_STATE],df.temp_enabled);
 		//printf("-->TCXO state created\n\r");
 	}
-	//
+
+	// ------------------------------------------------------------------------------------
+	// Try to read BIAS saved values - update if changed
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_PA_BIAS], &value) == 0)
+	{
+		// Create only!!!
+		// Update implemented in calibration menu
+		//
+		//if(ts.pa_bias != value)
+		//{
+		//	EE_WriteVariable(VirtAddVarTab[EEPROM_PA_BIAS],ts.pa_bias);
+		//	printf("-->PA BIAS saved\n\r");
+		//}
+	}
+	else	// create
+	{
+		EE_WriteVariable(VirtAddVarTab[EEPROM_PA_BIAS],ts.pa_bias);
+		//printf("-->PA BIAS created\n\r");
+	}
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Audio Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_AUDIO_GAIN, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_AUDIO_GAIN], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_AUDIO_GAIN,ts.audio_gain);
-		//printf("-->Audio Gain saved\n\r");
+		if(ts.audio_gain != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_AUDIO_GAIN],ts.audio_gain);
+			//printf("-->Audio Gain saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_AUDIO_GAIN,DEFAULT_AUDIO_GAIN);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_AUDIO_GAIN],ts.audio_gain);
 		//printf("-->Audio Gain created\n\r");
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RF Codec Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_CODEC_GAIN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_CODEC_GAIN,ts.rf_codec_gain);
-		//printf("-->RF Codec Gain saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_CODEC_GAIN,DEFAULT_RF_CODEC_GAIN_VAL);
-		//printf("-->RF Codec Gain created\n\r");
-	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read RF Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_GAIN, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_RF_GAIN], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_RX_GAIN,ts.rf_gain);
-		//printf("-->RF Gain saved\n\r");
+		if(ts.rf_gain != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_RF_GAIN],ts.rf_gain);
+			//printf("-->RF Gain saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_RX_GAIN,DEFAULT_RF_GAIN);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_RF_GAIN],ts.rf_gain);
 		//printf("-->RF Gain created\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
-	// Try to read Noise Blanker saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_NB_SETTING, &value) == 0)
+	// Try to read RIT saved values - update if changed
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_RIT], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_NB_SETTING,ts.nb_setting);
-		//printf("-->Attenuator saved\n\r");
+		if(ts.rit_value != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_RIT],(ushort)ts.rit_value);
+			//printf("-->RIT Gain saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_NB_SETTING,0);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_RIT],(ushort)ts.rit_value);
+		//printf("-->RIT Gain created\n\r");
+	}
+
+	// ------------------------------------------------------------------------------------
+	// Try to read Attenuator saved values - update if changed
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_ATTEN], &value) == 0)
+	{
+		if(ts.rf_atten != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_ATTEN],ts.rf_atten);
+			//printf("-->Attenuator saved\n\r");
+		}
+	}
+	else	// create
+	{
+		EE_WriteVariable(VirtAddVarTab[EEPROM_ATTEN],ts.rf_atten);
 		//printf("-->Attenuator created\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read power level saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_POWER_LEVEL, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_POWER], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_TX_POWER_LEVEL,ts.power_level);
-		//printf("-->power level saved\n\r");
+		if(ts.power_level != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_POWER],ts.power_level);
+			//printf("-->power level saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_TX_POWER_LEVEL,PA_LEVEL_DEFAULT);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_POWER],ts.power_level);
 		//printf("-->power level created\n\r");
 	}
 
 	// ------------------------------------------------------------------------------------
 	// Try to read Keyer speed saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_KEYER_SPEED, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_KEYER_SPEED], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_KEYER_SPEED,ts.keyer_speed);
-		//printf("-->Keyer speed saved\n\r");
+		if(ts.keyer_speed != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_KEYER_SPEED],ts.keyer_speed);
+			//printf("-->Keyer speed saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_KEYER_SPEED,DEFAULT_KEYER_SPEED);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_KEYER_SPEED],ts.keyer_speed);
 		//printf("-->Keyer speed created\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Keyer mode saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_KEYER_MODE, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_KEYER_MODE], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_KEYER_MODE,ts.keyer_mode);
-		//printf("-->Keyer mode saved\n\r");
+		if(ts.keyer_mode != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_KEYER_MODE],ts.keyer_mode);
+			//printf("-->Keyer mode saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_KEYER_MODE,CW_MODE_IAM_B);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_KEYER_MODE],ts.keyer_mode);
 		//printf("-->Keyer mode created\n\r");
 	}
-	//
+
 	// ------------------------------------------------------------------------------------
 	// Try to read Sidetone Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SIDETONE_GAIN, &value) == 0)
+	if(EE_ReadVariable(VirtAddVarTab[EEPROM_SIDETONE_GAIN], &value) == 0)
 	{
-		Write_VirtEEPROM(EEPROM_SIDETONE_GAIN,ts.st_gain);
-		//printf("-->Sidetone Gain saved\n\r");
+		if(ts.st_gain != value)
+		{
+			EE_WriteVariable(VirtAddVarTab[EEPROM_SIDETONE_GAIN],ts.st_gain);
+			//printf("-->Sidetone Gain saved\n\r");
+		}
 	}
 	else	// create
 	{
-		Write_VirtEEPROM(EEPROM_SIDETONE_GAIN,DEFAULT_SIDETONE_GAIN);
+		EE_WriteVariable(VirtAddVarTab[EEPROM_SIDETONE_GAIN],ts.st_gain);
 		//printf("-->Sidetone Gain created\n\r");
 	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Frequency Calibration saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FREQ_CAL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FREQ_CAL,ts.freq_cal);
-		//printf("-->Frequency Calibration saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FREQ_CAL,0);
-		//printf("-->Frequency Calibration\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read AGC Mode saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_AGC_MODE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_AGC_MODE,ts.agc_mode);
-		//printf("-->AGC mode saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_AGC_MODE,AGC_DEFAULT);
-		//printf("-->AGC mode created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Microphone Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_MIC_GAIN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_MIC_GAIN,ts.tx_mic_gain);
-		//printf("-->Microphone Gain saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_MIC_GAIN,MIC_GAIN_DEFAULT);
-		//printf("-->Microphone Gain created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Line Gain saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_LINE_GAIN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_LINE_GAIN,ts.tx_line_gain);
-		//printf("-->Line Gain saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_LINE_GAIN,LINE_GAIN_DEFAULT);
-		//printf("-->Line Gain created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Sidetone Frequency saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SIDETONE_FREQ, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SIDETONE_FREQ,ts.sidetone_freq);
-		//printf("-->Sidetone Freq saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SIDETONE_FREQ,CW_SIDETONE_FREQ_DEFAULT);
-		//printf("-->Sidetone Freq created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope Speed saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPEC_SCOPE_SPEED, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPEC_SCOPE_SPEED,ts.scope_speed);
-		//printf("-->Spectrum Scope Speed saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPEC_SCOPE_SPEED,SPECTRUM_SCOPE_SPEED_DEFAULT);
-		//printf("-->Spectrum Scope Speed created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum Scope Filter Strength saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPEC_SCOPE_FILTER, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPEC_SCOPE_FILTER,ts.scope_filter);
-		//printf("-->Spectrum Scope Filter saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPEC_SCOPE_FILTER,SPECTRUM_SCOPE_FILTER_DEFAULT);
-		//printf("-->Spectrum Scope Speed created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read AGC Custom Decay saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_AGC_CUSTOM_DECAY, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_AGC_CUSTOM_DECAY,ts.agc_custom_decay);
-		//printf("-->AGC Custom Decay value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_AGC_CUSTOM_DECAY,AGC_CUSTOM_DEFAULT);
-		//printf("-->AGC Custom Decay value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Scope trace color saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_TRACE_COLOUR, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_TRACE_COLOUR,ts.scope_trace_colour);
-		//printf("-->Scope Trace Color value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_TRACE_COLOUR,SPEC_COLOUR_TRACE_DEFAULT);
-		//printf("-->Scope Trace Color value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Scope grid color saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_GRID_COLOUR, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_GRID_COLOUR,ts.scope_grid_colour);
-		//printf("-->Scope Grid Color value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_GRID_COLOUR,SPEC_COLOUR_GRID_DEFAULT);
-		//printf("-->Scope Grid Color value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Scope scale color saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_SCALE_COLOUR, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_SCALE_COLOUR,ts.scope_scale_colour);
-		//printf("-->Scope Scale Color value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_SCALE_COLOUR,SPEC_COLOUR_SCALE_DEFAULT);
-		//printf("-->Scope Scale Color value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Paddle Reversal saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_PADDLE_REVERSE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_PADDLE_REVERSE,ts.paddle_reverse);
-		//printf("-->Scope Paddle Reverse value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_PADDLE_REVERSE,0);
-		//printf("-->Paddle Reverse value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read CW TX>RX Delay saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_CW_RX_DELAY, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_CW_RX_DELAY,ts.cw_rx_delay);
-		//printf("-->CW TX>RX Delay value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_CW_RX_DELAY,CW_RX_DELAY_DEFAULT);
-		//printf("-->CW TX>RX Delay value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Max. volume saved values - update if changed
-	if(Read_VirtEEPROM(EEPROM_MAX_VOLUME, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_MAX_VOLUME,ts.audio_max_volume);
-		//printf("-->Max. volume value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_MAX_VOLUME,MAX_VOLUME_DEFAULT);
-		//printf("-->Max. volume value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 300 Hz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_300HZ_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_300HZ_SEL,ts.filter_300Hz_select);
-		//printf("-->300 Hz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_300HZ_SEL,FILTER_300HZ_DEFAULT);
-		//printf("-->300 Hz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 500 Hz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_500HZ_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_500HZ_SEL,ts.filter_500Hz_select);
-		//printf("-->500 Hz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_500HZ_SEL,FILTER_500HZ_DEFAULT);
-		//printf("-->500 Hz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 1.8 kHz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_1K8_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_1K8_SEL,ts.filter_1k8_select);
-		//printf("-->1.8 kHz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_1K8_SEL,FILTER_1K8_DEFAULT);
-		//printf("-->1.8 kHz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 2.3 kHz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_2K3_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_2K3_SEL,ts.filter_2k3_select);
-		//printf("-->2.3 kHz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_2K3_SEL,FILTER_2K3_DEFAULT);
-		//printf("-->2.3 kHz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 3.6 kHz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_3K6_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_3K6_SEL,ts.filter_3k6_select);
-		//printf("-->3.6 kHz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_3K6_SEL,FILTER_3K6_DEFAULT);
-		//printf("-->3.6 kHz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10 kHz filter values - update if changed
-	if(Read_VirtEEPROM(EEPROM_FILTER_10K_SEL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_10K_SEL,ts.filter_10k_select);
-		//printf("-->10 kHz filter value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FILTER_10K_SEL,FILTER_10K_DEFAULT);
-		//printf("-->10 kHz filter value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read PA Bias values - update if changed
-	if(Read_VirtEEPROM(EEPROM_PA_BIAS, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_PA_BIAS,ts.pa_bias);
-		//printf("-->PA Bias value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_PA_BIAS,DEFAULT_PA_BIAS);
-		//printf("-->PA Bias value created\n\r");
-	}
-	//
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read PA CW Bias values - update if changed
-	if(Read_VirtEEPROM(EEPROM_PA_CW_BIAS, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_PA_CW_BIAS,ts.pa_cw_bias);
-		//printf("-->PA CW Bias value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_PA_CW_BIAS,0);
-		//printf("-->PA CW Bias value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX IQ LSB Gain Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_LSB_GAIN_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_LSB_GAIN_BALANCE, ts.tx_iq_lsb_gain_balance);
-		//printf("-->TX IQ LSB Gain balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_LSB_GAIN_BALANCE,0);
-		//printf("-->TX IQ LSB Gain balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX IQ USB Gain Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_USB_GAIN_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_USB_GAIN_BALANCE, ts.tx_iq_usb_gain_balance);
-		//printf("-->TX IQ USB Gain balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_USB_GAIN_BALANCE,0);
-		//printf("-->TX IQ USB Gain balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX IQ LSB Phase Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_LSB_PHASE_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_LSB_PHASE_BALANCE, ts.tx_iq_lsb_phase_balance);
-		//printf("-->TX IQ LSB Phase balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_LSB_PHASE_BALANCE,0);
-		//printf("-->TX IQ LSB Phase balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX IQ USB Phase Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_IQ_USB_PHASE_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_USB_PHASE_BALANCE, ts.tx_iq_usb_phase_balance);
-		//printf("-->TX IQ USB Phase balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_IQ_USB_PHASE_BALANCE,0);
-		//printf("-->TX IQ USB Phase balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX IQ LSB Gain Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_LSB_GAIN_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_LSB_GAIN_BALANCE, ts.rx_iq_lsb_gain_balance);
-		//printf("-->RX IQ LSB Gain balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_LSB_GAIN_BALANCE,0);
-		//printf("-->RX IQ LSB Gain balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX IQ USB Gain Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_USB_GAIN_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_USB_GAIN_BALANCE, ts.rx_iq_usb_gain_balance);
-		//printf("-->RX IQ USB Gain balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_USB_GAIN_BALANCE,0);
-		//printf("-->RX IQ USB Gain balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX IQ LSB Phase Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_LSB_PHASE_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_LSB_PHASE_BALANCE, ts.rx_iq_lsb_phase_balance);
-		//printf("-->RX IQ LSB Phase balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_LSB_PHASE_BALANCE,0);
-		//printf("-->RX IQ LSB Phase balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX IQ USB Phase Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_USB_PHASE_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_USB_PHASE_BALANCE, ts.rx_iq_usb_phase_balance);
-		//printf("-->RX IQ USB Phase balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_USB_PHASE_BALANCE,0);
-		//printf("-->RX IQ USB Phase balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read RX IQ AM Gain Balance values - update if changed
-	if(Read_VirtEEPROM(EEPROM_RX_IQ_AM_GAIN_BALANCE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_AM_GAIN_BALANCE, ts.rx_iq_am_gain_balance);
-		//printf("-->RX IQ AM Gain balance saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_RX_IQ_AM_GAIN_BALANCE,0);
-		//printf("-->RX IQ AM Gain balance value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read SWR Forward power meter calibration value - update if changed
-	if(Read_VirtEEPROM(EEPROM_FWD_PWR_CAL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FWD_PWR_CAL, swrm.fwd_cal);
-		//printf("-->SWR Forward power meter calibration value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FWD_PWR_CAL,SWR_CAL_DEFAULT);
-		//printf("-->SWR Forward power meter calibration value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Transverter frequency offset saved values - update if changed
-	if(	(Read_VirtEEPROM(EEPROM_XVERTER_OFFSET_HIGH, &value) == 0) && (Read_VirtEEPROM(EEPROM_XVERTER_OFFSET_LOW, &value1) == 0)) {
-		Write_VirtEEPROM(EEPROM_XVERTER_OFFSET_HIGH,(ts.xverter_offset >> 16));
-		//printf("-->freq high saved\n\r");
-		Write_VirtEEPROM(EEPROM_XVERTER_OFFSET_LOW,(ts.xverter_offset & 0xFFFF));
-		//printf("-->freq low saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_XVERTER_OFFSET_HIGH,(ts.xverter_offset >> 16));
-		Write_VirtEEPROM(EEPROM_XVERTER_OFFSET_LOW,(ts.xverter_offset & 0xFFFF));
-		//printf("-->Transverter offset frequency created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Transverter display offset mode enable - update if changed
-	if(Read_VirtEEPROM(EEPROM_XVERTER_DISP, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_XVERTER_DISP, ts.xverter_mode);
-		//printf("-->Transverter display offset mode enable value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_XVERTER_DISP,0);
-		//printf("-->Transverter display offset mode enable value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 80m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND0_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND0_5W, ts.pwr_80m_5w_adj);
-		//printf("-->80m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND0_5W,TX_POWER_FACTOR_80_DEFAULT);
-		//printf("-->80m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 60m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND1_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND1_5W, ts.pwr_60m_5w_adj);
-		//printf("-->60m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND1_5W,TX_POWER_FACTOR_60_DEFAULT);
-		//printf("-->60m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 40m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND2_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND2_5W, ts.pwr_40m_5w_adj);
-		//printf("-->40m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND2_5W,TX_POWER_FACTOR_40_DEFAULT);
-		//printf("-->40m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 30m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND3_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND3_5W, ts.pwr_30m_5w_adj);
-		//printf("-->80m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND3_5W,TX_POWER_FACTOR_30_DEFAULT);
-		//printf("-->30m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 20m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND4_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND4_5W, ts.pwr_20m_5w_adj);
-		//printf("-->20m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND4_5W,TX_POWER_FACTOR_20_DEFAULT);
-		//printf("-->20m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 17m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND5_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND5_5W, ts.pwr_17m_5w_adj);
-		//printf("-->17m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND5_5W,TX_POWER_FACTOR_17_DEFAULT);
-		//printf("-->17m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 15m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND6_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND6_5W, ts.pwr_15m_5w_adj);
-		//printf("-->15m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND6_5W,TX_POWER_FACTOR_15_DEFAULT);
-		//printf("-->15m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 12m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND7_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND7_5W, ts.pwr_12m_5w_adj);
-		//printf("-->12m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND7_5W,TX_POWER_FACTOR_12_DEFAULT);
-		//printf("-->12m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10m 5 watt power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND8_5W, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND8_5W, ts.pwr_10m_5w_adj);
-		//printf("-->10m 5 watt power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND8_5W,TX_POWER_FACTOR_10_DEFAULT);
-		//printf("-->10m 5 watt power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 80m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND0_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND0_FULL, ts.pwr_80m_full_adj);
-		//printf("-->80m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND0_FULL,TX_POWER_FACTOR_80_DEFAULT);
-		//printf("-->80m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 60m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND1_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND1_FULL, ts.pwr_60m_full_adj);
-		//printf("-->60m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND1_FULL,TX_POWER_FACTOR_60_DEFAULT);
-		//printf("-->60m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 40m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND2_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND2_FULL, ts.pwr_40m_full_adj);
-		//printf("-->40m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND2_FULL,TX_POWER_FACTOR_40_DEFAULT);
-		//printf("-->40m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 30m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND3_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND3_FULL, ts.pwr_30m_full_adj);
-		//printf("-->80m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND3_FULL,TX_POWER_FACTOR_30_DEFAULT);
-		//printf("-->30m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 20m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND4_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND4_FULL, ts.pwr_20m_full_adj);
-		//printf("-->20m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND4_FULL,TX_POWER_FACTOR_20_DEFAULT);
-		//printf("-->20m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 17m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND5_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND5_FULL, ts.pwr_17m_full_adj);
-		//printf("-->17m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND5_FULL,TX_POWER_FACTOR_17_DEFAULT);
-		//printf("-->17m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 15m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND6_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND6_FULL, ts.pwr_15m_full_adj);
-		//printf("-->15m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND6_FULL,TX_POWER_FACTOR_15_DEFAULT);
-		//printf("-->15m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 12m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND7_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND7_FULL, ts.pwr_12m_full_adj);
-		//printf("-->12m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND7_FULL,TX_POWER_FACTOR_12_DEFAULT);
-		//printf("-->12m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read 10m FULL power setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_BAND8_FULL, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_BAND8_FULL, ts.pwr_10m_full_adj);
-		//printf("-->10m FULL power setting value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_BAND8_FULL,TX_POWER_FACTOR_10_DEFAULT);
-		//printf("-->10m FULL power setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read spectrum scope magnify mode - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_MAGNIFY, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_MAGNIFY, sd.magnify);
-		//printf("-->spectrum scope magnify mode value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_MAGNIFY,0);
-		//printf("-->spectrum scope magnify mode value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read wide filter in CW mode disable - update if changed
-	if(Read_VirtEEPROM(EEPROM_WIDE_FILT_CW_DISABLE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_WIDE_FILT_CW_DISABLE, ts.filter_cw_wide_disable);
-		//printf("-->wide filter in CW mode disable value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_WIDE_FILT_CW_DISABLE,0);
-		//printf("-->wide filter in CW mode disable value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read narrow filter in SSB mode disable - update if changed
-	if(Read_VirtEEPROM(EEPROM_NARROW_FILT_SSB_DISABLE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_NARROW_FILT_SSB_DISABLE, ts.filter_ssb_narrow_disable);
-		//printf("-->narrow filter in SSB mode disable value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_NARROW_FILT_SSB_DISABLE,0);
-		//printf("-->narrow filter in SSB mode disable value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read AM mode disable - update if changed
-	if(Read_VirtEEPROM(EEPROM_AM_MODE_DISABLE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_AM_MODE_DISABLE, ts.am_mode_disable);
-		//printf("-->narrow filter in SSB mode disable value saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_AM_MODE_DISABLE,0);
-		//printf("-->narrow filter in SSB mode disable value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum scope rescale rate - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_RESCALE_RATE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_RESCALE_RATE, ts.scope_rescale_rate);
-		//printf("-->Spectrum scope rescale rate saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_RESCALE_RATE,SPECTRUM_SCOPE_RESCALE_DEFAULT);
-		//printf("-->Spectrum scope rescale rate value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Spectrum scope AGC - update if changed
-	if(Read_VirtEEPROM(EEPROM_SPECTRUM_AGC_RATE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_AGC_RATE, ts.scope_agc_rate);
-		//printf("-->Spectrum scope AGC saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_SPECTRUM_AGC_RATE,SPECTRUM_SCOPE_AGC_DEFAULT);
-		//printf("-->Spectrum scope AGC value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read meter mode - update if changed
-	if(Read_VirtEEPROM(EEPROM_METER_MODE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_METER_MODE, ts.tx_meter_mode);
-		//printf("-->METER MODE saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_METER_MODE,METER_SWR);
-		//printf("-->METER MODE value created\n\r");
-	}
-	//
-	// is the TX compressor enabled?  If so, do NOT overwrite the currently-saved values for ALC release time or post-filter TX gain
-	//
-	if(!ts.tx_comp_level)	{
-		// ------------------------------------------------------------------------------------
-		// Try to read ALC release (decay) time - update if changed
-		if(Read_VirtEEPROM(EEPROM_ALC_DECAY_TIME, &value) == 0)
-		{
-			Write_VirtEEPROM(EEPROM_ALC_DECAY_TIME, ts.alc_decay);
-			//printf("-->ALC release time saved\n\r");
-		}
-		else	// create
-		{
-			Write_VirtEEPROM(EEPROM_ALC_DECAY_TIME,ALC_DECAY_DEFAULT);
-			//printf("-->ALC Release time value created\n\r");
-		}
-		//
-		// ------------------------------------------------------------------------------------
-		// Try to read TX audio post-filter gain setting - update if changed
-		if(Read_VirtEEPROM(EEPROM_ALC_POSTFILT_TX_GAIN, &value) == 0)
-		{
-			Write_VirtEEPROM(EEPROM_ALC_POSTFILT_TX_GAIN, ts.alc_tx_postfilt_gain);
-			//printf("-->TX audio post-filter gain setting saved\n\r");
-		}
-		else	// create
-		{
-			Write_VirtEEPROM(EEPROM_ALC_POSTFILT_TX_GAIN,ALC_POSTFILT_GAIN_DEFAULT);
-			//printf("-->TX audio post-filter gain setting value created\n\r");
-		}
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read step size marker line setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_STEP_SIZE_CONFIG, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_STEP_SIZE_CONFIG, ts.freq_step_config);
-		//printf("-->step size marker line setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_STEP_SIZE_CONFIG,0);
-		//printf("-->step size marker line setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP mode setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_MODE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_MODE, ts.dsp_active);
-		//printf("-->DSP mode setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_MODE,0);
-		//printf("-->DSP mode setting setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP noise reduction strength - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_STRENGTH, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_STRENGTH, ts.dsp_nr_strength);
-		//printf("-->DSP noise reduction strength saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_STRENGTH,DSP_NR_STRENGTH_DEFAULT);
-		//printf("-->DSP noise reduction strength value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP noise reduction de-correlator buffer length - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_DECOR_BUFLEN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_DECOR_BUFLEN, ts.dsp_nr_delaybuf_len);
-		//printf("-->DSP noise reduction de-correlator buffer length saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_DECOR_BUFLEN, DSP_NR_BUFLEN_DEFAULT);
-		//printf("-->DSP noise reduction de-correlator buffer length value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP noise reduction FFT length - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_NR_FFT_NUMTAPS, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_FFT_NUMTAPS, ts.dsp_nr_numtaps);
-		//printf("-->DSP noise reduction FFT length saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NR_FFT_NUMTAPS, DSP_NR_NUMTAPS_DEFAULT);
-		//printf("-->DSP noise reduction FFT length value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP notch de-correlator buffer length - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_NOTCH_DECOR_BUFLEN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NOTCH_DECOR_BUFLEN, ts.dsp_notch_delaybuf_len);
-		//printf("-->DSP notch de-correlator buffer length saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NOTCH_DECOR_BUFLEN, DSP_NOTCH_DELAYBUF_DEFAULT);
-		//printf("-->DSP notch de-correlator buffer length value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read DSP Note convergence rate setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_DSP_NOTCH_CONV_RATE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NOTCH_CONV_RATE, ts.dsp_notch_mu);
-		//printf("-->DSP Note convergence rate setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_DSP_NOTCH_CONV_RATE, DSP_NOTCH_MU_DEFAULT);
-		//printf("-->DSP Note convergence rate setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read maximum RF gain setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_MAX_RX_GAIN, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_MAX_RX_GAIN, ts.max_rf_gain);
-		//printf("-->maximum RF gain setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_MAX_RX_GAIN, MAX_RF_GAIN_DEFAULT);
-		//printf("-->maximum RF gain setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX compression setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_AUDIO_COMPRESS, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_AUDIO_COMPRESS, ts.tx_comp_level);
-		//printf("-->TX compression setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_AUDIO_COMPRESS, TX_AUDIO_COMPRESSION_DEFAULT);
-		//printf("-->TX compression setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read TX disable setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_TX_DISABLE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_TX_DISABLE, ts.tx_disable);
-		//printf("-->TX disable setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_TX_DISABLE, 0);
-		//printf("-->TX disable setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read Misc. flags 1 setting - update if changed
-	if(Read_VirtEEPROM(EEPROM_MISC_FLAGS1, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_MISC_FLAGS1, ts.misc_flags1);
-		//printf("-->Misc. flags 1 setting saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_MISC_FLAGS1, 0);
-		//printf("-->Misc. flags 1 setting value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read currently-stored version number - update if changed
-	if(Read_VirtEEPROM(EEPROM_VERSION_NUMBER, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_VERSION_NUMBER, ts.version_number_build);
-		//printf("-->Version number saved\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_VERSION_NUMBER, 0);
-		//printf("-->Version number value created\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read noise blanker time constant - update if changed
-	if(Read_VirtEEPROM(EEPROM_NB_AGC_TIME_CONST, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_NB_AGC_TIME_CONST, ts.nb_agc_time_const);
-		//printf("-->Noise blanker time constant\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_NB_AGC_TIME_CONST, NB_AGC_DEFAULT);
-		//printf("-->Noise blanker time constant\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read CW offset mode - update if changed
-	if(Read_VirtEEPROM(EEPROM_CW_OFFSET_MODE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_CW_OFFSET_MODE, ts.cw_offset_mode);
-		//printf("-->CW offset mode\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_CW_OFFSET_MODE, CW_OFFSET_MODE_DEFAULT);
-		//printf("-->CW offset mode\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read I/Q Freq. conversion mode - update if changed
-	if(Read_VirtEEPROM(EEPROM_FREQ_CONV_MODE, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_FREQ_CONV_MODE, ts.iq_freq_mode);
-		//printf("-->I/Q Freq. conversion mode\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_FREQ_CONV_MODE, FREQ_IQ_CONV_MODE_DEFAULT);
-		//printf("-->I/Q Freq. conversion mode\n\r");
-	}
-	//
-	// ------------------------------------------------------------------------------------
-	// Try to read LSB/USB auto select mode - update if changed
-	if(Read_VirtEEPROM(EEPROM_LSB_USB_AUTO_SELECT, &value) == 0)
-	{
-		Write_VirtEEPROM(EEPROM_LSB_USB_AUTO_SELECT, ts.lsb_usb_auto_select);
-		//printf("-->LSB/USB auto select mode\n\r");
-	}
-	else	// create
-	{
-		Write_VirtEEPROM(EEPROM_LSB_USB_AUTO_SELECT, AUTO_LSB_USB_DEFAULT);
-		//printf("-->LSB/USB auto select mode\n\r");
-	}
-	//
-	//
-	//
+
 	// Next setting...
 }

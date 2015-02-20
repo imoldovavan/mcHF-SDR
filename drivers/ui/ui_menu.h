@@ -19,11 +19,13 @@
 void UiDriverUpdateMenu(uchar mode);
 //
 //
+#define	MAX_MENU_ITEM		39		// Number of menu items
+#define	MAX_RADIO_CONFIG_ITEMS	47	// Number of radio configuration menu items
+//
 #define	MENUSIZE	6				// number of menu items per page/screen
 //
 // Enumeration for main menu.
 // These items MUST be listed below in the order that they appear on the screen!
-//
 //
 enum {
 	MENU_DSP_NR_STRENGTH = 0,
@@ -36,13 +38,11 @@ enum {
 	MENU_CW_WIDE_FILT,
 	MENU_SSB_NARROW_FILT,
 	MENU_AM_DISABLE,
-	MENU_SSB_AUTO_MODE_SELECT,
 	MENU_AGC_MODE,
 	MENU_RF_GAIN_ADJ,
 	MENU_CUSTOM_AGC,
 	MENU_CODEC_GAIN_MODE,
 	MENU_NOISE_BLANKER_SETTING,
-	MENU_RX_FREQ_CONV,
 	MENU_MIC_LINE_MODE,
 	MENU_MIC_GAIN,
 	MENU_LINE_GAIN,
@@ -66,9 +66,7 @@ enum {
 	MENU_SCOPE_MAGNIFY,
 	MENU_SCOPE_ALC_ADJUST,
 	MENU_SCOPE_RESCALE_ADJUST,
-	MENU_CONFIG_ENABLE,
-	//
-	MAX_MENU_ITEM	// Number of menu items - This must remain as the LAST item!
+	MENU_CONFIG_ENABLE
 };
 //
 //
@@ -81,7 +79,6 @@ enum {
 	CONFIG_BAND_BUTTON_SWAP,
 	CONFIG_TX_DISABLE,
 	CONFIG_AUDIO_MAIN_SCREEN_MENU_SWITCH,
-	CONFIG_MUTE_LINE_OUT_TX,
 	CONFIG_MAX_VOLUME,
 	CONFIG_MAX_RX_GAIN,
 	CONFIG_CAT_ENABLE,
@@ -124,9 +121,6 @@ enum {
 	CONFIG_DSP_NOTCH_CONVERGE_RATE,
 	CONFIG_DSP_NOTCH_DECORRELATOR_BUFFER_LENGTH,
 	CONFIG_AGC_TIME_CONSTANT,
-	CONFIG_AM_TX_FILTER_ENABLE,
-	//
-	MAX_RADIO_CONFIG_ITEMS	// Number of radio configuration menu items - This must remain as the LAST item!
 };
 //
 #endif
